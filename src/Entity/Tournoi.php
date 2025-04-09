@@ -29,7 +29,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name:"nom",type: 'string', nullable: false)]
     private ?string $nom = null;
 
     public function getNom(): ?string
@@ -43,7 +43,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name:"sportType",type: 'string', nullable: true)]
     private ?string $sportType = null;
 
     public function getSportType(): ?string
@@ -57,7 +57,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name:"format",type: 'string', nullable: true)]
     private ?string $format = null;
 
     public function getFormat(): ?string
@@ -71,7 +71,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name:"status",type: 'string', nullable: true)]
     private ?string $status = null;
 
     public function getStatus(): ?string
@@ -85,7 +85,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(name:"start_date",type: 'date', nullable: false)]
     private ?\DateTimeInterface $start_date = null;
 
     public function getStart_date(): ?\DateTimeInterface
@@ -99,7 +99,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(name:"end_date",type: 'date', nullable: false)]
     private ?\DateTimeInterface $end_date = null;
 
     public function getEnd_date(): ?\DateTimeInterface
@@ -113,7 +113,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'integer', nullable: false)]
+    #[ORM\Column(name:"nbEquipe",type: 'integer', nullable: false)]
     private ?int $nbEquipe = null;
 
     public function getNbEquipe(): ?int
@@ -127,7 +127,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name:"tournoiLocation",type: 'string', nullable: true)]
     private ?string $tournoiLocation = null;
 
     public function getTournoiLocation(): ?string
@@ -156,7 +156,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name:"reglements",type: 'string', nullable: true)]
     private ?string $reglements = null;
 
     public function getReglements(): ?string

@@ -68,6 +68,26 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link " href="{{ path('app_admin_dashborad_Tournoi') }}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title>office</title>
+                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(-1869.000000, -293.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                    <g transform="translate(1716.000000, 291.000000)">
+                      <g id="office" transform="translate(153.000000, 2.000000)">
+                        <path class="color-background opacity-6" d="M12.25,17.5 L8.75,17.5 L8.75,1.75 C8.75,0.78225 9.53225,0 10.5,0 L31.5,0 C32.46775,0 33.25,0.78225 33.25,1.75 L33.25,12.25 L29.75,12.25 L29.75,3.5 L12.25,3.5 L12.25,17.5 Z"></path>
+                        <path class="color-background" d="M40.25,14 L24.5,14 C23.53225,14 22.75,14.78225 22.75,15.75 L22.75,38.5 L19.25,38.5 L19.25,22.75 C19.25,21.78225 18.46775,21 17.5,21 L1.75,21 C0.78225,21 0,21.78225 0,22.75 L0,40.25 C0,41.21775 0.78225,42 1.75,42 L40.25,42 C41.21775,42 42,41.21775 42,40.25 L42,15.75 C42,14.78225 41.21775,14 40.25,14 Z M12.25,36.75 L7,36.75 L7,33.25 L12.25,33.25 L12.25,36.75 Z M12.25,29.75 L7,29.75 L7,26.25 L12.25,26.25 L12.25,29.75 Z M35,36.75 L29.75,36.75 L29.75,33.25 L35,33.25 L35,36.75 Z M35,29.75 L29.75,29.75 L29.75,26.25 L35,26.25 L35,29.75 Z M35,22.75 L29.75,22.75 L29.75,19.25 L35,19.25 L35,22.75 Z"></path>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            </div>
+            <span class="nav-link-text ms-1">Tournois</span>
+          </a>
+        </li>
+        <li class="nav-item">
            <a class="nav-link " href="{{ path('app_admin_dashborad_billing') }}">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -165,9 +185,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Tables</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Teams</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Tables</h6>
+          <h6 class="font-weight-bolder mb-0">Teams</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -283,19 +303,23 @@
       <div class="row">
         <div class="col-12">
           <div class="card mb-4">
-            <div class="card-header pb-0">
-              <h6>Authors table</h6>
+            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Teams table</h6>
+              <a class="btn btn-success btn-sm" href="javascript:void(0);">Add</a>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
               <div class="table-responsive p-0">
                 <table class="table align-items-center mb-0">
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Author</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Function</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Employed</th>
-                      <th class="text-secondary opacity-7"></th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Game mode</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Categorie</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">nb Players</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Edit</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Delete</th>
+                      
+                      
                     </tr>
                   </thead>
                   <tbody>
@@ -308,25 +332,33 @@
                           </div>
                           <div class="d-flex flex-column justify-content-center">
                             <h6 class="mb-0 text-sm">{{ team.nom }}</h6>
-                            <p class="text-xs text-secondary mb-0">{{ team.modeJeu }}</p>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <p class="text-xs font-weight-bold mb-0">{{team.categorie }}</p>
-                        <p class="text-xs text-secondary mb-0">{{ team.nombreJoueurs}}</p>
+                        <p class="text-xs font-weight-bold mb-0">{{ team.modeJeu }}</p>
+                        <p class="text-xs text-secondary mb-0"></p>
                       </td>
                       <!--<td class="align-middle text-center text-sm">
                         <span class="badge badge-sm bg-gradient- author.status == 'Online' ? 'success' : 'secondary' }}"> author.status }}</span>
                       </td>-->
                       <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">{{ team.id }}</span>
+                        <span class="text-secondary text-xs font-weight-bold">{{team.categorie }}</span>
                       </td>
-                      <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
-                        </a>
+                       <td class="align-middle text-center">
+                        <span class="text-secondary text-xs font-weight-bold">{{ team.nombreJoueurs}}</span>
                       </td>
+                      <td class="align-middle text-center">
+                        <a class="btn btn-warning btn-sm edit-team" href="javascript:void(0);" 
+                           data-team-id="{{ team.id }}" 
+                           data-team-name="{{ team.nom }}"
+                           data-team-categorie="{{ team.categorie }}"
+                           data-team-modejeu="{{ team.modeJeu }}"
+                           data-team-nombrejoueurs="{{ team.nombreJoueurs }}">Edit</a>
+                        </td>
+                        <td class="align-middle text-center">
+                        <a class="btn btn-danger btn-sm delete-team" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Delete</a>
+                        </td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -336,264 +368,102 @@
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-12">
-          <div class="card mb-4">
-            <div class="card-header pb-0">
-              <h6>Projects table</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center justify-content-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Project</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Budget</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Completion</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ asset('assets/images/small-logos/logo-spotify.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="spotify">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Spotify</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$2,500</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">working</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">60%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-info" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ asset('assets/images/small-logos/logo-invision.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="invision">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Invision</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$5,000</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">done</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">100%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ asset('assets/images/small-logos/logo-jira.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="jira">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Jira</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$3,400</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">canceled</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">30%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-danger" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="30" style="width: 30%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ asset('assets/images/small-logos/logo-slack.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="slack">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Slack</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$1,000</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">canceled</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">0%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0" style="width: 0%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ asset('assets/images/small-logos/logo-webdev.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="webdev">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Webdev</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$14,000</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">working</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">80%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-info" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="80" style="width: 80%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ asset('assets/images/small-logos/logo-xd.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="xd">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Adobe XD</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$2,300</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">done</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">100%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-      <footer class="footer pt-3  ">
-        <div class="container-fluid">
-          <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6 mb-lg-0 mb-4">
-              <div class="copyright text-center text-sm text-muted text-lg-start">
-                © <script>
-                  document.write(new Date().getFullYear())
-                </script>,
-                made with <i class="fa fa-heart"></i> by
-                <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative Tim</a>
-                for a better web.
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com" class="nav-link text-muted" target="_blank">Creative Tim</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted" target="_blank">About Us</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/blog" class="nav-link text-muted" target="_blank">Blog</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted" target="_blank">License</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
+      
     </div>
   </main>
+
+  <!-- Edit Team Modal -->
+  <div class="modal fade" id="editTeamModal" tabindex="-1" role="dialog" aria-labelledby="editTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editTeamModalLabel">Edit Team</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editTeamForm">
+            <input type="hidden" id="editTeamId" name="id">
+            <div class="mb-3">
+              <label for="editTeamName" class="form-label">Team Name</label>
+              <input type="text" class="form-control" id="editTeamName" name="nom" required>
+            </div>
+            <div class="mb-3">
+              <label for="editTeamCategorie" class="form-label">Category</label>
+              <input type="text" class="form-control" id="editTeamCategorie" name="categorie" required>
+            </div>
+            <div class="mb-3">
+              <label for="editTeamModeJeu" class="form-label">Game Mode</label>
+              <input type="text" class="form-control" id="editTeamModeJeu" name="modeJeu" required>
+            </div>
+            <div class="mb-3">
+              <label for="editTeamNombreJoueurs" class="form-label">Number of Players</label>
+              <input type="number" class="form-control" id="editTeamNombreJoueurs" name="nombreJoueurs" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveEdit">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteTeamModal" tabindex="-1" role="dialog" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteTeamModalLabel">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the team "<span id="teamName"></span>"?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Team Modal -->
+  <div class="modal fade" id="addTeamModal" tabindex="-1" role="dialog" aria-labelledby="addTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTeamModalLabel">Add New Team</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addTeamForm">
+            <div class="mb-3">
+              <label for="addTeamName" class="form-label">Team Name</label>
+              <input type="text" class="form-control" id="addTeamName" name="nom" required>
+            </div>
+            <div class="mb-3">
+              <label for="addTeamCategorie" class="form-label">Category</label>
+              <input type="text" class="form-control" id="addTeamCategorie" name="categorie" required>
+            </div>
+            <div class="mb-3">
+              <label for="addTeamModeJeu" class="form-label">Game Mode</label>
+              <input type="text" class="form-control" id="addTeamModeJeu" name="modeJeu" required>
+            </div>
+            <div class="mb-3">
+              <label for="addTeamNombreJoueurs" class="form-label">Number of Players</label>
+              <input type="number" class="form-control" id="addTeamNombreJoueurs" name="nombreJoueurs" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveAdd">Add Team</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="fixed-plugin">
     <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
@@ -678,6 +548,302 @@
       }
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
+
+    // Edit team modal
+    document.addEventListener('DOMContentLoaded', function() {
+      const editButtons = document.querySelectorAll('.edit-team');
+      const editModal = new bootstrap.Modal(document.getElementById('editTeamModal'));
+      const editForm = document.getElementById('editTeamForm');
+      const saveEditBtn = document.getElementById('saveEdit');
+      let currentTeamId = null;
+      let currentRow = null;
+
+      editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const teamId = this.getAttribute('data-team-id');
+          const teamName = this.getAttribute('data-team-name');
+          const teamCategorie = this.getAttribute('data-team-categorie');
+          const teamModeJeu = this.getAttribute('data-team-modejeu');
+          const teamNombreJoueurs = this.getAttribute('data-team-nombrejoueurs');
+          
+          currentTeamId = teamId;
+          currentRow = this.closest('tr');
+          
+          // Fill the form with current team data
+          document.getElementById('editTeamId').value = teamId;
+          document.getElementById('editTeamName').value = teamName;
+          document.getElementById('editTeamCategorie').value = teamCategorie;
+          document.getElementById('editTeamModeJeu').value = teamModeJeu;
+          document.getElementById('editTeamNombreJoueurs').value = teamNombreJoueurs;
+          
+          editModal.show();
+        });
+      });
+
+      saveEditBtn.addEventListener('click', function() {
+        if (currentTeamId) {
+          const formData = new FormData(editForm);
+          const data = Object.fromEntries(formData.entries());
+          
+          fetch(`/admin/teams/${currentTeamId}/edit`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              // Update the row with new data
+              const row = currentRow;
+              row.querySelector('h6.mb-0.text-sm').textContent = data.team.nom;
+              row.querySelector('td:nth-child(2) p.text-xs.font-weight-bold.mb-0').textContent = data.team.modeJeu;
+              row.querySelector('td:nth-child(3) span').textContent = data.team.categorie;
+              row.querySelector('td:nth-child(4) span').textContent = data.team.nombreJoueurs;
+              
+              // Update the data attributes on the edit button
+              const editButton = row.querySelector('.edit-team');
+              editButton.setAttribute('data-team-name', data.team.nom);
+              editButton.setAttribute('data-team-categorie', data.team.categorie);
+              editButton.setAttribute('data-team-modejeu', data.team.modeJeu);
+              editButton.setAttribute('data-team-nombrejoueurs', data.team.nombreJoueurs);
+              
+              // Show success message
+              const toastContainer = document.createElement('div');
+              toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+              toastContainer.innerHTML = `
+                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="d-flex">
+                    <div class="toast-body">
+                      Team updated successfully
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                </div>
+              `;
+              document.body.appendChild(toastContainer);
+              const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+              toast.show();
+              // Remove the toast container after it's hidden
+              toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
+                toastContainer.remove();
+              });
+            } else {
+              throw new Error(data.message || 'Failed to update team');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            toastContainer.innerHTML = `
+              <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                  <div class="toast-body">
+                    ${error.message}
+                  </div>
+                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(toastContainer);
+            const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+            toast.show();
+            // Remove the toast container after it's hidden
+            toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
+              toastContainer.remove();
+            });
+          })
+          .finally(() => {
+            editModal.hide();
+          });
+        }
+      });
+    });
+
+    // Delete team confirmation modal
+    document.addEventListener('DOMContentLoaded', function() {
+      const deleteButtons = document.querySelectorAll('.delete-team');
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteTeamModal'));
+      const teamNameSpan = document.getElementById('teamName');
+      const confirmDeleteBtn = document.getElementById('confirmDelete');
+      let currentTeamId = null;
+      let currentRow = null;
+
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const teamId = this.getAttribute('data-team-id');
+          const teamName = this.getAttribute('data-team-name');
+          currentTeamId = teamId;
+          currentRow = this.closest('tr');
+          teamNameSpan.textContent = teamName;
+          deleteModal.show();
+        });
+      });
+
+      confirmDeleteBtn.addEventListener('click', function() {
+        if (currentTeamId) {
+          // Make AJAX call to delete the team
+          fetch(`/admin/teams/${currentTeamId}/delete`, {
+            method: 'DELETE',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              // Remove the row from the table
+              currentRow.remove();
+              // Show success message
+              const toastContainer = document.createElement('div');
+              toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+              toastContainer.innerHTML = `
+                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="d-flex">
+                    <div class="toast-body">
+                      Team deleted successfully
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                </div>
+              `;
+              document.body.appendChild(toastContainer);
+              const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+              toast.show();
+              // Remove the toast container after it's hidden
+              toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
+                toastContainer.remove();
+              });
+            } else {
+              throw new Error(data.message || 'Failed to delete team');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            toastContainer.innerHTML = `
+              <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                  <div class="toast-body">
+                    ${error.message}
+                  </div>
+                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(toastContainer);
+            const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+            toast.show();
+            // Remove the toast container after it's hidden
+            toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
+              toastContainer.remove();
+            });
+          })
+          .finally(() => {
+            deleteModal.hide();
+          });
+        }
+      });
+    });
+
+    // Add team modal
+    document.addEventListener('DOMContentLoaded', function() {
+      const addButton = document.querySelector('.btn-success');
+      const addModal = new bootstrap.Modal(document.getElementById('addTeamModal'));
+      const addForm = document.getElementById('addTeamForm');
+      const saveAddBtn = document.getElementById('saveAdd');
+
+      addButton.addEventListener('click', function() {
+        addForm.reset();
+        addModal.show();
+      });
+
+      saveAddBtn.addEventListener('click', function() {
+        const formData = new FormData(addForm);
+        const data = Object.fromEntries(formData.entries());
+        
+        fetch('/admin/teams/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify(data)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            // Show success message
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            toastContainer.innerHTML = `
+              <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                  <div class="toast-body">
+                    Team added successfully
+                  </div>
+                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(toastContainer);
+            const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+            toast.show();
+            
+            // Refresh the page after a short delay to show the success message
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            throw new Error(data.message || 'Failed to add team');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          const toastContainer = document.createElement('div');
+          toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+          toastContainer.innerHTML = `
+            <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="d-flex">
+                <div class="toast-body">
+                  ${error.message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(toastContainer);
+          const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+          toast.show();
+          // Remove the toast container after it's hidden
+          toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
+            toastContainer.remove();
+          });
+        })
+        .finally(() => {
+          addModal.hide();
+        });
+      });
+    });
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
