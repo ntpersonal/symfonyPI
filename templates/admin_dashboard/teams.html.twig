@@ -1,4 +1,4 @@
-{% extends 'admin_dashborad/dashboard.html.twig' %}
+{% extends 'admin_dashboard/dashboard.html.twig' %}
 
 {% block title %}Tables - Soft UI Dashboard 3{% endblock %}
 
@@ -10,9 +10,141 @@
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- CSS Files -->
   <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.1.0') }}" rel="stylesheet" />
+  <style>
+    /* New pagination styles */
+    .pagination {
+      width: 100%;
+      padding: 0 1rem;
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .page-btn {
+      color: #000000;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: inline-flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      background-color: #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: color 128ms ease-out, background-color 128ms ease-out;
+      border: 1px solid #e9ecef;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .page-btn:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-1px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .page-btn:target {
+      color: #ffffff;
+      background-color: #344767;
+      border-color: #344767;
+      box-shadow: 0 4px 6px -1px rgba(52, 71, 103, 0.4), 0 2px 4px -1px rgba(52, 71, 103, 0.3);
+    }
+
+    .page-step {
+      display: none;
+    }
+
+    .pagination:not(:has(.page-btn:target)) .page-step[data-shown="1"] {
+      display: inline-flex;
+    }
+
+    @for $i from 1 through 5 {
+      .pagination:has(#page-#{$i}:target) .page-step[data-shown="#{$i}"] {
+        display: inline-flex;
+      }
+    }
+
+    .pagination {
+      display: flex;
+      padding-left: 0;
+      list-style: none;
+      border-radius: 0.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+      gap: 0.5rem;
+    }
+    .pagination li {
+      margin: 0;
+    }
+    .pagination li a {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      height: 2.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #344767;
+      background-color: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease-in-out;
+      text-decoration: none;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .pagination li a:hover {
+      color: #344767;
+      background-color: #f8f9fa;
+      border-color: #e9ecef;
+      transform: translateY(-1px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+    .pagination li.active a {
+      color: #fff;
+      background-color: #344767;
+      border-color: #344767;
+      box-shadow: 0 4px 6px -1px rgba(52, 71, 103, 0.4), 0 2px 4px -1px rgba(52, 71, 103, 0.3);
+    }
+    .pagination li.disabled a {
+      color: #adb5bd;
+      background-color: #f8f9fa;
+      border-color: #e9ecef;
+      pointer-events: none;
+      box-shadow: none;
+    }
+    .pagination li a:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(52, 71, 103, 0.25);
+    }
+    /* Enhanced prev/next buttons */
+    .pagination li:first-child a,
+    .pagination li:last-child a {
+      min-width: 3.5rem;
+      background-color: #344767;
+      color: #fff;
+      border-color: #344767;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .pagination li:first-child a:hover,
+    .pagination li:last-child a:hover {
+      background-color: #2a3a52;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(52, 71, 103, 0.3);
+    }
+    .pagination li.disabled:first-child a,
+    .pagination li.disabled:last-child a {
+      background-color: #e9ecef;
+      color: #adb5bd;
+      border-color: #e9ecef;
+    }
+  </style>
 {% endblock %}
 
 {% block body %}
@@ -20,7 +152,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href="https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html" target="_blank">
-        <img src="{{ asset('assets/images/logo-ct-dark.png') }}" class="navbar-brand-img h-100" alt="main_logo">
+        <img src="{{ asset('assets/images/sportify.png') }}" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">Sportify</span>
       </a>
     </div>
@@ -318,6 +450,7 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">nb Players</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Edit</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Delete</th>
+                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ranking</th>
                       
                       
                     </tr>
@@ -328,7 +461,7 @@
                       <td>
                         <div class="d-flex px-2 py-1">
                           <div>
-                            <img src="{{ asset('assets/images/team-2.jpg') }}" class="avatar avatar-sm me-3" alt="user1">
+                            <img src="{{ team_logo(team.logoPath) }}" class="avatar avatar-sm me-3" alt="{{ team.nom }}">
                           </div>
                           <div class="d-flex flex-column justify-content-center">
                             <h6 class="mb-0 text-sm">{{ team.nom }}</h6>
@@ -359,10 +492,25 @@
                         <td class="align-middle text-center">
                         <a class="btn btn-danger btn-sm delete-team" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Delete</a>
                         </td>
+                         <td class="align-middle text-center">
+                        <a class="btn btn-red btn-sm Consult-Ranking" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Consult</a>
+                        </td>
                     </tr>
                     {% endfor %}
                   </tbody>
                 </table>
+              </div>
+              <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                  {{ knp_pagination_render(teams, null, {}, {
+                    'align': 'center',
+                    'size': 'medium',
+                    'style': 'pagination',
+                    'span_class': 'page-link',
+                    'template': 'pagination/custom_pagination.html.twig',
+                    'page_range': 5
+                  }) }}
+                </nav>
               </div>
             </div>
           </div>
@@ -549,6 +697,34 @@
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
 
+    // Function to show toast message
+    function showToast(message, type = 'success') {
+      const toastContainer = document.createElement('div');
+      toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+      toastContainer.innerHTML = `
+        <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(toastContainer);
+      const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+      toast.show();
+      toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
+        toastContainer.remove();
+      });
+    }
+
+    // Function to refresh the table
+    function refreshTable() {
+      const currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+      window.location.href = `${window.location.pathname}?page=${currentPage}`;
+    }
+
     // Edit team modal
     document.addEventListener('DOMContentLoaded', function() {
       const editButtons = document.querySelectorAll('.edit-team');
@@ -569,7 +745,6 @@
           currentTeamId = teamId;
           currentRow = this.closest('tr');
           
-          // Fill the form with current team data
           document.getElementById('editTeamId').value = teamId;
           document.getElementById('editTeamName').value = teamName;
           document.getElementById('editTeamCategorie').value = teamCategorie;
@@ -601,65 +776,15 @@
           })
           .then(data => {
             if (data.success) {
-              // Update the row with new data
-              const row = currentRow;
-              row.querySelector('h6.mb-0.text-sm').textContent = data.team.nom;
-              row.querySelector('td:nth-child(2) p.text-xs.font-weight-bold.mb-0').textContent = data.team.modeJeu;
-              row.querySelector('td:nth-child(3) span').textContent = data.team.categorie;
-              row.querySelector('td:nth-child(4) span').textContent = data.team.nombreJoueurs;
-              
-              // Update the data attributes on the edit button
-              const editButton = row.querySelector('.edit-team');
-              editButton.setAttribute('data-team-name', data.team.nom);
-              editButton.setAttribute('data-team-categorie', data.team.categorie);
-              editButton.setAttribute('data-team-modejeu', data.team.modeJeu);
-              editButton.setAttribute('data-team-nombrejoueurs', data.team.nombreJoueurs);
-              
-              // Show success message
-              const toastContainer = document.createElement('div');
-              toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-              toastContainer.innerHTML = `
-                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="d-flex">
-                    <div class="toast-body">
-                      Team updated successfully
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                  </div>
-                </div>
-              `;
-              document.body.appendChild(toastContainer);
-              const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
-              toast.show();
-              // Remove the toast container after it's hidden
-              toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
-                toastContainer.remove();
-              });
+              showToast('Team updated successfully');
+              setTimeout(refreshTable, 1500);
             } else {
               throw new Error(data.message || 'Failed to update team');
             }
           })
           .catch(error => {
             console.error('Error:', error);
-            const toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            toastContainer.innerHTML = `
-              <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                  <div class="toast-body">
-                    ${error.message}
-                  </div>
-                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-              </div>
-            `;
-            document.body.appendChild(toastContainer);
-            const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
-            toast.show();
-            // Remove the toast container after it's hidden
-            toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
-              toastContainer.remove();
-            });
+            showToast(error.message, 'danger');
           })
           .finally(() => {
             editModal.hide();
@@ -690,7 +815,6 @@
 
       confirmDeleteBtn.addEventListener('click', function() {
         if (currentTeamId) {
-          // Make AJAX call to delete the team
           fetch(`/admin/teams/${currentTeamId}/delete`, {
             method: 'DELETE',
             headers: {
@@ -705,53 +829,15 @@
           })
           .then(data => {
             if (data.success) {
-              // Remove the row from the table
-              currentRow.remove();
-              // Show success message
-              const toastContainer = document.createElement('div');
-              toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-              toastContainer.innerHTML = `
-                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="d-flex">
-                    <div class="toast-body">
-                      Team deleted successfully
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                  </div>
-                </div>
-              `;
-              document.body.appendChild(toastContainer);
-              const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
-              toast.show();
-              // Remove the toast container after it's hidden
-              toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
-                toastContainer.remove();
-              });
+              showToast('Team deleted successfully');
+              setTimeout(refreshTable, 1500);
             } else {
               throw new Error(data.message || 'Failed to delete team');
             }
           })
           .catch(error => {
             console.error('Error:', error);
-            const toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            toastContainer.innerHTML = `
-              <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                  <div class="toast-body">
-                    ${error.message}
-                  </div>
-                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-              </div>
-            `;
-            document.body.appendChild(toastContainer);
-            const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
-            toast.show();
-            // Remove the toast container after it's hidden
-            toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
-              toastContainer.remove();
-            });
+            showToast(error.message, 'danger');
           })
           .finally(() => {
             deleteModal.hide();
@@ -792,57 +878,25 @@
         })
         .then(data => {
           if (data.success) {
-            // Show success message
-            const toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            toastContainer.innerHTML = `
-              <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                  <div class="toast-body">
-                    Team added successfully
-                  </div>
-                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-              </div>
-            `;
-            document.body.appendChild(toastContainer);
-            const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
-            toast.show();
-            
-            // Refresh the page after a short delay to show the success message
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500);
+            showToast('Team added successfully');
+            setTimeout(refreshTable, 1500);
           } else {
             throw new Error(data.message || 'Failed to add team');
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          const toastContainer = document.createElement('div');
-          toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-          toastContainer.innerHTML = `
-            <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-              <div class="d-flex">
-                <div class="toast-body">
-                  ${error.message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-            </div>
-          `;
-          document.body.appendChild(toastContainer);
-          const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
-          toast.show();
-          // Remove the toast container after it's hidden
-          toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
-            toastContainer.remove();
-          });
+          showToast(error.message, 'danger');
         })
         .finally(() => {
           addModal.hide();
         });
       });
+    });
+
+    // Remove hash-based navigation handling
+    window.addEventListener('hashchange', function() {
+      // Remove the hash-based navigation handling
     });
   </script>
   <!-- Github buttons -->
