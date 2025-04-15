@@ -1,118 +1,412 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Dashboard - Soft UI Dashboard 3{% endblock %}
-
-{% block content %}
-<div class="container-fluid py-4">
-  <div class="row">
-    <div class="col-lg-6 col-12">
-      <div class="row">
-        <div class="col-lg-6 col-md-6 col-12">
-          <div class="card">
-            <span class="mask bg-primary opacity-10 border-radius-lg"></span>
-            <div class="card-body p-3 position-relative">
-              <div class="row">
-                <div class="col-8 text-start">
-                  <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
-                    <i class="ni ni-circle-08 text-dark text-gradient text-lg opacity-10" aria-hidden="true"></i>
-                  </div>
-                  <h5 class="text-white font-weight-bolder mb-0 mt-3">
-                    1600
-                  </h5>
-                  <span class="text-white text-sm">Users Active</span>
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}HomePage{% endblock %}
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+<div class="banner banner1">
+            <div class="swiper bannerSlide">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="banner-single banner-single-1 banner-bg">
+                            <div class="container">
+                                <div class="banner-content">
+                                    <span class="pretitle">WELCOME TO OUR FOOTBALL CLUB</span>
+                                    <h1 class="banner-heading">MANCHESTER & THE <BR>
+                                        UCL CHAMPION</h1>
+                                    <div class="banner-btn-area">
+                                        <a href="#0" class="team-btn banner-btn">OUR TEAM <i class="far fa-long-arrow-right ml--5"></i></a>
+                                        <a href="#0" class="nxt-match-btn banner-btn">NEXT MATCH <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="banner-single banner-single-1_2 banner-bg">
+                            <div class="container">
+                                <div class="banner-content">
+                                    <span class="pretitle">WELCOME TO OUR FOOTBALL CLUB</span>
+                                    <h1 class="banner-heading">ANDERSON & THE <BR>
+                                        WORLD CUP WINNER</h1>
+                                    <div class="banner-btn-area">
+                                        <a href="#0" class="team-btn banner-btn">OUR TEAM <i class="far fa-long-arrow-right ml--5"></i></a>
+                                        <a href="#0" class="nxt-match-btn banner-btn">NEXT MATCH <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="banner-single banner-single-3 banner-bg">
+                            <div class="container">
+                                <div class="banner-content">
+                                    <span class="pretitle">WELCOME TO OUR FOOTBALL CLUB</span>
+                                    <h1 class="banner-heading">HENDERSON & THE <BR>
+                                        WORLD CUP WINNER</h1>
+                                    <div class="banner-btn-area">
+                                        <a href="#0" class="team-btn banner-btn">OUR TEAM <i class="far fa-long-arrow-right ml--5"></i></a>
+                                        <a href="#0" class="nxt-match-btn banner-btn">NEXT MATCH <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-4">
-                  <div class="dropdown text-end mb-6">
-                    <a href="javascript:;" class="cursor-pointer" id="dropdownUsers1" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-ellipsis-h text-white"></i>
-                    </a>
-                    <ul class="dropdown-menu px-2 py-3" aria-labelledby="dropdownUsers1">
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Another action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Something else here</a></li>
-                    </ul>
-                  </div>
-                  <p class="text-white text-sm text-end font-weight-bolder mt-auto mb-0">+55%</p>
-                </div>
-              </div>
             </div>
-          </div>
+            <div>
+            </div>
+            <div class="slider-pagination-area">
+                <h5 class="slide-range">01</h5>
+                <div class="swiper-pagination"></div>
+                <h5 class="slide-range">03</h5>
+            </div>
         </div>
-        <!-- Add other cards here -->
-      </div>
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
+        {% block content %}
+    <!--================= Latest Match Start Here =================-->
+    <div class="rts-latest-match">
+        <div class="container">
+            <div class="latest-match-inner">
+                <div class="club-area">
+                    <div class="club-logo"><img src="{{ asset('assets/images/items/clubs.png') }}" alt=""></div>
+                    <div class="content">
+                        <h3 class="club-text">SPORTIUS F.C <BR>CHAMPIONS DI CLUB</H3>
+                    </div>
+                    <span class="match-type">SEMI FINAL</span>
+                </div>
+                <div class="match-countdown-area">
+                    <div class="countdown">
+                        <div class="countdown-el days-c">
+                            <span class="value" id="days">0</span>
+                        </div>
+                        <span class="letter">D</span>
+                        <div class="countdown-el hours-c">
+                            <span class="value" id="hours">0</span>
+                        </div>
+                        <span class="letter">H</span>
+                        <div class="countdown-el mins-c">
+                            <span class="value" id="mins">0</span>
+                        </div>
+                        <span class="letter">M</span>
+                        <div class="countdown-el seconds-c">
+                            <span class="value" id="seconds">0</span>
+                        </div>
+                        <span class="letter">S</span>
+                    </div>
+                </div>
+                <a href="{{ path('app_contact') }}" class="ticket-btn">BUY TICKETS</a>
+            </div>
+        </div>
     </div>
-    <!-- Add other sections here -->
-  </div>
-</div>
+    <!--================= Latest Match End Here =================-->
+
+    <!--================= Point Table Section Start Here =================-->
+    <div class="rts-point-table-section section-gap">
+        <div class="container">
+            <div class="section-title-area section-title-area1 text-center mb--50">
+                <h1 class="section-title"><span class="pretitle">POINT</span>MATCH POINT TABLE</h1>
+                <p>It is one of the most popular football clubs that offer training programs for the youth, as well as summer camps</p>
+            </div>
+            <div class="table-area table-full">
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                    </thead>
+                    <tbody>
+                        <tr class="head-tr">
+                            <th scope="col">POSITION</th>
+                            <th scope="col">CLUB NAME</th>
+                            <th scope="col">MATCH</th>
+                            <th scope="col">WIN</th>
+                            <th scope="col">DRAW</th>
+                            <th scope="col">LOSE</th>
+                            <th scope="col">DUE</th>
+                            <th scope="col">PTS</th>
+                        </tr>
+                        <tr>
+                            <td><span class="position-number">01</span></td>
+                            <td>
+                                <div class="product-title-area">
+                                    <h4 class="player-name">Sportius F.C.</h4>
+                                </div>
+                            </td>
+                            <td><span class="match-count">39</span></td>
+                            <td><span class="win-count">30</span></td>
+                            <td><span class="draw-count">02</span></td>
+                            <td><span class="lose-count">01</span></td>
+                            <td><span class="due-count">03</span></td>
+                            <td><span class="pts-count">60</span></td>
+                        </tr>
+                        <!-- ... other table rows ... -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-area"><a href="{{ path('app_score') }}" class="full-table-btn">VIEW FULL TABLE</a></div>
+        </div>
+    </div>
+    <!--================= Point Table Section End Here =================-->
+
+    <!--================= Player Details Section Start Here =================-->
+    <div class="rts-player-details-section pt--100 section-bg">
+        <div class="container">
+            <div class="top-wrapper">
+                <div class="section-title-area section-title-area1 text-start mb--50">
+                    <h1 class="section-title"><span class="pretitle pretitlebg">PLAYER</span>PLAYER DETAILS</h1>
+                    <p>It is one of the most popular football clubs that offer training programs for the youth, as well as summer camps</p>
+                </div>
+                <div class="swiper-navigation">
+                    <div class="slide-prev slide-nav"><i class="far fa-long-arrow-left"></i></div>
+                    <div class="slide-next slide-nav"><i class="far fa-long-arrow-right"></i></div>
+                </div>
+            </div>
+            <div class="swiper oneSlide">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="player-details-single">
+                            <div class="player-picture"><img src="{{ asset('assets/images/about/playerpic.png') }}" alt="playerspic"></div>
+                            <div class="contents">
+                                <span class="player-position-number">#01</span>
+                                <h2 class="player-name">ALEX BENZAMIN</h2>
+                                <h3 class="player-role">FORWARD</h3>
+                                <p>There are so many sports available in the world nowadays, but we can categorize them by the numbers of players, the three main categories are individual sport, dual sport.</p>
+                                <a href="{{ path('app_player_details', {'id': 1}) }}" class="more-details-btn">MORE DETAILS <i class="far fa-long-arrow-right ml--5"></i></a>
+                            </div>
+                            <div class="player-status-area">
+                                <div class="status-box">
+                                    <span class="box-title">2017-22 STATUS</span>
+                                    <div class="status-item">
+                                        <span class="status-name">Games Played</span>
+                                        <span class="status-number">22</span>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-name">Minutes played</span>
+                                        <span class="status-number">1,256</span>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-name">Goals</span>
+                                        <span class="status-number">30</span>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-name">Assists</span>
+                                        <span class="status-number">41</span>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-name">Jursey Number</span>
+                                        <span class="status-number">10</span>
+                                    </div>
+                                </div>
+                                <div class="status-percentage">
+                                    <div class="sp-item">
+                                        <span class="per">62<span>%</span></span>
+                                        <span class="title">POSSING</span>
+                                    </div>
+                                    <div class="sp-item">
+                                        <span class="per">39<span>%</span></span>
+                                        <span class="title">TACKLES</span>
+                                    </div>
+                                    <div class="sp-item">
+                                        <span class="per">77<span>%</span></span>
+                                        <span class="title">DRIBLING</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ... other player slides ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Player Details Section End Here =================-->
+
+    <!--================= Blog Section Start Here =================-->
+    <div class="rts-blog-section section-gap">
+        <div class="container">
+            <div class="section-title-area section-title-area1 text-center mb--50">
+                <h1 class="section-title"><span class="pretitle">BLOG</span>TEAM INSIGHTS</h1>
+                <p>It is one of the most popular football clubs that offer training programs for the youth, as well as summer camps</p>
+            </div>
+            <div class="blog-area">
+                <div class="row justify-content-center">
+                    <div class="col-xl-4 col-md-6">
+                        <div class="blog-item">
+                            <div class="blog-picture"><img src="{{ asset('assets/images/blog/blog1.jpg') }}" alt=""></div>
+                            <div class="contents-wrapper">
+                                <div class="contents">
+                                    <div class="d-block">
+                                        <a href="{{ path('app_category_details', {'id': 1})  }}" class="blog-catagory">FOOTBALL</a>
+                                        <a href="{{ path('app_blog_front_details', {'id': 1}) }}" class="blog-title">THE ENGLISH LEAGUE – WHAT TO EXPECT FROM ENGLAND FOOTBALL CLUB</a>
+                                    </div>
+                                    <div class="author-info">
+                                        <div class="author-dp"><img src="{{ asset('assets/images/items/author2.png') }}" alt="author-dp"></div>
+                                        <div class="content">
+                                            <a href="#0" class="author-name">CLUB DA AUTHOR</a>
+                                            <div class="blog-date">
+                                                <div class="date">June 21, 2024</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ... other blog items ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Blog Section End Here =================-->
+
+    <!--================= Match Result Start Here =================-->
+    <div class="rts-match-result-section">
+        <div class="row">
+            <div class="swiper rts-sixSlide-over">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide col-item">
+                        <div class="match-single">
+                            <span class="match-date">PLAYOFF, JULY 21</span>
+                            <div class="match-scores">
+                                <div class="club">
+                                    <h2 class="score-number">01</h2>
+                                    <span class="club-name">REAL M.</span>
+                                </div>
+                                <div class="colon">:</div>
+                                <div class="club">
+                                    <h2 class="score-number">03</h2>
+                                    <span class="club-name">HEMILTON H.</span>
+                                </div>
+                            </div>
+                            <div class="match-review">
+                                <a href="{{ path('app_blog_front_details', {'id': 1}) }}" class="review-link smry">SAMMARY</a>
+                                <div class="play-btn play-video">
+                                    <a href="https://www.youtube.com/watch?v=G4t6TqG5LM8" class="review-link vdo">VIDEO</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ... other match results ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Match Result Section End Here =================-->
+
+    <!--================= About Section Start Here =================-->
+    <div class="rts-about-section">
+        <div class="about-inner">
+            <div class="about-thumb"><img src="{{ asset('assets/images/about/aboutthumb.jpg') }}" alt="about-thumb"></div>
+            <div class="contents">
+                <div class="section-title-area section-title-area1 text-start mb--50">
+                    <h1 class="section-title"><span class="pretitle">ABOUT</span>ABOUT OUR CLUB</h1>
+                    <p>It is one of the most popular football clubs that offer training programs for the youth, as well as summer camps</p>
+                </div>
+                <div class="quote-box">
+                    <p>Sportius United has a long and exciting history that started three decades ago for move forward.</p>
+                    <span class="quote-author">ALONSO D. DOWSON</span>
+                </div>
+                <p>Sportius United has a long and exciting history that started 3 decades ago. It is one of the most popular football clubs that offer training into programs for the youth, as well as summer camps.</p>
+                <a href="{{ path('app_about') }}" class="more-btn">LEARN MORE <i class="long-arrow-right ml--10"></i></a>
+            </div>
+        </div>
+    </div>
+    <!--================= About Section End Here =================-->
+
+    <!--================= Shop Section Start Here =================-->
+    <div class="rts-shop-section section-gap">
+        <div class="container">
+            <div class="top-wrapper">
+                <div class="section-title-area section-title-area1 text-start mb--50">
+                    <h1 class="section-title"><span class="pretitle">SHOP</span>MARCH PRODUCTS</h1>
+                    <p>It is one of the most popular football clubs that offer training programs for the youth, as well as summer camps</p>
+                </div>
+                <a href="{{ path('app_shop') }}" class="more-details-btn">MORE PRODUCTS <i class="far fa-long-arrow-right ml--10"></i></a>
+            </div>
+            <div class="swiper rts-cmmnSlider">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="product-item">
+                            <a href="{{ path('app_product_details', {'id': 1}) }}" class="product-thumb"><img src="{{ asset('assets/images/products/product1.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <div class="rating-area">
+                                    <div class="rating-stars-group">
+                                        <div class="rating-star"><i class="fas fa-star"></i></div>
+                                        <div class="rating-star"><i class="fas fa-star"></i></div>
+                                        <div class="rating-star"><i class="fas fa-star"></i></div>
+                                        <div class="rating-star"><i class="fas fa-star"></i></div>
+                                        <div class="rating-star blank-star"><i class="fas fa-star"></i></div>
+                                    </div>
+                                </div>
+                                <a href="{{ path('app_product_details', {'id': 1}) }}" class="product-name">THE WORLD CUP-2018 FOOTBALL</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$59</span>
+                                    <a href="{{ path('app_cart') }}" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ... other product slides ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Shop Section End Here =================-->
+
+    <!--================= Sponsors Section Start Here =================-->
+    <div class="rts-sponsors-section section-gap section-bg">
+        <div class="container">
+            <div class="section-title-area section-title-area1 text-center mb--50">
+                <h1 class="section-title"><span class="pretitle">SPONSORS</span>HAPPY SPONSORS</h1>
+                <p>It is one of the most popular football clubs that offer training programs for the youth, as well as summer camps</p>
+            </div>
+            <div class="row">
+                <div class="col-xl-2 col-md-4 col-sm-6">
+                    <a href="#" class="sponsor-single"><img src="{{ asset('assets/images/brands/1.png') }}" alt="sponsor"></a>
+                </div>
+                <!-- ... other sponsor items ... -->
+            </div>
+        </div>
+    </div>
+    <!--================= Sponsors Section End Here =================-->
+{% endblock %}
+{% block footer %}
+    <!--================= Footer Start Here =================-->
+    <div class="footer footer1">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="row">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="footer-widget">
+                            <div class="footer-logo"><img src="{{ asset('assets/images/footer/footer-logo.png') }}" alt="footer-logo"></div>
+                            <p class="footer-text">It was the end of a period in the 1980s in which it seemed like every NBA Finals matchup featured the Celtics sports club.</p>
+                            <div class="social-links">
+                                <a href="#0" class="platform"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#0" class="platform"><i class="fab fa-pinterest-p"></i></a>
+                                <a href="#0" class="platform"><i class="fab fa-behance"></i></a>
+                                <a href="#0" class="platform"><i class="fab fa-youtube"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ... other footer widgets ... -->
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom-area">
+            <div class="container">
+                <div class="bottom-area-inner">
+                    <span class="copyright">COPYRIGHT & DESIGN BY <span class="brand">SPORTIUS</span> - 2024</span>
+                    <div class="footer-bottom-links">
+                        <a href="{{ path('app_about') }}">ABOUT US</a>
+                        <a href="{{ path('app_faq') }}">FAQ</a>
+                        <a href="{{ path('app_contact') }}">CONTACT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--================= Footer End Here =================-->
+
+    <!--================= Scroll to Top Start =================-->
+    <div class="scroll-top-btn scroll-top-btn1"><i class="fas fa-angle-up arrow-up"></i><i class="fas fa-circle-notch"></i></div>
+    <!--================= Scroll to Top End =================-->
 {% endblock %}
 
-{% block javascripts %}
-{{ parent() }}
-<script>
-  var ctx = document.getElementById("chart-bars").getContext("2d");
-
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      datasets: [{
-        label: "Sales",
-        tension: 0.4,
-        borderWidth: 0,
-        borderRadius: 4,
-        borderSkipped: false,
-        backgroundColor: "#fff",
-        data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
-        maxBarThickness: 6
-      }, ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false,
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-          },
-          ticks: {
-            suggestedMin: 0,
-            suggestedMax: 500,
-            beginAtZero: true,
-            padding: 15,
-            font: {
-              size: 14,
-              family: "Inter",
-              style: 'normal',
-              lineHeight: 2
-            },
-            color: "#fff"
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false
-          },
-          ticks: {
-            display: false
-          },
-        },
-      },
-    },
-  });
-</script>
-{% endblock %} 
