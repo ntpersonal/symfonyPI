@@ -23,7 +23,7 @@ final class AdminDashboradController extends AbstractController
     #[Route('/admin/dashboard/profile', name: 'app_admin_dashborad_profile')]
     public function profile(): Response
     {
-        return $this->render('admin_dashborad/profile.html.twig');
+        return $this->render('admin_dashboard/profile.html.twig');
     }
 
    

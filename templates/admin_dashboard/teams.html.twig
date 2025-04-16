@@ -129,8 +129,6 @@
       background-color: #344767;
       color: #fff;
       border-color: #344767;
-      font-size: 1.25rem;
-      font-weight: 600;
     }
     .pagination li:first-child a:hover,
     .pagination li:last-child a:hover {
@@ -180,7 +178,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" href="{{ path('app_admin_dashborad_tables') }}">
+          <a class="nav-link active" href="{{ path('app_admin_dashboard_teams') }}">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>office</title>
@@ -432,12 +430,21 @@
     <!-- End Navbar -->
 
     <div class="container-fluid py-4">
+      {% for label, messages in app.flashes %}
+          {% for message in messages %}
+              <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+          {% endfor %}
+      {% endfor %}
+      
       <div class="row">
         <div class="col-12">
           <div class="card mb-4">
             <div class="card-header pb-0 d-flex justify-content-between align-items-center">
               <h6 class="mb-0">Teams table</h6>
-              <a class="btn btn-success btn-sm" href="javascript:void(0);">Add</a>
+              <a class="btn btn-success btn-sm" href="javascript:void(0);" data-toggle="modal" id="AddTeamPopUpModel">Add</a>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
               <div class="table-responsive p-0">
@@ -450,7 +457,8 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">nb Players</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Edit</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Delete</th>
-                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ranking</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ranking</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Join Tournament</th>
                       
                       
                     </tr>
@@ -495,6 +503,9 @@
                          <td class="align-middle text-center">
                         <a class="btn btn-red btn-sm Consult-Ranking" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Consult</a>
                         </td>
+                        <td class="align-middle text-center">
+                        <a class="btn btn-info btn-sm join-tournament" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Join</a>
+                        </td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -530,29 +541,49 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="editTeamForm">
+          <form id="editTeamForm" class="needs-validation" novalidate>
             <input type="hidden" id="editTeamId" name="id">
             <div class="mb-3">
               <label for="editTeamName" class="form-label">Team Name</label>
-              <input type="text" class="form-control" id="editTeamName" name="nom" required>
+              <input type="text" class="form-control" id="editTeamName" name="nom" required 
+                     minlength="3" maxlength="255"
+                     pattern="^[a-zA-Z0-9\s\-_]+$">
+              <div class="invalid-feedback" id="editTeamNameError">
+                Please enter a valid team name (3-255 characters, letters, numbers, spaces, hyphens, and underscores only)
+              </div>
             </div>
             <div class="mb-3">
               <label for="editTeamCategorie" class="form-label">Category</label>
-              <input type="text" class="form-control" id="editTeamCategorie" name="categorie" required>
+              <input type="text" class="form-control" id="editTeamCategorie" name="categorie" required
+                     minlength="3" maxlength="255">
+              <div class="invalid-feedback" id="editTeamCategorieError">
+                Please enter a valid category (3-255 characters)
+              </div>
             </div>
             <div class="mb-3">
               <label for="editTeamModeJeu" class="form-label">Game Mode</label>
-              <input type="text" class="form-control" id="editTeamModeJeu" name="modeJeu" required>
+              <select class="form-control" id="editTeamModeJeu" name="modeJeu" required>
+                <option value="">Select a game mode</option>
+                <option value="EN_GROUPE">Group</option>
+                <option value="PAR_2">Pairs</option>
+              </select>
+              <div class="invalid-feedback" id="editTeamModeJeuError">
+                Please select a valid game mode
+              </div>
             </div>
             <div class="mb-3">
               <label for="editTeamNombreJoueurs" class="form-label">Number of Players</label>
-              <input type="number" class="form-control" id="editTeamNombreJoueurs" name="nombreJoueurs" required>
+              <input type="number" class="form-control" id="editTeamNombreJoueurs" name="nombreJoueurs" required
+                     min="2" max="10">
+              <div class="invalid-feedback" id="editTeamNombreJoueursError">
+                Please enter a valid number of players (between 2 and 10)
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="updateTeam">Save Changes</button>
             </div>
           </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="saveEdit">Save Changes</button>
         </div>
       </div>
     </div>
@@ -577,6 +608,43 @@
     </div>
   </div>
 
+  <!-- Team Ranking Modal -->
+  <div class="modal fade" id="teamRankingModal" tabindex="-1" role="dialog" aria-labelledby="teamRankingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 95%; width: 95%;" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="teamRankingModalLabel">Team Rankings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0" style="min-width: 1000px; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 20%;">Tournament</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2" style="width: 8%;">Position</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Points</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Wins</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Draws</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Losses</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 10%;">Goals Scored</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 10%;">Goals Conceded</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 10%;">Goal Difference</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTableBody">
+                <!-- Rankings will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Team Modal -->
   <div class="modal fade" id="addTeamModal" tabindex="-1" role="dialog" aria-labelledby="addTeamModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -586,28 +654,74 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="addTeamForm">
+          {{ form_start(form, {
+              'id': 'addTeamForm',
+              'attr': {
+                  'class': 'needs-validation',
+                  'novalidate': 'novalidate'
+              }
+          }) }}
             <div class="mb-3">
-              <label for="addTeamName" class="form-label">Team Name</label>
-              <input type="text" class="form-control" id="addTeamName" name="nom" required>
+              {{ form_label(form.nom, 'Team Name', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.nom, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter team name'
+                  }
+              }) }}
+              {{ form_errors(form.nom, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_nom_error'
+                  }
+              }) }}
             </div>
             <div class="mb-3">
-              <label for="addTeamCategorie" class="form-label">Category</label>
-              <input type="text" class="form-control" id="addTeamCategorie" name="categorie" required>
+              {{ form_label(form.categorie, 'Category', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.categorie, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter category'
+                  }
+              }) }}
+              {{ form_errors(form.categorie, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_categorie_error'
+                  }
+              }) }}
             </div>
             <div class="mb-3">
-              <label for="addTeamModeJeu" class="form-label">Game Mode</label>
-              <input type="text" class="form-control" id="addTeamModeJeu" name="modeJeu" required>
+              {{ form_label(form.modeJeu, 'Game Mode', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.modeJeu, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter game mode'
+                  }
+              }) }}
+              {{ form_errors(form.modeJeu, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_modeJeu_error'
+                  }
+              }) }}
             </div>
             <div class="mb-3">
-              <label for="addTeamNombreJoueurs" class="form-label">Number of Players</label>
-              <input type="number" class="form-control" id="addTeamNombreJoueurs" name="nombreJoueurs" required>
+              {{ form_label(form.nombreJoueurs, 'Number of Players', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.nombreJoueurs, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter number of players'
+                  }
+              }) }}
+              {{ form_errors(form.nombreJoueurs, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_nombreJoueurs_error'
+                  }
+              }) }}
             </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="saveAdd">Add Team</button>
+          {{ form_end(form) }}
         </div>
       </div>
     </div>
@@ -679,6 +793,34 @@
       </div>
     </div>
   </div>
+
+  <!-- Join Tournament Modal -->
+  <div class="modal fade" id="joinTournamentModal" tabindex="-1" role="dialog" aria-labelledby="joinTournamentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="joinTournamentModalLabel">Join Tournament</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="joinTournamentForm">
+            <input type="hidden" id="joinTeamId" name="teamId">
+            <div class="mb-3">
+              <label for="tournamentSelect" class="form-label">Select Tournament</label>
+              <select class="form-control" id="tournamentSelect" name="tournamentId" required>
+                <option value="">Select a tournament</option>
+                <!-- Tournaments will be populated here -->
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="joinTournamentBtn">Join</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block javascripts %}
@@ -688,6 +830,8 @@
   <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
   <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
   <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
@@ -725,73 +869,7 @@
       window.location.href = `${window.location.pathname}?page=${currentPage}`;
     }
 
-    // Edit team modal
-    document.addEventListener('DOMContentLoaded', function() {
-      const editButtons = document.querySelectorAll('.edit-team');
-      const editModal = new bootstrap.Modal(document.getElementById('editTeamModal'));
-      const editForm = document.getElementById('editTeamForm');
-      const saveEditBtn = document.getElementById('saveEdit');
-      let currentTeamId = null;
-      let currentRow = null;
-
-      editButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const teamId = this.getAttribute('data-team-id');
-          const teamName = this.getAttribute('data-team-name');
-          const teamCategorie = this.getAttribute('data-team-categorie');
-          const teamModeJeu = this.getAttribute('data-team-modejeu');
-          const teamNombreJoueurs = this.getAttribute('data-team-nombrejoueurs');
-          
-          currentTeamId = teamId;
-          currentRow = this.closest('tr');
-          
-          document.getElementById('editTeamId').value = teamId;
-          document.getElementById('editTeamName').value = teamName;
-          document.getElementById('editTeamCategorie').value = teamCategorie;
-          document.getElementById('editTeamModeJeu').value = teamModeJeu;
-          document.getElementById('editTeamNombreJoueurs').value = teamNombreJoueurs;
-          
-          editModal.show();
-        });
-      });
-
-      saveEditBtn.addEventListener('click', function() {
-        if (currentTeamId) {
-          const formData = new FormData(editForm);
-          const data = Object.fromEntries(formData.entries());
-          
-          fetch(`/admin/teams/${currentTeamId}/edit`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(data)
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          })
-          .then(data => {
-            if (data.success) {
-              showToast('Team updated successfully');
-              setTimeout(refreshTable, 1500);
-            } else {
-              throw new Error(data.message || 'Failed to update team');
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            showToast(error.message, 'danger');
-          })
-          .finally(() => {
-            editModal.hide();
-          });
-        }
-      });
-    });
+    
 
     // Delete team confirmation modal
     document.addEventListener('DOMContentLoaded', function() {
@@ -846,24 +924,207 @@
       });
     });
 
-    // Add team modal
+    // Add Team Form Submission
     document.addEventListener('DOMContentLoaded', function() {
-      const addButton = document.querySelector('.btn-success');
-      const addModal = new bootstrap.Modal(document.getElementById('addTeamModal'));
-      const addForm = document.getElementById('addTeamForm');
-      const saveAddBtn = document.getElementById('saveAdd');
+      const AfficheAddTeamModel = document.getElementById('AddTeamPopUpModel');
+      const addTeamModal = document.getElementById('addTeamModal');
+      const form = document.getElementById('addTeamForm');
+      const submitTeamForm = document.getElementById('submitTeamForm');
 
-      addButton.addEventListener('click', function() {
-        addForm.reset();
-        addModal.show();
+      function clearFormErrors() {
+        const errorElements = form.querySelectorAll('.invalid-feedback');
+        errorElements.forEach(element => element.textContent = '');
+        const formControls = form.querySelectorAll('.form-control');
+        formControls.forEach(control => {
+          control.classList.remove('is-invalid');
+          control.classList.remove('is-valid');
+        });
+      }
+
+      if (AfficheAddTeamModel && addTeamModal) {
+        const modal = new bootstrap.Modal(addTeamModal);
+        AfficheAddTeamModel.addEventListener('click', function() {
+          if (form) {
+            form.reset();
+            clearFormErrors();
+          }
+          modal.show();
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          clearFormErrors();
+
+          if (submitTeamForm) {
+            submitTeamForm.disabled = true;
+            submitTeamForm.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+          }
+
+          const formData = new FormData(form);
+          
+          fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+            } else if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text();
+          })
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const errorMessages = doc.querySelectorAll('.alert-danger');
+            
+            if (errorMessages.length > 0) {
+              errorMessages.forEach(error => {
+                showToast(error.textContent.trim(), 'danger');
+              });
+            } else {
+              showToast('Team added successfully', 'success');
+              if (addTeamModal) {
+                const modal = bootstrap.Modal.getInstance(addTeamModal);
+                if (modal) {
+                  modal.hide();
+                }
+              }
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred while submitting the form', 'danger');
+          })
+          .finally(() => {
+            if (submitTeamForm) {
+              submitTeamForm.disabled = false;
+              submitTeamForm.textContent = 'Add Team';
+            }
+          });
+        });
+      }
+    });
+
+    // Edit team validation and submission
+    document.addEventListener('DOMContentLoaded', function() {
+      const editForm = document.getElementById('editTeamForm');
+      const updateBtn = document.getElementById('updateTeam');
+      const editModal = new bootstrap.Modal(document.getElementById('editTeamModal'));
+      const editButtons = document.querySelectorAll('.edit-team');
+      editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const teamId = this.getAttribute('data-team-id');
+          const teamName = this.getAttribute('data-team-name');
+          const teamCategorie = this.getAttribute('data-team-categorie');
+          const teamModeJeu = this.getAttribute('data-team-modejeu');
+          const teamNombreJoueurs = this.getAttribute('data-team-nombrejoueurs');
+          
+          currentTeamId = teamId;
+          currentRow = this.closest('tr');
+          
+          document.getElementById('editTeamId').value = teamId;
+          document.getElementById('editTeamName').value = teamName;
+          document.getElementById('editTeamCategorie').value = teamCategorie;
+          document.getElementById('editTeamModeJeu').value = teamModeJeu;
+          document.getElementById('editTeamNombreJoueurs').value = teamNombreJoueurs;
+          
+          editModal.show();
+        });
       });
+      function clearEditFormErrors() {
+        const errorElements = editForm.querySelectorAll('.invalid-feedback');
+        errorElements.forEach(element => element.style.display = 'none');
+        const formControls = editForm.querySelectorAll('.form-control');
+        formControls.forEach(control => {
+          control.classList.remove('is-invalid');
+          control.classList.remove('is-valid');
+        });
+      }
 
-      saveAddBtn.addEventListener('click', function() {
-        const formData = new FormData(addForm);
+      function validateEditForm() {
+        let isValid = true;
+        clearEditFormErrors();
+
+        // Validate team name
+        const teamName = document.getElementById('editTeamName');
+        const teamNameValue = teamName.value.trim();
+        if (!teamNameValue || teamNameValue.length < 3 || teamNameValue.length > 255) {
+          teamName.classList.add('is-invalid');
+          document.getElementById('editTeamNameError').style.display = 'block';
+          isValid = false;
+        }
+
+        // Validate category
+        const category = document.getElementById('editTeamCategorie');
+        const categoryValue = category.value.trim();
+        if (!categoryValue || categoryValue.length < 3 || categoryValue.length > 255) {
+          category.classList.add('is-invalid');
+          document.getElementById('editTeamCategorieError').style.display = 'block';
+          isValid = false;
+        }
+
+        // Validate game mode
+        const gameMode = document.getElementById('editTeamModeJeu');
+        if (!gameMode.value || (gameMode.value !== 'EN_GROUPE' && gameMode.value !== 'PAR_2')) {
+          gameMode.classList.add('is-invalid');
+          document.getElementById('editTeamModeJeuError').style.display = 'block';
+          isValid = false;
+        }
+
+        // Validate number of players
+        const playersCount = document.getElementById('editTeamNombreJoueurs');
+        const playersCountValue = parseInt(playersCount.value);
+        if (isNaN(playersCountValue) || playersCountValue < 2 || playersCountValue > 100){
+          playersCount.classList.add('is-invalid');
+          document.getElementById('editTeamNombreJoueursError').style.display = 'block';
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+
+      if (editForm) {
+        // Add real-time validation
+        const inputs = editForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+          input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+              validateEditForm();
+            }
+          });
+        });
+
+        // Handle form submission
+        editForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const isValid = validateEditForm();
+          // First validate the form
+          if (!isValid) {
+            showToast('Please correct the errors in the form', 'warning');
+            return false;
+          }else if(isValid){
+            submitForm();
+            return true;
+          }
+        });
+
+      function submitForm() {
+        const formData = new FormData(editForm);
         const data = Object.fromEntries(formData.entries());
-        
-        fetch('/admin/teams/add', {
-          method: 'POST',
+        fetch(`/admin/teams/${data.id}/edit`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -878,10 +1139,16 @@
         })
         .then(data => {
           if (data.success) {
-            showToast('Team added successfully');
-            setTimeout(refreshTable, 1500);
+            showToast('Team updated successfully', 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTeamModal'));
+            if (modal) {
+              modal.hide();
+            }
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
           } else {
-            throw new Error(data.message || 'Failed to add team');
+            throw new Error(data.message || 'Failed to update team');
           }
         })
         .catch(error => {
@@ -889,18 +1156,228 @@
           showToast(error.message, 'danger');
         })
         .finally(() => {
-          addModal.hide();
+          if (updateBtn) {
+            updateBtn.disabled = false;
+            updateBtn.textContent = 'Save Changes';
+          }
+        });
+      }
+      }
+
+      // Team Ranking Modal
+      const rankingModal = new bootstrap.Modal(document.getElementById('teamRankingModal'));
+      const rankingTableBody = document.getElementById('rankingTableBody');
+      const consultButtons = document.querySelectorAll('.Consult-Ranking');
+
+      consultButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const teamId = this.getAttribute('data-team-id');
+          const teamName = this.getAttribute('data-team-name');
+          
+          // Update modal title with team name
+          document.getElementById('teamRankingModalLabel').textContent = `Rankings for ${teamName}`;
+          
+          // Clear previous rankings
+          rankingTableBody.innerHTML = '';
+          
+          // Show loading state
+          rankingTableBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+          `;
+          
+          // Fetch rankings
+          fetch(`/admin/teams/${teamId}/rankings`, {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            rankingTableBody.innerHTML = '';
+            
+            if (data.rankings && data.rankings.length > 0) {
+              data.rankings.forEach(ranking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>
+                    <div class="d-flex px-2 py-1">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">${ranking.tournamentName}</h6>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="text-xs font-weight-bold mb-0">${ranking.position}</p>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.points}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.wins}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.draws}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.losses}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalsScored}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalsConceded}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalDifference}</span>
+                  </td>
+                `;
+                rankingTableBody.appendChild(row);
+              });
+            } else {
+              rankingTableBody.innerHTML = `
+                <tr>
+                  <td colspan="4" class="text-center">
+                    <p class="text-muted mb-0">No rankings available for this team.</p>
+                  </td>
+                </tr>
+              `;
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            rankingTableBody.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center text-danger">
+                  <p class="mb-0">Error loading rankings. Please try again later.</p>
+                </td>
+              </tr>
+            `;
+          });
+          
+          rankingModal.show();
         });
       });
     });
 
-    // Remove hash-based navigation handling
-    window.addEventListener('hashchange', function() {
-      // Remove the hash-based navigation handling
+    // Join Tournament functionality
+    const joinTournamentModal = new bootstrap.Modal(document.getElementById('joinTournamentModal'));
+    const joinButtons = document.querySelectorAll('.join-tournament');
+    const tournamentSelect = document.getElementById('tournamentSelect');
+    const joinTeamId = document.getElementById('joinTeamId');
+    const joinTournamentForm = document.getElementById('joinTournamentForm');
+
+    joinButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const teamId = this.getAttribute('data-team-id');
+        const teamName = this.getAttribute('data-team-name');
+        
+        // Update modal title
+        document.getElementById('joinTournamentModalLabel').textContent = `Join Tournament - ${teamName}`;
+        joinTeamId.value = teamId;
+        
+        // Clear previous options
+        tournamentSelect.innerHTML = '<option value="">Select a tournament</option>';
+        
+        // Fetch available tournaments
+        fetch('/admin/tournaments/available', {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.tournaments && data.tournaments.length > 0) {
+            data.tournaments.forEach(tournament => {
+              const option = document.createElement('option');
+              option.value = tournament.id;
+              option.textContent = tournament.nom;
+              tournamentSelect.appendChild(option);
+            });
+          } else {
+            tournamentSelect.innerHTML = '<option value="" disabled>No tournaments available</option>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showToast('Error loading tournaments', 'danger');
+        });
+        
+        joinTournamentModal.show();
+      });
+    });
+
+    joinTournamentForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const teamId = joinTeamId.value;
+      const tournamentId = tournamentSelect.value;
+      
+      if (!tournamentId) {
+        showToast('Please select a tournament', 'warning');
+        return;
+      }
+      
+      const joinBtn = document.getElementById('joinTournamentBtn');
+      joinBtn.disabled = true;
+      joinBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Joining...';
+      
+      fetch('/admin/teams/join-tournament', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          teamId: teamId,
+          tournamentId: tournamentId
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          showToast('Team joined tournament successfully', 'success');
+          joinTournamentModal.hide();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          throw new Error(data.message || 'Failed to join tournament');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast(error.message, 'danger');
+      })
+      .finally(() => {
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+      });
     });
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="{{ asset('assets/js/soft-ui-dashboard.min.js?v=1.1.0') }}"></script>
 {% endblock %}

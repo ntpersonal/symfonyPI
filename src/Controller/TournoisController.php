@@ -8,8 +8,16 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request; // Added missing import
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\Tournoi;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 final class TournoisController extends AbstractController
 {
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
     #[Route('/admin/dashboard/Tournoi', name: 'app_admin_dashborad_Tournoi')]
     public function tournoi(Request $request, ManagerRegistry $doctrine): Response
     {
@@ -126,5 +134,28 @@ final class TournoisController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Error updating tournament'], 500);
         }
     }
+    #[Route('/admin/tournaments/available', name: 'app_tournaments_available', methods: ['GET'])]
+    public function getAvailableTournaments(ManagerRegistry $doctrine): JsonResponse
+    {
+        try {
+            $tournaments = $doctrine->getRepository(Tournoi::class)
+                ->findBy(['status' => 'Pending'], ['start_date' => 'ASC']);
 
+            $tournamentsData = array_map(function($tournament) {
+                return [
+                    'id' => $tournament->getId(),
+                    'nom' => $tournament->getNom(),
+                    'start_date' => $tournament->getStart_date()->format('Y-m-d'),
+                    'end_date' => $tournament->getEnd_date()->format('Y-m-d'),
+                    'format' => $tournament->getFormat(),
+                    'sportType' => $tournament->getSportType(),
+                    'nbEquipe' => $tournament->getNbEquipe()
+                ];
+            }, $tournaments);
+
+            return new JsonResponse(['tournaments' => $tournamentsData]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Failed to fetch tournaments'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

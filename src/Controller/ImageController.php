@@ -14,7 +14,7 @@ class ImageController extends AbstractController
     public function serveImage(string $filename): Response
     {
         // Define the base path where your images are stored
-        $basePath = 'C:/xampp3/htdocs/img/';
+        $basePath = 'C:/xampp4/htdocs/img/';
         $filePath = $basePath . $filename;
 
         // Check if file exists
