@@ -1,0 +1,190 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+    <div class="card-body p-3">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+        <div class="row">
+            <div class="col-md-4">
+                <div class="profile-picture-container">
+                    {% if user.profilepicture %}
+                        <img src="{{ asset('uploads/profile/' ~ user.profilepicture) }}"
+                             alt="Current Profile Picture"
+                             class="profile-picture"
+                             onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
+                    {% else %}
+                        <img src="{{ asset('assets/images/default-avatar.png') }}"
+                             alt="Default Profile Picture"
+                             class="profile-picture">
+                    {% endif %}
+                </div>
+                <div class="text-center mt-3">
+                    <div class="form-group">
+                        {{ form_label(form.profilepicture, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.profilepicture, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.profilepicture) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="info-section">
+                    <h6>Personal Information</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.firstname, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.firstname) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.lastname, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.lastname, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.lastname) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.phonenumber, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.phonenumber, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.phonenumber) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.dateofbirth, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.dateofbirth, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.dateofbirth) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end mt-4">
+                    <a href="{{ path('app_player_profile') }}" class="btn btn-secondary me-2">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+
+
+    <style>
+        .profile-picture-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+        }
+
+        .profile-picture {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .info-section {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-section h6 {
+            color: #344767;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            color: #344767 !important;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            display: block !important;
+            border: 1px solid #ced4da;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            background-color: #fff;
+            color: #212529
+        }
+
+        input::placeholder {
+            color: #6c757d;
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background-color: #5e72e4;
+            border-color: #5e72e4;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #8392ab;
+            border-color: #8392ab;
+            color: #fff;
+        }
+
+        .alert {
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-picture {
+                width: 150px;
+                height: 150px;
+            }
+
+            .info-section {
+                padding: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+    </style>
+{% endblock %} 

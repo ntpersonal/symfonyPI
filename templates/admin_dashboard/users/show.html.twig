@@ -1,0 +1,82 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}User Details - Soccer{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">User Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard_users') }}">Users</a></li>
+        <li class="breadcrumb-item active">User Details</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-user me-1"></i>
+                    User Information
+                </div>
+                <div>
+                    <a href="{{ path('app_admin_dashboard_user_edit', {'id': user.id}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{{ path('app_admin_dashboard_users') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <img src="{{ user.profilepicture ? asset('uploads/profile_pictures/' ~ user.profilepicture) : asset('assets/img/default-avatar.png') }}" 
+                         alt="{{ user.firstname }} {{ user.lastname }}" 
+                         class="rounded-circle mb-3"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                    <h3>{{ user.firstname }} {{ user.lastname }}</h3>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <span class="badge {{ user.isActive ? 'bg-success' : 'bg-danger' }}">
+                        {{ user.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                </div>
+                <div class="col-md-8">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Role</th>
+                                <td>{{ user.role }}</td>
+                            </tr>
+                            <tr>
+                                <th>Team</th>
+                                <td>{{ user.team ? user.team.name : 'No team' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Phone Number</th>
+                                <td>{{ user.phonenumber ?: 'Not provided' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date of Birth</th>
+                                <td>{{ user.dateofbirth ? user.dateofbirth|date('Y-m-d') : 'Not provided' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Coaching License</th>
+                                <td>{{ user.coachinglicense ?: 'Not provided' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Created At</th>
+                                <td>{{ user.createdat|date('Y-m-d H:i:s') }}</td>
+                            </tr>
+                            <tr>
+                                <th>Updated At</th>
+                                <td>{{ user.updatedat|date('Y-m-d H:i:s') }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -18,7 +18,35 @@
     <link rel="stylesheet" href="{{ asset('assets/css/aos.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 
-    {% block stylesheets %}{% endblock %}
+    {% block stylesheets %}
+        <!--================= Favicon =================-->
+        <link rel="apple-touch-icon" href="{{ asset('assets/images/fav.png') }}">
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/fav.png') }}">
+        <!--================= Bootstrap V5 CSS =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap2.min.css') }}">
+        <!--================= Font Awesome 5 CSS =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/all.min.css') }}">
+        <!--================= RT Icons CSS =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/rt-icons.css') }}">
+        <!--================= Animate css =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/animate.min.css') }}">
+        <!--================= Magnific popup Plugin =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/magnific-popup2.css') }}">
+        <!--================= Animate css =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/magnific.css') }}">
+        <!--================= Animate css =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/animate.min.css') }}">
+        <!--================= Swiper Slider Plugin =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/swiper-bundle.min.css') }}">
+        <!--================= Mobile Menu CSS =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/metisMenu.css') }}">
+        <!--================= Main Menu CSS =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/rtsmenu.css') }}">
+        <!--================= Main Stylesheet =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/variables/variable1.css') }}">
+        <!--================= Main Stylesheet =================-->
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
+    {% endblock %}
 </head>
 
 <body>
@@ -49,6 +77,8 @@
                                 <li><a href="{{ path('app_players') }}" class="nav-link">Players</a></li>
                                 <li><a href="{{ path('app_blog') }}" class="nav-link">Blog</a></li>
                                 <li><a href="{{ path('app_contact') }}" class="nav-link">Contact</a></li>
+                                <li><a href="{{ path('app_log_in') }}" class="btn btn-orange ml-2">Sign In</a></li>
+                                <li><a href="{{ path('app_sign_up') }}" class="btn btn-orange ml-2">Sign Up</a></li>
                             </ul>
                         </nav>
                         <a href="#" class="d-inline-block d-lg-none site-menu-toggle js-menu-toggle text-black float-right text-white">
@@ -63,7 +93,7 @@
         {% block body %}{% endblock %}
 
         {% block footer %}
-        <footer class="footer-section">
+        <footer class="footer-section footer-section--compact">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-3">
@@ -130,11 +160,11 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="{{ asset('assets/js/vendors/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery-migrate-3.0.1.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery-ui.js') }}"></script>
     <script src="{{ asset('assets/js/popper.min.js') }}"></script>
-    <script src="{{ asset('assets/js/vendors/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/js/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.stellar.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.countdown.min.js') }}"></script>
@@ -143,10 +173,6 @@
     <script src="{{ asset('assets/js/aos.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.fancybox.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.sticky.js') }}"></script>
-    <script src="{{ asset('assets/js/vendors/metisMenu.min.js') }}"></script>
-    <script src="{{ asset('assets/js/vendors/wow.min.js') }}"></script>
-    <script src="{{ asset('assets/js/vendors/zoom.js') }}"></script>
-    <script src="{{ asset('assets/js/vendors/rtsmenu.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
 
     {% block javascripts %}{% endblock %}
