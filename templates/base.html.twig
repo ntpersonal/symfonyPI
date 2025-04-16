@@ -18,36 +18,10 @@
     <link rel="stylesheet" href="{{ asset('assets/css/aos.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 
-    {% block stylesheets %}
-        <!--================= Favicon =================-->
-        <link rel="apple-touch-icon" href="{{ asset('assets/images/fav.png') }}">
-        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/fav.png') }}">
-        <!--================= Bootstrap V5 CSS =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap2.min.css') }}">
-        <!--================= Font Awesome 5 CSS =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/all.min.css') }}">
-        <!--================= RT Icons CSS =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/rt-icons.css') }}">
-        <!--================= Animate css =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/animate.min.css') }}">
-        <!--================= Magnific popup Plugin =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/magnific-popup2.css') }}">
-        <!--================= Animate css =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/magnific.css') }}">
-        <!--================= Animate css =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/animate.min.css') }}">
-        <!--================= Swiper Slider Plugin =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/swiper-bundle.min.css') }}">
-        <!--================= Mobile Menu CSS =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/metisMenu.css') }}">
-        <!--================= Main Menu CSS =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/rtsmenu.css') }}">
-        <!--================= Main Stylesheet =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/variables/variable1.css') }}">
-        <!--================= Main Stylesheet =================-->
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
-    {% endblock %}
+    {% block stylesheets %}{% endblock %}
 </head>
+
+
 
 <body>
     <div class="site-wrap">
@@ -72,13 +46,27 @@
                     <div class="ml-auto">
                         <nav class="site-navigation position-relative text-right" role="navigation">
                             <ul class="site-menu main-menu js-clone-nav mr-auto d-none d-lg-block">
-                                <li class="active"><a href="{{ path('app_home') }}" class="nav-link">Home</a></li>
-                                <li><a href="{{ path('app_matches') }}" class="nav-link">Matches</a></li>
-                                <li><a href="{{ path('app_players') }}" class="nav-link">Players</a></li>
-                                <li><a href="{{ path('app_blog') }}" class="nav-link">Blog</a></li>
-                                <li><a href="{{ path('app_contact') }}" class="nav-link">Contact</a></li>
-                                <li><a href="{{ path('app_log_in') }}" class="btn btn-orange ml-2">Sign In</a></li>
-                                <li><a href="{{ path('app_sign_up') }}" class="btn btn-orange ml-2">Sign Up</a></li>
+                                <li class="{% if app.request.attributes.get('_route') == 'app_home' %}active{% endif %}">
+                                    <a href="{{ path('app_home') }}" class="nav-link">Home</a>
+                                </li>
+                                <li class="{% if app.request.attributes.get('_route') == 'app_matches' %}active{% endif %}">
+                                    <a href="{{ path('app_matches') }}" class="nav-link">Matches</a>
+                                </li>
+                                <li class="{% if app.request.attributes.get('_route') == 'app_players' %}active{% endif %}">
+                                    <a href="{{ path('app_players') }}" class="nav-link">Players</a>
+                                </li>
+                                <li class="{% if app.request.attributes.get('_route') == 'app_blog' %}active{% endif %}">
+                                    <a href="{{ path('app_blog') }}" class="nav-link">Blog</a>
+                                </li>
+                                <li class="{% if app.request.attributes.get('_route') == 'app_contact' %}active{% endif %}">
+                                    <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+                                </li>
+                                <li class="{% if app.request.attributes.get('_route') == 'app_contact' %}active{% endif %}">
+                                    <a href="{{ path('app_log_in') }}" class="nav-link">Sign In</a>
+                                </li>
+                                <li class="{% if app.request.attributes.get('_route') == 'app_contact' %}active{% endif %}">
+                                    <a href="{{ path('app_sign_up') }}" class="nav-link">Sign up</a>
+                                </li>
                             </ul>
                         </nav>
                         <a href="#" class="d-inline-block d-lg-none site-menu-toggle js-menu-toggle text-black float-right text-white">
@@ -177,4 +165,4 @@
 
     {% block javascripts %}{% endblock %}
 </body>
-</html> 
+</html>

@@ -57,7 +57,7 @@ class AuthController extends AbstractController
                         'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/',
                         'message' => 'Password must contain at least 8 characters, including an uppercase letter, a number, and a special character.'
                     ]),
-                
+
                 ],
                 'role' => [
                     new Assert\NotBlank(['message' => 'Role is required.']),

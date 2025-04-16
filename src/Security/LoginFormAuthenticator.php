@@ -115,7 +115,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
                 return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
             } elseif (in_array('organizer', $roles)) {
                 // You can add a specific route for coaches if needed
-                return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
+                return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
             } else {
                 // Default route for regular users
                 return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
