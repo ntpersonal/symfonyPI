@@ -6,7 +6,7 @@
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card profile-card">
                 <div class="card-header pb-0 p-3">
                     <div class="row">
                         <div class="col-md-8 d-flex align-items-center">
@@ -24,13 +24,13 @@
                         <div class="col-md-4">
                             <div class="profile-picture-container">
                                 {% if user.profilepicture %}
-                                    <img src="{{ asset('uploads/profile/' ~ user.profilepicture) }}" 
-                                         alt="Profile Picture" 
+                                    <img src="{{ asset('uploads/profile/' ~ user.profilepicture) }}"
+                                         alt="Profile Picture"
                                          class="profile-picture"
                                          onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
                                 {% else %}
-                                    <img src="{{ asset('assets/images/default-avatar.png') }}" 
-                                         alt="Default Profile Picture" 
+                                    <img src="{{ asset('assets/images/default-avatar.png') }}"
+                                         alt="Default Profile Picture"
                                          class="profile-picture">
                                 {% endif %}
                             </div>
@@ -83,23 +83,35 @@
 </div>
 
 <style>
-.profile-picture-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-}
 
-.profile-picture {
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 6px solid #fff;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
-}
+    .profile-card .profile-picture {
+        width: 250px !important;
+        height: 250px !important;
+        border-radius: 50% !important;
+        object-fit: cover;
+        border: 6px solid #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .profile-card .profile-picture:hover {
+        transform: scale(1.02);
+    }
+    .profile-picture {
+        width: 250px ;
+        height: 250px ;
+        border-radius: 50% ;
+        object-fit: cover;
+        border: 6px solid #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        display: block;
+        margin: 0 auto;
+    }
+
+
 
 .profile-picture:hover {
     transform: scale(1.02);

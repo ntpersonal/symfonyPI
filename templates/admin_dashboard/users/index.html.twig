@@ -15,23 +15,14 @@
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            {% for label, messages in app.flashes %}
-                                {% for message in messages %}
-                                    <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show"
-                                         role="alert">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                aria-label="Close"></button>
-                                    </div>
-                                {% endfor %}
-                            {% endfor %}
+
                             <h6>Users Management</h6>
                             <p class="text-sm mb-0">
                                 <i class="fas fa-check-circle text-info"></i>
                                 <span class="font-weight-bold ms-1">{{ users|length }} users</span> in total
                             </p>
                         </div>
-                        <a href="{{ path('app_admin_dashboard_user_new') }}" class="btn bg-gradient-info">
+                        <a href="{{ path('app_admin_dashboard_user_new') }}" class="btn btn-orange">
                             <i class="fas fa-user-plus me-2"></i> Add New User
                         </a>
                     </div>
@@ -147,6 +138,18 @@
     .btn-link svg {
         transition: all 0.2s ease;
     }
+
+     .btn-orange {
+         background-color: #fd7e14;
+         color: #fff;
+         border: none;
+         transition: background-color 0.3s ease;
+     }
+    .btn-orange:hover {
+        background-color: #e96c0a;
+        color: #fff;
+    }
+
 </style>
 
 {% block javascripts %}

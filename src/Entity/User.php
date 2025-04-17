@@ -213,7 +213,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'dateofbirth', type: 'date', nullable: false)]
     #[Assert\NotBlank(message: 'Date of birth is required')]
     #[Assert\Type(type: \DateTimeInterface::class, message: 'Please enter a valid date in YYYY-MM-DD format')]
-    #[Assert\LessThanOrEqual(value: '-5 years', message: 'User must be at least 5 years old')]
+    #[Assert\LessThanOrEqual(value: '-16 years', message: 'User must be at least 16 years old')]
     private ?\DateTimeInterface $dateofbirth = null;
 
     public function getDateofbirth(): ?\DateTimeInterface
@@ -223,9 +223,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setDateofbirth(?\DateTimeInterface $dateofbirth): self
     {
-        if ($dateofbirth === null) {
-            throw new \InvalidArgumentException('Date of birth cannot be null');
-        }
+
         $this->dateofbirth = $dateofbirth;
         return $this;
     }

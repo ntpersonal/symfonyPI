@@ -66,6 +66,10 @@ class AuthController extends AbstractController
                 'dateofbirth' => [
                     new Assert\NotBlank(['message' => 'Date of birth is required.']),
                     new Assert\Date(['message' => 'Invalid date format.']),
+                    new Assert\LessThanOrEqual([
+                        'value' => (new \DateTime())->modify('-16 years')->format('Y-m-d'),
+                        'message' => 'You must be at least 16 years old to sign up.',
+                    ]),
                 ],
                 'coachinglicense' => $data['role'] === 'organizer'
                     ? [
