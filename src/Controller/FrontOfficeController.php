@@ -113,11 +113,6 @@ final class FrontOfficeController extends AbstractController
         return $this->render('front_office_dashboard/cart.html.twig');
     }
 
-    #[Route('/front/dashboard/contact', name: 'app_front_office_contact')]
-    public function contact(): Response
-    {
-        return $this->render('front_office_dashboard/contact.html.twig');
-    }
 
     #[Route('/front/dashboard/score', name: 'app_score')]
     public function score(): Response

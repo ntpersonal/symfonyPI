@@ -6,12 +6,18 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 use App\Repository\UserRepository;
 
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
-class User
+#[UniqueEntity(fields: ['email'], message: 'This email is already used by another account.')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -29,7 +35,18 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name: 'firstname', type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: 'First name is required')]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: 'First name must be at least {{ limit }} characters long',
+        maxMessage: 'First name cannot be longer than {{ limit }} characters'
+    )]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z\s\-]+$/',
+        message: 'First name can only contain letters, spaces, and hyphens'
+    )]
     private ?string $firstname = null;
 
     public function getFirstname(): ?string
@@ -43,7 +60,18 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name: 'lastname', type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: 'Last name is required')]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: 'Last name must be at least {{ limit }} characters long',
+        maxMessage: 'Last name cannot be longer than {{ limit }} characters'
+    )]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z\s\-]+$/',
+        message: 'Last name can only contain letters, spaces, and hyphens'
+    )]
     private ?string $lastname = null;
 
     public function getLastname(): ?string
@@ -57,7 +85,10 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'email', type: 'string', nullable: true)]
+    #[Assert\NotBlank(message: 'Email is required')]
+    #[Assert\Email(message: 'The email "{{ value }}" is not a valid email.')]
+    #[Assert\Length(max: 180, maxMessage: 'Email cannot be longer than {{ limit }} characters')]
     private ?string $email = null;
 
     public function getEmail(): ?string
@@ -71,7 +102,7 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'password', type: 'string', nullable: true)]
     private ?string $password = null;
 
     public function getPassword(): ?string
@@ -85,7 +116,12 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name: 'role', type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: 'Role is required')]
+    #[Assert\Choice(
+        choices: ['Admin', 'organizer', 'player'],
+        message: 'Choose a valid role'
+    )]
     private ?string $role = null;
 
     public function getRole(): ?string
@@ -99,7 +135,7 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'profilepicture', type: 'string', nullable: true)]
     private ?string $profilepicture = null;
 
     public function getProfilepicture(): ?string
@@ -113,7 +149,7 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(name: 'createdat', type: 'datetime', nullable: false)]
     private ?\DateTimeInterface $createdat = null;
 
     public function getCreatedat(): ?\DateTimeInterface
@@ -127,7 +163,7 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(name: 'updatedat', type: 'datetime', nullable: false)]
     private ?\DateTimeInterface $updatedat = null;
 
     public function getUpdatedat(): ?\DateTimeInterface
@@ -142,7 +178,7 @@ class User
     }
 
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'users')]
-    #[ORM\JoinColumn(name: 'id_team', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'id_team', referencedColumnName: 'id', nullable: true)]
     private ?Team $team = null;
 
     public function getTeam(): ?Team
@@ -156,7 +192,11 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'phonenumber', type: 'string', nullable: true)]
+    #[Assert\Regex(
+        pattern: '/^[0-9+\s()-]{8,20}$/',
+        message: 'Please enter a valid phone number'
+    )]
     private ?string $phonenumber = null;
 
     public function getPhonenumber(): ?string
@@ -170,7 +210,10 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(name: 'dateofbirth', type: 'date', nullable: false)]
+    #[Assert\NotBlank(message: 'Date of birth is required')]
+    #[Assert\Type(type: \DateTimeInterface::class, message: 'Please enter a valid date in YYYY-MM-DD format')]
+    #[Assert\LessThanOrEqual(value: '-5 years', message: 'User must be at least 5 years old')]
     private ?\DateTimeInterface $dateofbirth = null;
 
     public function getDateofbirth(): ?\DateTimeInterface
@@ -178,27 +221,40 @@ class User
         return $this->dateofbirth;
     }
 
-    public function setDateofbirth(\DateTimeInterface $dateofbirth): self
+    public function setDateofbirth(?\DateTimeInterface $dateofbirth): self
     {
+
         $this->dateofbirth = $dateofbirth;
         return $this;
     }
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private ?bool $isActive = null;
+    #[ORM\Column(name: 'is_active', type: 'boolean', nullable: true)]
+    private ?bool $is_active = null;
 
     public function isIsActive(): ?bool
     {
-        return $this->isActive;
+        return $this->is_active;
     }
 
-    public function setIsActive(?bool $isActive): self
+    public function setIsActive(?bool $is_active): self
     {
-        $this->isActive = $isActive;
+        $this->is_active = $is_active;
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'coachinglicense', type: 'string', nullable: true)]
+    #[Assert\When(
+        expression: "this.getRole() === 'ROLE_COACH'",
+        constraints: [
+            new Assert\NotBlank(message: 'Coaching license is required for coaches'),
+            new Assert\Length(
+                min: 5,
+                max: 20,
+                minMessage: 'License must be at least {{ limit }} characters long',
+                maxMessage: 'License cannot be longer than {{ limit }} characters'
+            )
+        ]
+    )]
     private ?string $coachinglicense = null;
 
     public function getCoachinglicense(): ?string
@@ -212,7 +268,7 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name: 'reset_code', type: 'string', nullable: false)]
     private ?string $reset_code = null;
 
     public function getReset_code(): ?string
@@ -226,7 +282,7 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'datetime', nullable: false)]
+    #[ORM\Column(name: 'reset_code_expiry', type: 'datetime', nullable: false)]
     private ?\DateTimeInterface $reset_code_expiry = null;
 
     public function getReset_code_expiry(): ?\DateTimeInterface
@@ -240,35 +296,40 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private ?bool $Favourite = null;
+    #[ORM\Column(name: 'favourite', type: 'boolean', nullable: true)]
+    private ?bool $favourite = null;
 
     public function isFavourite(): ?bool
     {
-        return $this->Favourite;
+        return $this->favourite;
     }
 
-    public function setFavourite(?bool $Favourite): self
+    public function setFavourite(?bool $favourite): self
     {
-        $this->Favourite = $Favourite;
+        $this->favourite = $favourite;
         return $this;
     }
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $Rating = null;
+    #[ORM\Column(name: 'rating', type: 'integer', nullable: true)]
+    #[Assert\Range(
+        min: 1,
+        max: 10,
+        notInRangeMessage: 'Rating must be between {{ min }} and {{ max }}'
+    )]
+    private ?int $rating = null;
 
     public function getRating(): ?int
     {
-        return $this->Rating;
+        return $this->rating;
     }
 
-    public function setRating(?int $Rating): self
+    public function setRating(?int $rating): self
     {
-        $this->Rating = $Rating;
+        $this->rating = $rating;
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'position', type: 'string', nullable: true)]
     private ?string $position = null;
 
     public function getPosition(): ?string
@@ -282,7 +343,6 @@ class User
         return $this;
     }
 
-   
 
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
     private Collection $orders;
@@ -340,7 +400,7 @@ class User
         return $this;
     }
 
-    
+
     #[ORM\OneToMany(targetEntity: Tournoi::class, mappedBy: 'user')]
     private Collection $tournois;
 
@@ -454,7 +514,7 @@ class User
 
     public function isActive(): ?bool
     {
-        return $this->isActive;
+        return $this->is_active;
     }
 
     public function getResetCode(): ?string
@@ -481,4 +541,18 @@ class User
         return $this;
     }
 
+    public function getRoles(): array
+    {
+        return ['ROLE_' . strtoupper($this->role)];
+    }
+
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string)$this->email;
+    }
 }
