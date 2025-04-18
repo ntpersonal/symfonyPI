@@ -325,6 +325,18 @@
                   </tbody>
                 </table>
               </div>
+                <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                  {{ knp_pagination_render(teams, null, {}, {
+                    'align': 'center',
+                    'size': 'medium',
+                    'style': 'pagination',
+                    'span_class': 'page-link',
+                    'template': 'pagination/custom_pagination.html.twig',
+                    'page_range': 5
+                  }) }}
+                </nav>
+              </div>
             </div>
           </div>
         </div>

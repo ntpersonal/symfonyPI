@@ -10,6 +10,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\Tournoi;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+
+use Knp\Component\Pager\PaginatorInterface;
 final class TournoisController extends AbstractController
 {
     private $entityManager;
@@ -19,11 +21,24 @@ final class TournoisController extends AbstractController
         $this->entityManager = $entityManager;
     }
     #[Route('/admin/dashboard/Tournoi', name: 'app_admin_dashboard_Tournoi')]
-    public function tournoi(Request $request, ManagerRegistry $doctrine): Response
+    public function tournoi(Request $request, ManagerRegistry $doctrine, PaginatorInterface $paginator): Response
     {
         $tournois = $doctrine->getRepository(Tournoi::class)->findAll();
+        $pagination = $paginator->paginate(
+            $tournois,
+            $request->query->getInt('page', 1),
+            5 // Number of items per page
+        );
         return $this->render('admin_dashboard/tournoi.html.twig',[
-            'tournois' => $tournois,
+            'tournois' => $pagination,
+        ]);
+    }
+    #[Route('/admin/dashboard/tournois/{id}', name: 'app_tournoi_show', methods: ['GET'])]
+    public function show(Tournoi $tournoi): Response
+    {
+        return $this->render('admin_dashboard/tournoi_show.html.twig', [
+            'tournoi' => $tournoi,
+            'matches' => $tournoi->getMatches(),
         ]);
     }
     #[Route('/admin/tournoi/add', name: 'app_admin_tournoi_add', methods: ['POST'])]

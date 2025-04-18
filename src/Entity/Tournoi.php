@@ -170,7 +170,7 @@ class Tournoi
         return $this;
     }
 
-    #[ORM\OneToMany(targetEntity: Matche::class, mappedBy: 'tournoi')]
+    #[ORM\OneToMany(targetEntity: Matches::class, mappedBy: 'tournoi')]
     private Collection $matches;
 
     /**
@@ -184,7 +184,7 @@ class Tournoi
         return $this->matches;
     }
 
-    public function addMatche(Matche $matche): self
+    public function addMatche(Matches $matche): self
     {
         if (!$this->getMatches()->contains($matche)) {
             $this->getMatches()->add($matche);
@@ -192,7 +192,7 @@ class Tournoi
         return $this;
     }
 
-    public function removeMatche(Matche $matche): self
+    public function removeMatche(Matches $matche): self
     {
         $this->getMatches()->removeElement($matche);
         return $this;
@@ -285,7 +285,7 @@ class Tournoi
         return $this;
     }
 
-    public function addMatch(Matche $match): static
+    public function addMatch(Matches $match): static
     {
         if (!$this->matches->contains($match)) {
             $this->matches->add($match);
@@ -295,12 +295,12 @@ class Tournoi
         return $this;
     }
 
-    public function removeMatch(Matche $match): static
+    public function removeMatch(Matches $match): static
     {
         if ($this->matches->removeElement($match)) {
             // set the owning side to null (unless already changed)
             if ($match->getTournoi() === $this) {
-                $match->setTournoi(null);
+             //   $match->setTournoi(null);
             }
         }
 

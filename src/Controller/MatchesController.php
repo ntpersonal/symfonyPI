@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/admin/dashborad/matches')]
+
+#[Route('/admin/dashboard/matches')]
 class MatchesController extends AbstractController
 {
     #[Route('/', name: 'app_matches_index', methods: ['GET'])]
