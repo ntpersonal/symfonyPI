@@ -18,7 +18,7 @@ final class TournoisController extends AbstractController
     {
         $this->entityManager = $entityManager;
     }
-    #[Route('/admin/dashboard/Tournoi', name: 'app_admin_dashborad_Tournoi')]
+    #[Route('/admin/dashboard/Tournoi', name: 'app_admin_dashboard_Tournoi')]
     public function tournoi(Request $request, ManagerRegistry $doctrine): Response
     {
         $tournois = $doctrine->getRepository(Tournoi::class)->findAll();
