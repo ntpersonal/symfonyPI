@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ReclamationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use App\Repository\AnswerRepository;
 
-use App\Repository\ReclamationRepository;
+
 
 #[ORM\Entity(repositoryClass: ReclamationRepository::class)]
 #[ORM\Table(name: 'reclamation')]
@@ -18,112 +20,57 @@ class Reclamation
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reclamations')]
-    #[ORM\JoinColumn(name: 'id_player', referencedColumnName: 'id')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'id_player', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull(message: "Le joueur est requis.")]
     private ?User $user = null;
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'text', nullable: false)]
+    #[ORM\Column(type: 'text')]
+    #[Assert\NotBlank(message: "Le message est obligatoire.")]
     private ?string $message = null;
 
-    public function getMessage(): ?string
-    {
-        return $this->message;
-    }
-
-    public function setMessage(string $message): self
-    {
-        $this->message = $message;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'datetime', nullable: false)]
+    #[ORM\Column(type: 'datetime')]
+    #[Assert\Type(\DateTimeInterface::class)]
     private ?\DateTimeInterface $created_at = null;
 
-    public function getCreated_at(): ?\DateTimeInterface
-    {
-        return $this->created_at;
-    }
-
-    public function setCreated_at(\DateTimeInterface $created_at): self
-    {
-        $this->created_at = $created_at;
-        return $this;
-    }
-
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'reclamations')]
-    #[ORM\JoinTable(
-        name: 'answer',
-        joinColumns: [
-            new ORM\JoinColumn(name: 'id_reclamation', referencedColumnName: 'id')
-        ],
-        inverseJoinColumns: [
-            new ORM\JoinColumn(name: 'id_admin', referencedColumnName: 'id')
-        ]
-    )]
-    private Collection $users;
+    #[ORM\OneToMany(mappedBy: 'reclamation', targetEntity: Answer::class, orphanRemoval: true)]
+    private Collection $answers;
 
     public function __construct()
     {
-        $this->users = new ArrayCollection();
+        $this->answers = new ArrayCollection();
     }
 
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
+    public function getId(): ?int { return $this->id; }
+
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): self { $this->user = $user; return $this; }
+
+    public function getMessage(): ?string { return $this->message; }
+    public function setMessage(string $message): self { $this->message = $message; return $this; }
+
+    public function getCreatedAt(): ?\DateTimeInterface { return $this->created_at; }
+    public function setCreatedAt(\DateTimeInterface $created_at): self { $this->created_at = $created_at; return $this; }
+
+    /** @return Collection<int, Answer> */
+    public function getAnswers(): Collection { return $this->answers; }
+
+    public function addAnswer(Answer $answer): self
     {
-        if (!$this->users instanceof Collection) {
-            $this->users = new ArrayCollection();
+        if (!$this->answers->contains($answer)) {
+            $this->answers[] = $answer;
+            $answer->setReclamation($this);
         }
-        return $this->users;
+        return $this;
     }
 
-    public function addUser(User $user): self
+    public function removeAnswer(Answer $answer): self
     {
-        if (!$this->getUsers()->contains($user)) {
-            $this->getUsers()->add($user);
+        if ($this->answers->removeElement($answer)) {
+            if ($answer->getReclamation() === $this) {
+                $answer->setReclamation(null);
+            }
         }
         return $this;
     }
-
-    public function removeUser(User $user): self
-    {
-        $this->getUsers()->removeElement($user);
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $created_at): static
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
 }

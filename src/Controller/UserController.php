@@ -16,18 +16,28 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use App\Form\AddUserType;
 use App\Form\EditUserType;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 final class UserController extends AbstractController
 {
     #[Route('/admin/dashboard/users', name: 'app_admin_dashboard_users')]
-    public function index(ManagerRegistry $doctrine): Response
+    public function index(Request $request, ManagerRegistry $doctrine, PaginatorInterface $paginator): Response
     {
-        // Get users sorted by creation date in descending order (newest first)
-        $users = $doctrine->getRepository(User::class)->findBy([], ['createdat' => 'DESC']);
+        $query = $doctrine->getRepository(User::class)->createQueryBuilder('u')
+            ->orderBy('u.createdat', 'DESC')
+            ->addOrderBy('u.id', 'DESC')
+            ->getQuery();
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1), // Current page number
+            5 // Users per page
+        );
+
         $teams = $doctrine->getRepository(Team::class)->findAll();
 
         return $this->render('admin_dashboard/users/index.html.twig', [
-            'users' => $users,
+            'pagination' => $pagination,
             'teams' => $teams,
         ]);
     }

@@ -12,6 +12,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\Regex;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class PlayerProfileType extends AbstractType
 {
@@ -84,8 +87,29 @@ class PlayerProfileType extends AbstractType
                         ],
                         'mimeTypesMessage' => 'Please upload a valid image file (JPEG, PNG or GIF)',
                     ])
+                ]
+            ])
+            ->add('currentPassword', PasswordType::class, [
+                'label' => 'Current Password',
+                'mapped' => false,
+                'required' => false,
+                'attr' => ['class' => 'form-control', 'placeholder' => 'Enter your current password'],
+            ])
+            ->add('newPassword', PasswordType::class, [
+                'label' => 'New Password',
+                'mapped' => false,
+                'required' => false,
+                'attr' => ['class' => 'form-control', 'placeholder' => 'Enter new password'],
+                'constraints' => [
+                    new Length(['min' => 8, 'minMessage' => 'Password must be at least {{ limit }} characters']),
+                    new Regex([
+                        'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                        'message' => 'Must include uppercase, lowercase, and number',
+                    ])
                 ],
             ]);
+
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

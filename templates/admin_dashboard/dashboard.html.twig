@@ -16,7 +16,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href="https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html" target="_blank">
-        <img src="{{ asset('assets/images/logo-ct-dark.png') }}" class="navbar-brand-img h-100" alt="main_logo">
+        <img src="{{ asset('assets/images/sportify.png') }}" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">Sportify</span>
       </a>
     </div>
@@ -123,6 +123,15 @@
             <span class="nav-link-text ms-1">Billing</span>
           </a>
         </li>
+        <li class="nav-item">
+  <a class="nav-link {% if app.request.attributes.get('_route') == 'reclamation_index' %}active{% endif %}" href="{{ path('reclamation_index') }}">
+    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="fa fa-comments text-dark"></i>
+    </div>
+    <span class="nav-link-text ms-1">Réclamations</span>
+  </a>
+</li>
+
       </ul>
     </div>
     
@@ -1013,6 +1022,17 @@
 
 
 {% block javascripts %}
+  <script>
+    // Auto-dismiss alerts after 4 seconds
+    setTimeout(function () {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.classList.remove('show'); // fades it out
+        alert.classList.add('fade');
+        setTimeout(() => alert.remove(), 500); // remove from DOM after fade
+      });
+    }, 4000);
+  </script>
   <!--   Core JS Files   -->
   <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
   <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
@@ -1036,5 +1056,14 @@
             window.location.reload();
         }
     });
+
+
+
+
+
+
   </script>
+
+
+
 {% endblock %} 

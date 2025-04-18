@@ -72,7 +72,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
         if (!$user) {
             error_log('User not found for email: ' . $email);
-            throw new CustomUserMessageAuthenticationException('Invalid credentials.');
+            throw new CustomUserMessageAuthenticationException('No account found with this email.');
         }
 
         error_log('User found: ' . $user->getEmail());
@@ -111,21 +111,19 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         if ($user instanceof User) {
             $roles = $user->getRoles();
 
-            if (in_array('Admin', $roles)) {
+            if (in_array('ROLE_ADMIN', $roles)) {
                 return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
-            } elseif (in_array('organizer', $roles)) {
-                // You can add a specific route for coaches if needed
+            } elseif (in_array('ROLE_ORGANIZER', $roles)) {
+                return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
+            } elseif (in_array('ROLE_PLAYER', $roles)) {
                 return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
             } else {
-                // Default route for regular users
                 return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
             }
         }
 
-        // Fallback to dashboard if role check fails
-        return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
+        return new RedirectResponse($this->urlGenerator->generate('app_log_in'));
     }
-
     protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);

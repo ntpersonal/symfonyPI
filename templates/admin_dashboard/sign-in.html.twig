@@ -2,6 +2,13 @@
 
 {% block title %}Sign In - Soccer{% endblock %}
 
+
+
+{# Other CSS files #}
+
+
+
+
 {% block body %}
     <div class="hero overlay d-flex align-items-center" style="background-image: url('{{ asset('assets/images/bg_3.jpg') }}'); min-height: calc(100vh - 120px); padding-top: 300px; padding-bottom: 110px;">
         <div class="container">
@@ -13,11 +20,7 @@
                             <p class="mb-0 text-muted">Enter your credentials</p>
                         </div>
                         <div class="card-body p-3">
-                            {% if already_logged_in %}
-                                <div class="alert alert-warning text-center mb-3">
-                                    You are already logged in!
-                                </div>
-                            {% endif %}
+
                             {% if error %}
                                 <div class="alert alert-danger text-center mb-3">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
                             {% endif %}
@@ -26,10 +29,14 @@
                                     <label for="inputEmail" class="form-label">Email</label>
                                     <input name="email" type="email" class="form-control rounded-pill" id="inputEmail" placeholder="Email" value="{{ last_username }}" required autofocus>
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 position-relative">
                                     <label for="inputPassword" class="form-label">Password</label>
-                                    <input name="password" type="password" class="form-control rounded-pill" id="inputPassword" placeholder="Password" required>
+                                    <input name="password" type="password" class="form-control rounded-pill pe-5" id="inputPassword" placeholder="Password" required>
+                                    <span class="position-absolute" style="top: 42px; right: 20px; cursor: pointer;" onclick="togglePassword()">
+    <i class="fa fa-eye" id="togglePasswordIcon"></i>
+</span>
                                 </div>
+
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" id="rememberMe" name="_remember_me" checked>
                                     <label class="form-check-label" for="rememberMe">Remember me</label>

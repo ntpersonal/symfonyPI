@@ -29,6 +29,12 @@
             </div>
         </div>
         <div class="card-body">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
             <div class="row">
                 <div class="col-md-4 text-center">
                     <img src="{{ user.profilepicture ? asset('uploads/profile_pictures/' ~ user.profilepicture) : asset('assets/img/default-avatar.png') }}" 

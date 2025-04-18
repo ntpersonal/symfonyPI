@@ -37,22 +37,17 @@
                                 <div class="mb-2">
                                     <label for="inputDateOfBirth" class="form-label">Date of Birth</label>
                                     <input type="date" name="dateofbirth" class="form-control rounded-pill" id="inputDateOfBirth">
-                                    <div class="invalid-feedback">Please enter a valid date (must be at least 16 years old)</div>
+                                    <div class="invalid-feedback">Please enter a valid date (must be at least 5 years old)</div>
                                 </div>
                                 <div class="mb-2">
                                     <label for="inputPassword" class="form-label">Password</label>
-                                    <div class="position-relative">
-                                        <input type="password" name="password" class="form-control rounded-pill pe-5" id="inputPassword" placeholder="Password">
-
-                                        <!-- Eye icon button positioned inside input -->
-                                        <button type="button" class="btn eye-btn" onclick="togglePasswordVisibility()" tabindex="-1">
-                                            <i class="fas fa-eye" id="eyeIcon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password" class="form-control rounded-pill" id="inputPassword" placeholder="Password">
+                                        <button class="btn btn-outline-secondary rounded-pill ms-2" type="button" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
                                         </button>
-
-                                        <div class="invalid-feedback mt-1">Password must be at least 8 characters with uppercase, lowercase and numbers</div>
                                     </div>
-
-
+                                    <div class="invalid-feedback">Password must be at least 8 characters with uppercase, lowercase and numbers</div>
                                 </div>
                                 <div class="mb-2">
                                     <label for="inputRole" class="form-label">Role</label>
@@ -68,21 +63,19 @@
                                     <input type="text" name="coachinglicense" class="form-control rounded-pill" id="inputCoachingLicense" placeholder="Coaching License">
                                     <div class="invalid-feedback">Coaching license is required for organizers (5-20 characters)</div>
                                 </div>
-                                <div class="mb-4">
-                                    <label for="inputProfilePicture" class="form-label fw-semibold text-dark">Profile Picture</label>
-                                    <div class="custom-file-upload-container p-3 rounded-3 shadow-sm mb-3">
-                                        <input type="file" name="profilePicture" class="file-input d-none" id="inputProfilePicture" accept="image/jpeg,image/png,image/gif" onchange="displayFileName(this)">
-
-                                        <div class="file-upload-btn w-100 rounded-pill d-flex align-items-center justify-content-center text-white bg-orange-theme py-2 px-3"
-                                             onclick="document.getElementById('inputProfilePicture').click();">
+                                <div class="mb-2">
+                                    <label for="inputProfilePicture" class="form-label">Profile Picture</label>
+                                    <div class="custom-file-upload">
+                                        <input type="file" name="profilePicture" class="file-input" id="inputProfilePicture" accept="image/jpeg,image/png,image/gif">
+                                        <div class="file-upload-btn rounded-pill d-flex align-items-center">
                                             <i class="fas fa-cloud-upload-alt me-2"></i>
                                             <span id="file-chosen">Choose a file</span>
                                         </div>
-                                        <small class="text-muted mt-2 d-block">Accepted formats: JPG, PNG, GIF (Max: 2MB)</small>
+                                        <div class="invalid-feedback">Please select a valid image file (JPEG, PNG, or GIF, max 2MB)</div>
                                     </div>
                                 </div>
-                                <div class="d-grid mt-4">
-                                    <button type="submit" class="btn btn-orange btn-block rounded-pill py-2">Sign Up</button>
+                                <div class="d-grid mt-3">
+                                    <button type="submit" class="btn btn-info btn-block rounded-pill py-2">Sign Up</button>
                                 </div>
                             </form>
                         </div>
@@ -97,33 +90,6 @@
         </div>
     </div>
     <style>
-
-        .eye-btn {
-            position: absolute;
-            top: 50%;
-            right: 16px;
-            transform: translateY(-50%);
-            border: none;
-            background: none;
-            color: #888;
-            padding: 0;
-        }
-
-        .eye-btn:hover {
-            color: #fd7e14;
-        }
-
-        .bg-orange-theme {
-            background: linear-gradient(90deg, #ff8800 0%, #fd7e14 100%);
-            transition: background 0.3s ease, transform 0.2s ease;
-            cursor: pointer;
-        }
-
-        .bg-orange-theme:hover {
-            background: linear-gradient(90deg, #fd7e14 0%, #ff8800 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(253, 126, 20, 0.2);
-        }
         .glass-card {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(8px) saturate(120%);
@@ -223,44 +189,7 @@
             position: relative;
             z-index: 5;
         }
-
-
-        .bg-orange-theme {
-            background: linear-gradient(90deg, #ff8800 0%, #fd7e14 100%);
-            transition: background 0.3s ease, transform 0.2s ease;
-            cursor: pointer;
-        }
-
-        .bg-orange-theme:hover {
-            background: linear-gradient(90deg, #fd7e14 0%, #ff8800 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(253, 126, 20, 0.2);
-        }
-
-        .btn-orange {
-            background: linear-gradient(90deg, #ff8800 0%, #fd7e14 100%);
-            border: none;
-            color: #fff;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-orange:hover {
-            background: linear-gradient(90deg, #fd7e14 0%, #ff8800 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(253, 126, 20, 0.25);
-        }
-
-        .custom-file-upload-container {
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid #e3e3e3;
-            border-radius: 1rem;
-            transition: border-color 0.2s ease-in-out;
-        }
-
     </style>
-
-
 {% endblock %}
 
 {% block javascripts %}
@@ -405,14 +334,5 @@
                 });
             }
         });
-
-
-
-        function displayFileName(input) {
-            const fileName = input.files.length > 0 ? input.files[0].name : 'Choose a file';
-            document.getElementById('file-chosen').textContent = fileName;
-        }
-
-
     </script>
 {% endblock %}

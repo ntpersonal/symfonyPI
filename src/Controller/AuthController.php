@@ -57,7 +57,7 @@ class AuthController extends AbstractController
                         'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/',
                         'message' => 'Password must contain at least 8 characters, including an uppercase letter, a number, and a special character.'
                     ]),
-
+                
                 ],
                 'role' => [
                     new Assert\NotBlank(['message' => 'Role is required.']),
@@ -66,10 +66,6 @@ class AuthController extends AbstractController
                 'dateofbirth' => [
                     new Assert\NotBlank(['message' => 'Date of birth is required.']),
                     new Assert\Date(['message' => 'Invalid date format.']),
-                    new Assert\LessThanOrEqual([
-                        'value' => (new \DateTime())->modify('-16 years')->format('Y-m-d'),
-                        'message' => 'You must be at least 16 years old to sign up.',
-                    ]),
                 ],
                 'coachinglicense' => $data['role'] === 'organizer'
                     ? [
@@ -131,20 +127,14 @@ class AuthController extends AbstractController
     }
 
     #[Route('/login', name: 'app_log_in', methods: ['GET', 'POST'])]
-    public function signIn(AuthenticationUtils $authenticationUtils, Security $security): Response
+    public function signIn(AuthenticationUtils $authenticationUtils): Response
     {
-        $alreadyLoggedIn = false;
-        if ($security->getUser()) {
-            $alreadyLoggedIn = true;
-        }
-
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('admin_dashboard/sign-in.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
-            'already_logged_in' => $alreadyLoggedIn,
         ]);
     }
 

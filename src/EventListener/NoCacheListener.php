@@ -7,6 +7,7 @@ use Symfony\Component\Security\Core\Security;
 class NoCacheListener
 {
     private $security;
+
     public function __construct(Security $security)
     {
         $this->security = $security;
@@ -14,8 +15,15 @@ class NoCacheListener
 
     public function onKernelResponse(ResponseEvent $event)
     {
-        // Only for master requests and authenticated users
-        if (!$event->isMainRequest() || !$this->security->getUser()) {
+        if (!$event->isMainRequest()) {
+            return;
+        }
+
+        $request = $event->getRequest();
+        $route = $request->attributes->get('_route');
+
+        // Skip setting no-cache headers on the login page
+        if ($route === 'app_log_in') {
             return;
         }
 
@@ -24,4 +32,4 @@ class NoCacheListener
         $response->headers->set('Pragma', 'no-cache');
         $response->headers->set('Expires', '0');
     }
-} 
+}

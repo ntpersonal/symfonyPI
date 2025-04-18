@@ -41,13 +41,7 @@ class HomeController extends AbstractController
         ]);
     }
 
-    #[Route('/contact', name: 'app_contact')]
-    public function contact(): Response
-    {
-        return $this->render('Home/contact.html.twig', [
-            'controller_name' => 'HomeController',
-        ]);
-    }
+
 
     #[Route('/single', name: 'app_single')]
     public function single(): Response

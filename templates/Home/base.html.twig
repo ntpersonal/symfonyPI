@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/aos.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 
+
     {% block stylesheets %}{% endblock %}
 </head>
 
@@ -48,7 +49,7 @@
                                 <li><a href="{{ path('app_matches') }}" class="nav-link">Matches</a></li>
                                 <li><a href="{{ path('app_players') }}" class="nav-link">Players</a></li>
                                 <li><a href="{{ path('app_blog') }}" class="nav-link">Blog</a></li>
-                                <li><a href="{{ path('app_contact') }}" class="nav-link">Contact</a></li>
+                                <li><a href="{{ path('app_front_office_contact') }}" class="nav-link">Contact</a></li>
                             </ul>
                         </nav>
                         <a href="#" class="d-inline-block d-lg-none site-menu-toggle js-menu-toggle text-black float-right text-white">
@@ -163,6 +164,10 @@
                             margin-top: 1rem;
                             border-top: 1px solid rgba(255, 255, 255, 0.1);
                         }
+                        #togglePasswordIcon {
+                            color: #999;
+                            font-size: 1rem;
+                        }
                     </style>
                 </footer>
             {% endblock %}
@@ -184,6 +189,18 @@
     <script src="{{ asset('assets/js/jquery.fancybox.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.sticky.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('inputPassword');
+            const icon = document.getElementById('togglePasswordIcon');
+
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+    </script>
 
     {% block javascripts %}{% endblock %}
 </body>
