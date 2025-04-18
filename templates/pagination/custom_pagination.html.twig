@@ -1,0 +1,103 @@
+{# templates/pagination/custom_pagination.html.twig #}
+{% extends '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig' %}
+
+{% block knp_pagination_render %}
+{% if pageCount > 1 %}
+  <div style="display: flex; justify-content: center; margin-top: 2rem;">
+    <ul style="
+          list-style: none;
+          margin: 0;
+          padding: 1rem 2rem;
+          background: #ff9800;
+          border-radius: 9999px;
+          box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+          display: inline-flex;
+          align-items: center;
+          gap: 1.5rem;
+          color: #fff;
+          font-weight: 500;
+        ">
+      {# Bouton Précédent #}
+      {% if previous is defined %}
+        <li>
+          <a href="{{ path(route, query|merge({ (pageParameterName): previous })) }}"
+             style="text-decoration: none; color: inherit; font-size: 1rem;"
+             aria-label="<<>>">
+            Prev
+          </a>
+        </li>
+      {% else %}
+        <li style="opacity: 0.5;">
+          <span style="font-size: 1rem;">Prev</span>
+        </li>
+      {% endif %}
+
+      {# Ellipse si nécessaire pour page de début > 1 #}
+      {% if startPage > 1 %}
+        <li>
+          <a href="{{ path(route, query|merge({ (pageParameterName): 1 })) }}"
+             style="text-decoration: none; color: inherit; font-size: 1rem;">
+            1
+          </a>
+        </li>
+        <li style="opacity: 0.8; font-size: 1rem;"><span>…</span></li>
+      {% endif %}
+
+      {# Numéros de pages #}
+      {% for page in pagesInRange %}
+        {% if page == current %}
+          <li style="
+                width: 3.5rem; 
+                height: 3.5rem; 
+                border-radius: 50%;
+                background: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #ff9800;
+                font-weight: 600;
+                font-size: 1.1rem;
+              ">
+            {{ page }}
+          </li>
+        {% else %}
+          <li>
+            <a href="{{ path(route, query|merge({ (pageParameterName): page })) }}"
+               style="text-decoration: none; color: inherit; font-size: 1.1rem;"
+               onmouseover="this.style.color='#fff'; this.style.background='rgba(255,255,255,0.2)';"
+               onmouseout="this.style.background='transparent'; this.style.color='inherit';">
+              {{ page }}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {# Ellipse si nécessaire pour page de fin < total #}
+      {% if endPage < pageCount %}
+        <li style="opacity: 0.8; font-size: 1rem;"><span>…</span></li>
+        <li>
+          <a href="{{ path(route, query|merge({ (pageParameterName): pageCount })) }}"
+             style="text-decoration: none; color: inherit; font-size: 1rem;">
+            {{ pageCount }}
+          </a>
+        </li>
+      {% endif %}
+
+      {# Bouton Suivant #}
+      {% if next is defined %}
+        <li>
+          <a href="{{ path(route, query|merge({ (pageParameterName): next })) }}"
+             style="text-decoration: none; color: inherit; font-size: 1rem;"
+             aria-label="Next">
+            >>
+          </a>
+        </li>
+      {% else %}
+        <li style="opacity: 0.5; font-size: 1rem;">
+          <span>>></span>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}event Details{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+    <div class="banner banner1">
+            <div class="inner-page-banner banner-bg">
+                <div class="container">
+                    <div class="banner-content">
+                        <div class="page-path">
+                            <ul>
+                                <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                                <li><a class="current-page" href="#">Event Details</a></li>
+                            </ul>
+                        </div>
+                        <h1 class="banner-heading">EVENT DETAILS</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
+
+{% block content %}
+<!--================= Team Details Section Start Here =================-->
+    <div class="rts-event-details-section section-gap">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-8">
+                    <div class="event-overview event-info-part">
+                        <div class="overview-image">
+                            <img src="{{ asset('assets/images/event/overview.jpg') }}" alt="overview-image">
+                            <span class="event-date">JUNE 8, 2024 - OCTOBER 5, 2024</span>
+                        </div>
+                        <h2 class="event-info-title">EVENT OVERVIEW</h2>
+                        <div class="contents">
+                            <p class="p1">
+                                What makes Thomas Tuchel tick? The will to win, of course. His love of football. A
+                                constant desire to
+                                improve and innovate. But our boss always knows the significance of being able to
+                                unwind, so that's
+                                why we have a Chief Relaxation Officer at Chelsea. Meet Lars, our CRO. A firm believer
+                                in the power and
+                                art of relaxation, Lars is tasked with bringing smiles to the Chelsea players' faces,
+                                lifting their moods
+                                and even, in some cases, booking their family holidays.
+                            </p>
+                            <p>
+                                Earlier this year, official Chelsea Football Club partner trivago supported the Chelsea
+                                Foundation and its
+                                female participants in the Goal Getters programme, promoting positive female role models
+                                under the
+                                theme of allyship.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="event-location event-info-part">
+                        <h2 class="event-info-title">LOCATION</h2>
+                        <div class="google-map-area">
+                            <div class="map">
+                                <p><iframe
+                                        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3651.0452483624595!2d90.424043!3d23.781403!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x3cc42b4e4b430164!2sReacThemes!5e0!3m2!1sen!2sbd!4v1656420500360!5m2!1sen!2sbd"
+                                        height="500" style="border:0;" allowfullscreen="" loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade"></iframe></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-facilities event-info-part">
+                        <h2 class="event-info-title">FACILITIES</h2>
+                        <p class="p1">The Foundation's Goal Getters platform is a female-targeted programme delivered
+                            across
+                            secondary
+                            schools in the UK and aims to inspire and empower young women to set new goals, embed
+                            positive
+                            values and connect with other young females.</p>
+                        <div class="facilities-picture-area">
+                            <div class="row">
+                                <div class="col-xl-6 col-md-6">
+                                    <div class="picture"><img src="{{ asset('assets/images/event/fs1.jpg') }}" alt="fs-pic"></div>
+                                </div>
+                                <div class="col-xl-6 col-md-6">
+                                    <div class="picture"><img src="{{ asset('assets/images/event/fs2.jpg') }}" alt="fs-pic"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="event-side-info">
+                        <div class="info-box">
+                            <div class="info-top">
+                                <span class="info-title">ORGANIZER</span>
+                            </div>
+                            <div class="info-body">
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-user"></i></div>
+                                    <span class="q-span">Name:</span>
+                                    <span class="a-span">Mike Dawson</span>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-phone"></i></div>
+                                    <span class="q-span">Phone:</span>
+                                    <a href="tel:1234567" class="a-span">8 (800) 123-45-67</a>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-envelope-open"></i></div>
+                                    <span class="q-span">Email:</span>
+                                    <a href="mailto:info@example.com" class="a-span">info@example.com</a>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-globe"></i></div>
+                                    <span class="q-span">Website:</span>
+                                    <a href="http://reactheme.com/" target="_blank" class="a-span">www.webmail.com</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-top">
+                                <span class="info-title">TIME & DATE</span>
+                            </div>
+                            <div class="info-body">
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-clock"></i></div>
+                                    <span class="q-span">Start:</span>
+                                    <span class="a-span">10:00 AM</span>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-clock"></i></div>
+                                    <span class="q-span">Break:</span>
+                                    <span class="a-span">8 (800) 123-45-67</span>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-clock"></i></div>
+                                    <span class="q-span">End:</span>
+                                    <span class="a-span">02:00PM</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-top">
+                                <span class="info-title">VANUE</span>
+                            </div>
+                            <div class="info-body">
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-home"></i></div>
+                                    <span class="a-span">Donald Stadium</span>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-map"></i></div>
+                                    <span class="a-span">350 5th Ave, New York</span>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <span class="a-span">United States</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#" class="side-action-btn book-seat-btn">BOOK YOUR SEAT</a>
+                        <a href="#" class="side-action-btn add-cal-btn">ADD TO CALANDER</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Team Details Section Start Here =================-->
+
+{% endblock %}
+{% block footer %}
+    {{ parent() }}
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}Match Details{% endblock %}
+
+{% block body %}
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+  <div class="container-fluid py-4">
+    <div class="card mb-4">
+      <div class="card-header pb-0">
+        <h6 class="mb-0">Match Details</h6>
+      </div>
+      <div class="card-body">
+        <h1 class="mb-4">Match {{ match.id }}</h1>
+        <ul class="list-group mb-4">
+          <li class="list-group-item">Team A: {{ match.teamAName is not empty ? match.teamAName : (match.teamA ? match.teamA.nom : 'N/A') }}</li>
+          <li class="list-group-item">Team B: {{ match.teamBName is not empty ? match.teamBName : (match.teamB ? match.teamB.nom : 'N/A') }}</li>
+          <li class="list-group-item">Score: {{ match.scoreTeamA }} - {{ match.scoreTeamB }}</li>
+          <li class="list-group-item">Status: {{ match.status }}</li>
+          <li class="list-group-item">Match Time: {{ match.matchTime|date('Y-m-d H:i') }}</li>
+          <li class="list-group-item">Location: {{ match.locationMatch }}</li>
+        </ul>
+        <a class="btn btn-warning" href="{{ path('app_matches_edit', {id: match.id}) }}">Edit</a>
+        <form method="post" action="{{ path('app_matches_delete', {id: match.id}) }}" class="d-inline" onsubmit="return confirm('Confirm delete?');">
+          <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ match.id) }}">
+          <button class="btn btn-danger">Delete</button>
+        </form>
+        <a class="btn btn-secondary" href="{{ path('app_matches_index') }}">Back to list</a>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}Thank You{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+<style>
+        .thanks-area {
+            padding: 100px 0;
+            text-align: center;
+        }
+        .section-inner {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section-icon {
+            width: 100px;
+            height: 100px;
+            background: #e41b23;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+        }
+        .section-icon i {
+            font-size: 40px;
+            color: #fff;
+        }
+        .section-title {
+            margin-bottom: 40px;
+        }
+        .sub-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+        .sect-title {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .section-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .btn-1 {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: #e41b23;
+            color: #fff;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-1:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .btn-2 {
+            color: #e41b23;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-2:hover {
+            color: #1a1a1a;
+        }
+        @media (max-width: 768px) {
+            .thanks-area {
+                padding: 60px 0;
+            }
+            .sub-title {
+                font-size: 28px;
+            }
+            .sect-title {
+                font-size: 16px;
+            }
+        }
+    </style>
+{% endblock %}
+{% block banner %}
+ <!--================= Banner Section Start Here =================-->
+    <div class="banner banner1">
+        <div class="inner-page-banner banner-bg">
+            <div class="container">
+                <div class="banner-content">
+                    <div class="page-path">
+                        <ul>
+                            <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                            <li><a class="current-page" href="#">THANKYOU</a></li>
+                        </ul>
+                    </div>
+                    <h1 class="banner-heading">THANK YOU</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Banner Section End Here =================-->
+
+{% endblock %}
+{% block content %}
+<!--thanks-area start-->
+    <div class="thanks-area">
+        <div class="container">
+            <div class="section-inner">
+                <div class="section-icon">
+                    <i class="fal fa-check"></i>
+                </div>
+                <div class="section-title">
+                    <h2 class="sub-title">Thanks For your Order</h2>
+                    <h3 class="sect-title">Your order has been successfully placed. We will process it as soon as possible.<br>
+                        You can track your order status in your account.</h3>
+                </div>
+                <div class="section-button">
+                    <a class="btn-1" href="{{ path('app_home') }}">
+                        <i class="fal fa-long-arrow-left"></i> Go To Homepage
+                    </a>
+                    <h3>
+                        Let's track your order or
+                        <a class="btn-2" href="{{ path('app_contact') }}">Contact Us</a>
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--thanks-area end-->
+{% endblock %}
+{% block footer %}
+{{ parent() }}
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
