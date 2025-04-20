@@ -28,9 +28,39 @@ final class TeamController extends AbstractController
     #[Route('/admin/dashboard/Teams', name: 'app_admin_dashboard_teams', methods: ['GET', 'POST'])]
     public function tables(Request $request, ManagerRegistry $doctrine, PaginatorInterface $paginator): Response
     {
-        $teams = $doctrine->getRepository(Team::class)->findBy([], ['id' => 'DESC']);
+        $entityManager = $doctrine->getManager();
+        $queryBuilder = $entityManager->getRepository(Team::class)->createQueryBuilder('t')
+            ->orderBy('t.id', 'DESC');
+        
+        // Apply filters if they exist
+        if ($name = $request->get('name')) {
+            $queryBuilder->andWhere('t.nom LIKE :name')
+                ->setParameter('name', '%'.$name.'%');
+        }
+        
+        if ($category = $request->get('category')) {
+            $queryBuilder->andWhere('t.categorie LIKE :category')
+                ->setParameter('category', '%'.$category.'%');
+        }
+        
+        if ($gameMode = $request->get('gameMode')) {
+            $queryBuilder->andWhere('t.modeJeu = :gameMode')
+                ->setParameter('gameMode', $gameMode);
+        }
+        
+        if ($minPlayers = $request->get('minPlayers')) {
+            $queryBuilder->andWhere('t.nombreJoueurs >= :minPlayers')
+                ->setParameter('minPlayers', $minPlayers);
+        }
+        
+        if ($maxPlayers = $request->get('maxPlayers')) {
+            $queryBuilder->andWhere('t.nombreJoueurs <= :maxPlayers')
+                ->setParameter('maxPlayers', $maxPlayers);
+        }
+        
+        // Create pagination
         $pagination = $paginator->paginate(
-            $teams,
+            $queryBuilder->getQuery(),
             $request->query->getInt('page', 1),
             5 // Number of items per page
         );
@@ -41,7 +71,6 @@ final class TeamController extends AbstractController
         
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $entityManager = $doctrine->getManager();
                 $entityManager->persist($team);
                 $entityManager->flush();
                 
