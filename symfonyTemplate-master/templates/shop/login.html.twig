@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login - Shop{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .shop-header {
+        background-color: #fb6340;
+        padding: 50px 0;
+        margin-bottom: 40px;
+    }
+    .shop-header h1 {
+        color: white;
+        font-weight: bold;
+    }
+    .login-card {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 40px;
+    }
+    .login-form {
+        padding: 30px;
+    }
+    .form-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #344767;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .login-btn {
+        background-color: #fb6340;
+        color: white;
+        border: none;
+        padding: 12px 0;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        font-weight: bold;
+        width: 100%;
+    }
+    .login-btn:hover {
+        background-color: #fa3a2e;
+        color: white;
+    }
+    .register-link {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .register-link a {
+        color: #fb6340;
+        font-weight: bold;
+    }
+    .alert-danger {
+        background-color: #f5365c;
+        color: white;
+        border: none;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="shop-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1>Login to Shop</h1>
+                <p class="text-white">Sign in to access your account and shopping cart</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="login-card">
+                <div class="login-form">
+                    <h3 class="form-title">Sign In</h3>
+                    
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ path('app_shop_login') }}">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn login-btn">Sign In</button>
+                    </form>
+                    
+                    <div class="register-link">
+                        <p>Don't have an account? <a href="{{ path('app_shop_register') }}">Register here</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mb-5">
+                <a href="{{ path('app_shop') }}" class="btn btn-secondary">Back to Shop</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

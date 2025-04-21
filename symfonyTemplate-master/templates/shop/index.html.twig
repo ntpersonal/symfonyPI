@@ -1,0 +1,400 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Shop - Soccer{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .shop-header {
+        background-color: #fb6340;
+        padding: 50px 0;
+        margin-bottom: 40px;
+    }
+    .shop-header h1 {
+        color: white;
+        font-weight: bold;
+    }
+    .product-card {
+        height: 100%;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+    .product-img {
+        height: 250px;
+        overflow: hidden;
+    }
+    .product-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .product-info {
+        padding: 20px;
+        background-color: white;
+    }
+    .product-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #344767;
+    }
+    .product-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: #fb6340;
+        margin-bottom: 10px;
+    }
+    .product-meta {
+        font-size: 14px;
+        color: #67748e;
+        margin-bottom: 15px;
+    }
+    .product-btn {
+        background-color: #fb6340;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .product-btn:hover {
+        background-color: #fa3a2e;
+        color: white;
+    }
+    .stock-yes {
+        color: #2dce89;
+    }
+    .stock-coming {
+        color: #fb6340;
+    }
+    .stock-no {
+        color: #f5365c;
+    }
+    .filter-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .filter-card h4 {
+        margin-bottom: 20px;
+        color: #344767;
+        font-weight: bold;
+    }
+    .user-actions {
+        display: inline-block;
+        margin-left: 15px;
+    }
+    .user-actions .btn {
+        margin-left: 5px;
+    }
+    .cart-icon {
+        position: relative;
+        margin-left: 15px;
+    }
+    .cart-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #fb6340;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .alert {
+        margin-bottom: 20px;
+        border-radius: 5px;
+        padding: 15px;
+    }
+    .alert-success {
+        background-color: #2dce89;
+        color: white;
+        border: none;
+    }
+    .add-to-cart-form {
+        margin-top: 10px;
+    }
+    /* Login Modal Styles */
+    .login-modal {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .login-modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 0;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        max-width: 400px;
+        position: relative;
+    }
+    .login-modal-header {
+        background-color: #fb6340;
+        color: white;
+        padding: 20px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    .login-modal-body {
+        padding: 20px;
+    }
+    .login-modal-footer {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        text-align: center;
+    }
+    .close-modal {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="shop-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-left">
+                <h1>Shop</h1>
+                <p class="text-white">Browse our products and find the perfect gear for your sports needs</p>
+            </div>
+            <div class="col-md-6 text-center text-md-right">
+                {% if isLoggedIn %}
+                    <span class="text-white">Welcome, {{ userName }}!</span>
+                    <div class="user-actions">
+                        <a href="{{ path('app_shop_cart') }}" class="btn btn-light">
+                            <i class="icon-shopping-cart"></i> Cart
+                            {% if cartCount > 0 %}
+                                <span class="cart-badge">{{ cartCount }}</span>
+                            {% endif %}
+                        </a>
+                        <a href="{{ path('app_shop_logout') }}" class="btn btn-outline-light">Logout</a>
+                    </div>
+                {% else %}
+                    <div class="user-actions">
+                        <a href="#" class="btn btn-light login-trigger">Login</a>
+                        <a href="{{ path('app_shop_register') }}" class="btn btn-outline-light">Register</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Filter Sidebar -->
+        <div class="col-lg-3">
+            <div class="filter-card">
+                <h4>Filter Products</h4>
+                <form method="GET" action="{{ path('app_shop') }}">
+                    <div class="form-group">
+                        <label for="search">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Product name..." value="{{ searchTerm }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" name="category">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}" {% if selectedCategory == cat %}selected{% endif %}>
+                                    {{ cat|capitalize }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="stock">Availability</label>
+                        <select class="form-control" id="stock" name="stock">
+                            <option value="">All</option>
+                            {% for option in stockOptions %}
+                                <option value="{{ option }}" {% if selectedStock == option %}selected{% endif %}>
+                                    {{ option|capitalize }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn product-btn">Search</button>
+                            <a href="{{ path('app_shop') }}" class="btn btn-secondary">Reset</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Products Grid -->
+        <div class="col-lg-9">
+            {% if products|length > 0 %}
+                <div class="row">
+                    {% for product in products %}
+                        <div class="col-md-4">
+                            <div class="product-card">
+                                <div class="product-img">
+                                    {% if product.image %}
+                                        <img src="{{ asset('uploads/products/' ~ product.image) }}" alt="{{ product.nameproduct }}">
+                                    {% else %}
+                                        <img src="{{ asset('assets/images/default-product.png') }}" alt="Default Image">
+                                    {% endif %}
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-title">{{ product.nameproduct }}</h3>
+                                    <div class="product-price">{{ product.priceproduct }} €</div>
+                                    <div class="product-meta">
+                                        <div>
+                                            <strong>Category:</strong> {{ product.category|capitalize }}
+                                        </div>
+                                        <div>
+                                            <strong>Status:</strong> 
+                                            <span class="stock-{% if product.stock == 'yes' %}yes{% elseif product.stock == 'coming' %}coming{% else %}no{% endif %}">
+                                                {{ product.stock|capitalize }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <a href="{{ path('app_shop_product', {'id': product.id}) }}" class="btn product-btn">
+                                        {% if product.stock == 'yes' %}
+                                            View Details
+                                        {% elseif product.stock == 'coming' %}
+                                            Coming Soon
+                                        {% else %}
+                                            Out of Stock
+                                        {% endif %}
+                                    </a>
+                                    
+                                    {% if product.stock == 'yes' %}
+                                        {% if isLoggedIn %}
+                                            <form method="POST" action="{{ path('app_shop_add_to_cart', {'id': product.id}) }}" class="add-to-cart-form">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" class="btn btn-secondary w-100">
+                                                    <i class="icon-shopping-cart"></i> Add to Cart
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <button class="btn btn-secondary w-100 login-trigger" data-product-id="{{ product.id }}">
+                                                <i class="icon-shopping-cart"></i> Add to Cart
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <h3>No products found</h3>
+                    <p>Try adjusting your filters or check back soon for new products.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="login-modal">
+    <div class="login-modal-content">
+        <div class="login-modal-header">
+            <h4>Login to Shop</h4>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="login-modal-body">
+            <form id="loginForm" method="POST" action="{{ path('app_shop_login') }}">
+                <div class="form-group mb-3">
+                    <label for="email">Email or Username</label>
+                    <input type="text" class="form-control" id="email" name="email" placeholder="Enter email or username" required>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <button type="submit" class="btn product-btn w-100">Sign In</button>
+                </div>
+                
+                <div class="quick-login mb-3">
+                    <p class="text-center mb-2">Quick Login as Admin:</p>
+                    <button type="button" id="adminLoginBtn" class="btn btn-secondary w-100">Admin Login</button>
+                </div>
+            </form>
+        </div>
+        <div class="login-modal-footer">
+            <p>Don't have an account? <a href="{{ path('app_shop_register') }}">Register here</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('loginModal');
+    const loginTriggers = document.querySelectorAll('.login-trigger');
+    const closeModal = document.querySelector('.close-modal');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    
+    // Open modal on login trigger click
+    loginTriggers.forEach(trigger => {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            modal.style.display = 'block';
+        });
+    });
+    
+    // Close modal when clicking the X
+    closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    });
+    
+    // Admin quick login
+    adminLoginBtn.addEventListener('click', function() {
+        document.getElementById('email').value = 'admin';
+        document.getElementById('password').value = 'passworde';
+        document.getElementById('loginForm').submit();
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,40 @@
+{% extends 'admin_dashborad/dashboard.html.twig' %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-9 mx-auto">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>Edit Order #{{ order.id }}</h6>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        <div class="mb-3">
+                            {{ form_label(form.idUser) }}
+                            {{ form_widget(form.idUser, { 'attr': {'class': 'form-control'} }) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.product) }}
+                            {{ form_widget(form.product, { 'attr': {'class': 'form-control'} }) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.panier) }}
+                            {{ form_widget(form.panier, { 'attr': {'class': 'form-control'} }) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.date) }}
+                            {{ form_widget(form.date, { 'attr': {'class': 'form-control'} }) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.quantityOrder) }}
+                            {{ form_widget(form.quantityOrder, { 'attr': {'class': 'form-control'} }) }}
+                        </div>
+                        <button class="btn btn-success">Save</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'admin_dashborad/dashboard.html.twig' %}
+
+{% block body %}
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <div class="container-fluid py-4">
+        <h6 class="font-weight-bolder mb-0">Product Statistics</h6>
+        <div class="row mt-4">
+            <div class="col-lg-6 col-md-6 col-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>Product Overview</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Total Products: {{ totalProducts }}</p>
+                        <p>Average Price: {{ averagePrice | number_format(2) }} $</p>
+                        <p>Products in Stock: {{ productsInStock }}</p>
+                        <p>Products Out of Stock: {{ productsOutOfStock }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>Sales Overview</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Total Sales: {{ totalSales }}</p>
+                        <p>Sales This Month: {{ salesThisMonth }}</p>
+                        <p>Sales Last Month: {{ salesLastMonth }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>Product Sales Chart</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="productSalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        var ctx = document.getElementById('productSalesChart').getContext('2d');
+        var productSalesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ productNames|json_encode|raw }},
+                datasets: [{
+                    label: 'Sales',
+                    data: {{ productSales|json_encode|raw }},
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

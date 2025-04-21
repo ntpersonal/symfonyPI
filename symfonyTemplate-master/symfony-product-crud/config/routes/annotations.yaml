@@ -1,0 +1,4 @@
+# filepath: symfony-product-crud/symfony-product-crud/config/routes/annotations.yaml
+controllers:
+    resource: '../src/Controller/'
+    type: annotation
