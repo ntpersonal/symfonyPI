@@ -1,0 +1,10 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block body %}
+<h2>Nouvelle réclamation</h2>
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-success mt-3">Enregistrer</button>
+{{ form_end(form) }}
+{% endblock %}

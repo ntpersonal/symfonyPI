@@ -1,0 +1,249 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}New User - Soccer{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>Create New User</h6>
+                            <p class="text-sm mb-0">
+                                <i class="fas fa-user-plus text-info"></i>
+                                <span class="font-weight-bold ms-1">Add a new user to the system</span>
+                            </p>
+                        </div>
+                        <a href="{{ path('app_admin_dashboard_users') }}" class="btn bg-gradient-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.firstname, 'First Name', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.firstname) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.lastname, 'Last Name', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.lastname, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.lastname) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.password, 'Password', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.password) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.role, 'Role', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.role, {'attr': {'class': 'form-control', 'id': 'user_role'}}) }}
+                                {{ form_errors(form.role) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.team, 'Team', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.team, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.team) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.phonenumber, 'Phone Number', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.phonenumber, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.phonenumber) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.dateofbirth, 'Date of Birth', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.dateofbirth, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.dateofbirth) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6" id="coaching-license-container" style="display: none;">
+                            <div class="form-group">
+                                {{ form_label(form.coachinglicense, 'Coaching License', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.coachinglicense, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.coachinglicense) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.profilepicture, 'Profile Picture', {'label_attr': {'class': 'form-control-label'}}) }}
+                                {{ form_widget(form.profilepicture, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
+                                {{ form_errors(form.profilepicture) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label d-block mb-2">User Status</label>
+                                <div style="display: flex; align-items: center; gap: 1.2rem;">
+                                    <label class="modern-switch">
+                                        <input type="checkbox" id="modern_status_switch" name="user[is_active]" value="1" {% if form.is_active.vars.value %}checked{% endif %}>
+                                        <span class="modern-slider"></span>
+                                    </label>
+                                    <span id="modern-status-badge" class="modern-status-badge {{ form.is_active.vars.value ? 'active' : 'inactive' }}">
+                                        {{ form.is_active.vars.value ? 'ACTIVE' : 'INACTIVE' }}
+                                    </span>
+                                </div>
+                                <small class="text-muted mt-1 d-block">Toggle to activate or deactivate user account</small>
+                                {{ form_errors(form.is_active) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{{ path('app_admin_dashboard_users') }}" class="btn btn-light m-0 me-2">Cancel</a>
+                        <button type="submit" class="btn bg-gradient-success m-0">
+                            <i class="fas fa-plus me-2"></i> Create User
+                        </button>
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('user_role');
+        const coachingLicenseContainer = document.getElementById('coaching-license-container');
+
+        // Handle role change
+        roleSelect.addEventListener('change', function() {
+            if (this.value === 'organizer') {
+                coachingLicenseContainer.style.display = 'block';
+            } else {
+                coachingLicenseContainer.style.display = 'none';
+            }
+        });
+        // Modern toggle switch logic
+        const statusSwitch = document.getElementById('modern_status_switch');
+        const statusBadge = document.getElementById('modern-status-badge');
+        function updateModernSwitch() {
+            if (statusSwitch.checked) {
+                statusBadge.textContent = 'ACTIVE';
+                statusBadge.classList.remove('inactive');
+                statusBadge.classList.add('active');
+            } else {
+                statusBadge.textContent = 'INACTIVE';
+                statusBadge.classList.remove('active');
+                statusBadge.classList.add('inactive');
+            }
+        }
+        if (statusSwitch && statusBadge) {
+            statusSwitch.addEventListener('change', updateModernSwitch);
+            updateModernSwitch();
+        }
+    });
+</script>
+<style>
+    .modern-switch {
+        position: relative;
+        display: inline-block;
+        width: 52px;
+        height: 28px;
+    }
+    .modern-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .modern-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(90deg, #232323 0%, #444 100%);
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: background 0.3s;
+    }
+    .modern-switch input:checked + .modern-slider {
+        background: linear-gradient(90deg, #ff8800 0%, #fd7e14 100%);
+        box-shadow: 0 2px 12px rgba(253,126,20,0.15);
+    }
+    .modern-slider:before {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 4px;
+        width: 20px;
+        height: 20px;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        transition: transform 0.3s cubic-bezier(.4,2.08,.55,.44);
+    }
+    .modern-switch input:checked + .modern-slider:before {
+        transform: translateX(24px);
+        background: #fff;
+    }
+    .modern-switch:hover .modern-slider {
+        box-shadow: 0 4px 16px rgba(253,126,20,0.18);
+    }
+    .modern-status-badge {
+        font-size: 1em;
+        padding: 0.45em 1.2em;
+        border-radius: 0.7em;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        background: #232323;
+        color: #fff;
+        transition: background 0.3s, color 0.3s;
+        border: none;
+        outline: none;
+        user-select: none;
+        display: inline-block;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .modern-status-badge.active {
+        background: linear-gradient(90deg, #ff8800 0%, #fd7e14 100%);
+        color: #fff;
+    }
+    .modern-status-badge.inactive {
+        background: linear-gradient(90deg, #232323 0%, #444 100%);
+        color: #fff;
+    }
+</style>
+{% endblock %} 

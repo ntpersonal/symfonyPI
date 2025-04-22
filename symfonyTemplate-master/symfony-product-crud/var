@@ -1,1 +1,0 @@
-The var directory is typically used for temporary files, cache, logs, and other runtime data in a Symfony application. Therefore, this directory is intentionally left blank.

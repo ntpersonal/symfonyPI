@@ -1,0 +1,436 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}shop {% endblock %}
+{% block stylesheets %}
+{{ parent() }}
+<style>
+        .shop-container {
+            padding: 2rem 0;
+        }
+
+        .shop-product-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .items-onlist {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .product-filter {
+            padding: 0.5rem 1rem;
+            background: #046bd2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .separator {
+            width: 1px;
+            height: 20px;
+            background: #ddd;
+        }
+
+        .product-show {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .product-show select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .grid-btn,
+        .list-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .product-item {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .product-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-thumb {
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-thumb img {
+            width: 100%;
+            height: auto;
+            transition: transform 0.3s;
+        }
+
+        .product-item:hover .product-thumb img {
+            transform: scale(1.1);
+        }
+
+        .contents {
+            padding: 1.5rem;
+        }
+
+        .product-name {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            text-decoration: none;
+        }
+
+        .product-action-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #046bd2;
+        }
+
+        .old-price {
+            font-size: 0.9rem;
+            color: #666;
+            text-decoration: line-through;
+            margin-left: 0.5rem;
+        }
+
+        .addto-cart {
+            padding: 0.5rem 1rem;
+            background: #046bd2;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .addto-cart:hover {
+            background: #0356a8;
+            color: #fff;
+        }
+
+        .product-pagination-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .product-pagination-area button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .product-pagination-area button.active {
+            background: #046bd2;
+            color: #fff;
+            border-color: #046bd2;
+        }
+
+        .product-pagination-area button:hover:not(.active) {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            .shop-product-topbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .filter-area {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .product-item {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+{% block banner %}
+ <!--================= Banner Section Start Here =================-->
+        <div class="banner banner1">
+            <div class="inner-page-banner banner-bg">
+                <div class="container">
+                    <div class="banner-content">
+                        <div class="page-path">
+                            <ul>
+                                <li><a class="home-page-link" href="index.html">Home</a></li>
+                                <li><a class="current-page" href="#">SHOP</a></li>
+                            </ul>
+                        </div>
+                        <h1 class="banner-heading">OUR MERCH</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--================= Banner Section End Here =================-->
+{% endblock %}
+{% block content %}
+<!--================= Match Result Section Start Here =================-->
+    <div class="rts-merch-section section-gap">
+        <div class="container">
+            <div class="shop-product-topbar">
+                <span class="items-onlist"><span>30</span> ITEM ON LIST</span>
+                <div class="filter-area">
+                    <button class="product-filter"><i class="fas fa-list"></i> FILTER</button>
+                    <div class="separator"></div>
+                    <div class="product-show">SHOW<select>
+                            <option value="1">12</option>
+                            <option value="2">8</option>
+                            <option value="3">6</option>
+                            <option value="4">4</option>
+                        </select></div>
+                    <button class="grid-btn"><img src="{{ asset('assets/images/icons/grid-icon.svg') }}" alt="grid-icon"></button>
+                    <button class="list-btn"><img src="{{ asset('assets/images/icons/list-icon.png') }}" alt="list-icon"></button>
+                </div>
+            </div>
+            <div class="product-area">
+                <div class="row">
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product1.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">NIKE SPORTS BOOT</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$52</span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product2.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">NIKE SPORTS BOOT</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$52 <span class="old-price">$98</span></span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product3.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">RAPIEURS JERSEY</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$59</span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product4.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">CLUB JERSEY</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$52 <span class="old-price">$98</span></span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product5.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">ADIDAS BLACK PANT</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$59</span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product6.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">CYAN KIPSTA GLOVES</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$52 <span class="old-price">$98</span></span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product7.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">SHIN GUARDS</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$59</span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product8.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">MEN FOOTBALL SHOES BOOTS</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$52 <span class="old-price">$98</span></span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product9.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">BLACK WHITE SOCKS</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$59</span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product10.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">SILVER SPORTS WHITSLE</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$52 <span class="old-price">$98</span></span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product11.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">VECTORE FOOTBALL</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$59</span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="product-item">
+                            <a href="product-details.html" class="product-thumb"><img
+                                    src="{{ asset('assets/images/products/product12.png') }}" alt="product-thumb"></a>
+                            <div class="contents">
+                                <a href="product-details.html" class="product-name">PUMA LEGTHER BAG</a>
+                                <div class="product-action-area">
+                                    <span class="product-price d-block">$52 <span class="old-price">$98</span></span>
+                                    <a href="cart.html" class="addto-cart">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="product-pagination-area mt--20">
+                <button class="prev"><i class="fal fa-angle-double-left"></i></button>
+                <button class="number active">01</button>
+                <button class="number">02</button>
+                <button class="skip-number">---</button>
+                <button class="number">07</button>
+                <button class="number">08</button>
+                <button class="next"><i class="fal fa-angle-double-right"></i></button>
+            </div>
+        </div>
+    </div>
+    <!--================= Match Result Section End Here =================-->
+
+
+
+{% endblock %}
+{% block footer %}
+{{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Grid/List view toggle
+            const gridBtn = document.getElementById('gridView');
+            const listBtn = document.getElementById('listView');
+            const productArea = document.querySelector('.product-area');
+
+            gridBtn.addEventListener('click', function() {
+                productArea.classList.remove('list-view');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            });
+
+            listBtn.addEventListener('click', function() {
+                productArea.classList.add('list-view');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            });
+
+            // Items per page change
+            const itemsPerPageSelect = document.getElementById('itemsPerPage');
+            itemsPerPageSelect.addEventListener('change', function() {
+                const url = new URL(window.location.href);
+                url.searchParams.set('perPage', this.value);
+                window.location.href = url.toString();
+            });
+        });
+    </script>
+{% endblock %} 
