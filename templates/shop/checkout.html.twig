@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block body %}
+<div class="hero overlay" style="background-image: url('{{ asset('assets/images/bg_3.jpg') }}');">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mx-auto text-center">
+                <h1 class="text-white">Checkout</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="widget-next-match">
+                    <div class="widget-body mb-3">
+                        <div class="widget-vs">
+                            <h3>Order Details</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form_label(form.shippingAddress) }}
+                    {{ form_widget(form.shippingAddress) }}
+                    {{ form_errors(form.shippingAddress) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.billingAddress) }}
+                    {{ form_widget(form.billingAddress) }}
+                    {{ form_errors(form.billingAddress) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Place Order</button>
+            <a href="{{ path('app_shop_cart') }}" class="btn btn-secondary">Back to Cart</a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

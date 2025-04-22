@@ -113,6 +113,20 @@ class Product
         return $this;
     }
 
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $image = null;
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+
     #[ORM\OneToMany(targetEntity: Panier::class, mappedBy: 'product')]
     private Collection $paniers;
 
