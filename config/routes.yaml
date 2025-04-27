@@ -1,3 +1,14 @@
+connect_google_start:
+    path: /connect/google
+    controller: App\Controller\ConnectController::connectGoogle
+
+connect_google_check:
+    path: /connect/google/check
+
+
+
+
+
 # app_admin:
 #     path: /listUsers
 #     controller: App\Controller\UserController::admin
@@ -136,21 +147,3 @@ app_tournois_delete:
     path: /tournois/delete/{id}
     controller: App\Controller\TournoisController::delete
     methods: [POST]
-
-# Shop routes
-shop:
-    path: /shop
-    controller: App\Controller\ShopController::index
-
-shop_cart:
-    path: /shop/cart
-    controller: App\Controller\ShopController::cart
-
-shop_checkout:
-    path: /shop/checkout
-    controller: App\Controller\ShopController::checkout
-
-# Product admin routes
-product_admin:
-    path: /admin/product
-    controller: App\Controller\ProductController::index

@@ -46,6 +46,7 @@ class EditUserType extends AbstractType
                     'placeholder' => 'Enter email address'
                 ]
             ])
+
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'mapped' => false,

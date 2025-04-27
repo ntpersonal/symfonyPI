@@ -58,10 +58,7 @@
                                 </li>
                                 <li class="{% if app.request.attributes.get('_route') == 'app_blog' %}active{% endif %}">
                                     <a href="{{ path('app_blog') }}" class="nav-link">Blog</a>
-                                </li>
-                                <li class="{% if app.request.attributes.get('_route') starts with 'app_shop' %}active{% endif %}">
-                                    <a href="{{ path('app_shop') }}" class="nav-link">Shop</a>
-                                </li>
+
                                 <li class="{% if app.request.attributes.get('_route') == 'app_log_in' %}active{% endif %}">
                                     <a href="{{ path('app_log_in') }}" class="nav-link">Sign In</a>
                                 </li>

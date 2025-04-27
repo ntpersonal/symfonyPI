@@ -6,7 +6,6 @@
 parameters:
     upload_directory: '%kernel.project_dir%/public/uploads'  # Adjust the path as per your project structure
     profile_pictures_directory: '%kernel.project_dir%/public/uploads/profile'
-    product_images_directory: '%kernel.project_dir%/public/uploads/products'
 
 services:
     # default configuration for services in *this* file
@@ -42,3 +41,8 @@ services:
     App\EventListener\NoCacheListener:
         tags:
             - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+
+
+
+    App\Security\RequestMatcher\ApiRequestMatcher:
+            public: true

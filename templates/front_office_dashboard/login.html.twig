@@ -139,7 +139,7 @@
                             <div class="card-body">
                                 <form method="post" action="{{ path('app_login') }}" class="needs-validation" novalidate>
                                     {% if error %}
-                                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'reset_password') }}</div>
                                     {% endif %}
 
                                     {% if app.user %}
@@ -159,7 +159,7 @@
                                                autofocus>
                                         {% if error %}
                                             <div class="invalid-feedback">
-                                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                                                {{ error.messageKey|trans(error.messageData, 'reset_password') }}
                                             </div>
                                         {% endif %}
                                     </div>
@@ -178,7 +178,7 @@
                                         </div>
                                         {% if error %}
                                             <div class="invalid-feedback">
-                                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                                                {{ error.messageKey|trans(error.messageData, 'reset_password') }}
                                             </div>
                                         {% endif %}
                                     </div>
@@ -197,7 +197,7 @@
                                     </div>
 
                                     <div class="text-center">
-                                        <a class="forgot-password" href="{{ path('app_forgot_password') }}">Lost your password?</a>
+                                        <a class="forgot-password" href="{{ path('app_forgot_password_request') }}">Lost your password?</a>
                                     </div>
                                 </form>
                             </div>

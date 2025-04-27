@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -11,16 +13,49 @@ use App\Entity\Team;
 use App\Entity\Tournoi;
 use App\Entity\User;
 
+
 final class AdminDashboardController extends AbstractController
 {
     #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
-    public function index(): Response
+    public function index(
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager
+    ): Response
     {
-        #dd($this->getUser()?->getRoles()); // <- add this
+        // User statistics
+        $totalUsers = $userRepository->count([]);
+        $activeUsers = $userRepository->count(['is_active' => true]);
+        $playerUsers = $userRepository->count(['role' => 'player']);
+        $organizerUsers = $userRepository->count(['role' => 'organizer']);
+
+
+        // Growth metrics
+        $newUsersThisMonth = $userRepository->countUsersRegisteredThisMonth();
+        $userGrowthRate = $this->calculateGrowthRate($userRepository);
+
         return $this->render('admin_dashboard/dashboard.html.twig', [
-            'controller_name' => 'AdminDashboardController',
+            'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'playerUsers' => $playerUsers,
+            'organizerUsers' => $organizerUsers,
+
+            'newUsersThisMonth' => $newUsersThisMonth,
+            'userGrowthRate' => $userGrowthRate,
         ]);
     }
+
+    private function calculateGrowthRate(UserRepository $repository): int
+    {
+        $usersLastMonth = $repository->countUsersRegisteredLastMonth();
+        $usersThisMonth = $repository->countUsersRegisteredThisMonth();
+
+        if ($usersLastMonth === 0) {
+            return $usersThisMonth > 0 ? 100 : 0;
+        }
+
+        return intval((($usersThisMonth - $usersLastMonth) / $usersLastMonth) * 100);
+    }
+
 
     #[Route('/admin/dashboard/profile', name: 'app_admin_dashboard_profile')]
     public function profile(): Response

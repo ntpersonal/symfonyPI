@@ -12,6 +12,9 @@ security:
         property: email
 
   firewalls:
+
+
+
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
@@ -20,6 +23,9 @@ security:
       pattern: ^/
       lazy: true
       provider: app_user_provider
+      custom_authenticators:
+        - App\Security\LoginFormAuthenticator
+        - App\Security\GoogleAuthenticator
       custom_authenticator: App\Security\LoginFormAuthenticator
       entry_point: App\Security\LoginFormAuthenticator
       form_login:
@@ -32,7 +38,6 @@ security:
       logout:
         path: app_log_out
         target: app_log_in
-        csrf_token_generator: security.csrf.token_manager
       remember_me:
         secret: '%kernel.secret%'
         lifetime: 604800
@@ -42,10 +47,12 @@ security:
         httponly: true
         samesite: lax
 
+
+
+
   access_control:
-    - { path: ^/admin/dashboard, roles: [ROLE_ADMIN, ROLE_ORGANIZER] }
     - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/signup, roles: PUBLIC_ACCESS }
     - { path: ^/debug/auth, roles: PUBLIC_ACCESS }
-    - { path: ^/front, roles: [ROLE_PLAYER, ROLE_ORGANIZER, ROLE_ADMIN] }
+    - { path: ^/front, roles: ROLE_PLAYER }

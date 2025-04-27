@@ -111,22 +111,7 @@
                         </div>
                     </div>
                     <div class="row mt-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-control-label d-block mb-2">User Status</label>
-                                <div style="display: flex; align-items: center; gap: 1.2rem;">
-                                    <label class="modern-switch">
-                                        <input type="checkbox" id="modern_status_switch" name="user[is_active]" value="1" {% if form.is_active.vars.value %}checked{% endif %}>
-                                        <span class="modern-slider"></span>
-                                    </label>
-                                    <span id="modern-status-badge" class="modern-status-badge {{ form.is_active.vars.value ? 'active' : 'inactive' }}">
-                                        {{ form.is_active.vars.value ? 'ACTIVE' : 'INACTIVE' }}
-                                    </span>
-                                </div>
-                                <small class="text-muted mt-1 d-block">Toggle to activate or deactivate user account</small>
-                                {{ form_errors(form.is_active) }}
-                            </div>
-                        </div>
+
                     </div>
                     <div class="d-flex justify-content-end mt-4">
                         <a href="{{ path('app_admin_dashboard_users') }}" class="btn btn-light m-0 me-2">Cancel</a>
@@ -146,18 +131,27 @@
 {{ parent() }}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const roleSelect = document.getElementById('user_role');
+        const roleSelect = document.querySelector('[id$="_role"]');
         const coachingLicenseContainer = document.getElementById('coaching-license-container');
 
-        // Handle role change
-        roleSelect.addEventListener('change', function() {
-            if (this.value === 'organizer') {
+        if (!roleSelect || !coachingLicenseContainer) return;
+
+        // Function to toggle visibility
+        function toggleCoachingLicense() {
+            if (roleSelect.value.toLowerCase() === 'organizer') {
                 coachingLicenseContainer.style.display = 'block';
             } else {
                 coachingLicenseContainer.style.display = 'none';
             }
-        });
-        // Modern toggle switch logic
+        }
+
+        // Show on load
+        toggleCoachingLicense();
+
+        // Show/hide on change
+        roleSelect.addEventListener('change', toggleCoachingLicense);
+
+        // Your existing modern toggle logic
         const statusSwitch = document.getElementById('modern_status_switch');
         const statusBadge = document.getElementById('modern-status-badge');
         function updateModernSwitch() {

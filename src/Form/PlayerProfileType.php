@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -107,6 +108,14 @@ class PlayerProfileType extends AbstractType
                         'message' => 'Must include uppercase, lowercase, and number',
                     ])
                 ],
+            ])
+            ->add('faceData', HiddenType::class, [ // Changed from TextType to HiddenType
+                'label' => false,
+                'required' => false,
+                'mapped' => true,
+                'attr' => [
+                    'id' => 'faceData'
+                ]
             ]);
 
 

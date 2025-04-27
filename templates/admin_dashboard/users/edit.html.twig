@@ -146,17 +146,28 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const roleSelect = document.getElementById('user_role');
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.querySelector('[id$="_role"]');
             const coachingLicenseContainer = document.getElementById('coaching-license-container');
-            // Handle role change
-            roleSelect && roleSelect.addEventListener('change', function () {
-                if (this.value === 'ROLE_COACH') {
+
+            if (!roleSelect || !coachingLicenseContainer) return;
+
+            // Function to toggle visibility
+            function toggleCoachingLicense() {
+                if (roleSelect.value.toLowerCase() === 'organizer') {
                     coachingLicenseContainer.style.display = 'block';
                 } else {
                     coachingLicenseContainer.style.display = 'none';
                 }
-            });
+            }
+
+            // Show on load
+            toggleCoachingLicense();
+
+            // Show/hide on change
+            roleSelect.addEventListener('change', toggleCoachingLicense);
+
+
         });
     </script>
     <style>

@@ -193,6 +193,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     #[ORM\Column(name: 'phonenumber', type: 'string', nullable: true)]
+    #[Assert\NotBlank(message: 'phone number is required')]
     #[Assert\Regex(
         pattern: '/^[0-9+\s()-]{8,20}$/',
         message: 'Please enter a valid phone number'
@@ -543,15 +544,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        $roles = ['ROLE_USER'];
-        if ($this->role === 'player') {
-            $roles[] = 'ROLE_PLAYER';
-        } elseif ($this->role === 'organizer') {
-            $roles[] = 'ROLE_ORGANIZER';
-        } elseif ($this->role === 'Admin') {
-            $roles[] = 'ROLE_ADMIN';
-        }
-        return $roles;
+        return ['ROLE_' . strtoupper($this->role)];
     }
 
     public function eraseCredentials(): void
@@ -562,5 +555,54 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return (string)$this->email;
+    }
+
+
+    #[ORM\Column(nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $tokenCreatedAt = null;
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+        return $this;
+    }
+
+    public function getTokenCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->tokenCreatedAt;
+    }
+
+    public function setTokenCreatedAt(?\DateTimeInterface $tokenCreatedAt): static
+    {
+        $this->tokenCreatedAt = $tokenCreatedAt;
+        return $this;
+    }
+
+    public function isResetTokenExpired(): bool
+    {
+        return $this->tokenCreatedAt !== null &&
+            (new \DateTime()) > $this->tokenCreatedAt->modify('+1 hour');
+    }
+
+    #[ORM\Column(name: "faceData", type: "text", nullable: true)]
+    private ?string $faceData = null;
+
+    public function getFaceData(): ?string
+    {
+        return $this->faceData;
+    }
+
+    public function setFaceData(?string $faceData): self
+    {
+        $this->faceData = $faceData;
+        return $this;
     }
 }
