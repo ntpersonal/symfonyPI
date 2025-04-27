@@ -7,7 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use App\Repository\TeamRepository;
-
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 #[ORM\Table(name: 'team')]
 class Team
@@ -113,11 +112,11 @@ class Team
         return $this;
     }
 
-    #[ORM\OneToMany(targetEntity: Matche::class, mappedBy: 'team')]
+    #[ORM\OneToMany(targetEntity: Matches::class, mappedBy: 'team')]
     private Collection $matches;
 
     /**
-     * @return Collection<int, Matche>
+     * @return Collection<int, Matches>
      */
     public function getMatches(): Collection
     {
@@ -127,7 +126,7 @@ class Team
         return $this->matches;
     }
 
-    public function addMatche(Matche $matche): self
+    public function addMatche(Matches $matche): self
     {
         if (!$this->getMatches()->contains($matche)) {
             $this->getMatches()->add($matche);
@@ -135,7 +134,7 @@ class Team
         return $this;
     }
 
-    public function removeMatche(Matche $matche): self
+    public function removeMatche(Matches $matche): self
     {
         $this->getMatches()->removeElement($matche);
         return $this;
@@ -207,7 +206,7 @@ class Team
         return $this;
     }
 
-    public function addMatch(Matche $match,team $teamA,team $teamB): static
+    public function addMatch(Matches $match,team $teamA,team $teamB): static
     {
         if (!$this->matches->contains($match)) {
             $this->matches->add($match);
@@ -215,23 +214,23 @@ class Team
             $match->setTeamB($teamB);
             $match->setTeamAName($teamA->getNom());
             $match->setTeamBName($teamB->getNom());
-            $match->setLocation_Match($match->getLocation_Match());
-            $match->setMatch_Time($match->getMatch_Time());
+            $match->setLocationMatch($match->getLocationMatch());
+            $match->setMatchTime($match->getMatchTime());
             $match->setStatus($match->getStatus());
         }
 
         return $this;
     }
 
-    public function removeMatch(Matche $match): static
+    public function removeMatch(Matches $match): static
     {
         if ($this->matches->removeElement($match)) {
             // set the owning side to null (unless already changed)
             if ($match->getTeamA() === $this) {
-                $match->setTeamA(null);
+                //$match->setTeamA(null);
             }
             if ($match->getTeamB() === $this) {
-                $match->setTeamB(null);
+               // $match->setTeamB(null);
             }
         }
 

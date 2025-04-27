@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <img src="{{ absolute_url(asset('assets/images/logo.png')) }}" alt="Soccer Logo" style="max-height: 60px;">
+        </div>
+
+        <div style="background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <h2 style="color: #333; margin-top: 0; margin-bottom: 25px; font-weight: 600;">Password Reset Request</h2>
+
+            <p style="color: #444; line-height: 1.5; font-size: 16px;">Hello <strong>{{ user.email }}</strong>,</p>
+
+            <p style="color: #444; line-height: 1.5; font-size: 16px;">We received a request to reset your password. To complete this process, please click the button below:</p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ url('app_reset_password', {token: resetToken.token}) }}" style="display: inline-block; background: linear-gradient(90deg, #ff8800 0%, #fd7e14 100%); color: white; text-decoration: none; padding: 12px 25px; border-radius: 50px; font-weight: 600; font-size: 16px;">Reset My Password</a>
+            </div>
+
+            <p style="color: #444; line-height: 1.5; font-size: 16px;">If the button doesn't work, copy and paste this URL into your browser:</p>
+
+            <p style="background: #f5f5f5; padding: 12px; border-radius: 6px; word-break: break-all; font-size: 14px; color: #666;">
+                {{ url('app_reset_password', {token: resetToken.token}) }}
+            </p>
+
+            <p style="color: #444; line-height: 1.5; font-size: 16px;">This password reset link will expire in <strong>{{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}</strong>.</p>
+
+            <p style="color: #444; line-height: 1.5; font-size: 16px;">If you didn't request a password reset, you can ignore this email or contact our support team if you have concerns.</p>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <p style="color: #777; margin-bottom: 5px;">Cheers,</p>
+                <p style="color: #777; font-weight: 600; margin-top: 0;">The Soccer Team</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; font-size: 14px; color: #888;">
+            <p>© {% if "now"|date("Y") != "2025" %}2025-{% endif %}{{ "now"|date("Y") }} Soccer. All rights reserved.</p>
+            <p>This is an automated email, please do not reply.</p>
+        </div>
+    </div>
+{% endblock %}

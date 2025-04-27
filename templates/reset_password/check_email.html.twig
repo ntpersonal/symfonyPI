@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Password Reset Email Sent - Soccer{% endblock %}
+
+{% block body %}
+    <div class="hero overlay d-flex align-items-center" style="background-image: url('{{ asset('assets/images/bg_3.jpg') }}'); min-height: calc(100vh - 120px); padding-top: 300px; padding-bottom: 110px;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7 col-12">
+                    <div class="card glass-card border-0 rounded-3 shadow-sm p-3 mb-4" style="max-width: 450px; margin: 0 auto;">
+                        <div class="card-header bg-transparent text-center py-2 border-0">
+                            <h3 class="font-weight-bold text-dark mb-1">Check Your Email</h3>
+                            <p class="mb-0 text-muted">Reset link has been sent</p>
+                        </div>
+                        <div class="card-body p-3 text-center">
+                            <div class="mb-4">
+                                <i class="fa fa-envelope-open-text fa-3x text-info mb-3"></i>
+                            </div>
+
+                            <p class="mb-3">
+                                If an account matching your email exists, we've sent you instructions to reset your password.
+                            </p>
+
+                            <p class="mb-3">
+                                The reset link will expire in <strong>{{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}</strong>.
+                            </p>
+
+                            <div class="alert alert-light border-0 rounded-pill py-2 px-3 d-inline-block">
+                                <i class="fa fa-info-circle me-2"></i>
+                                Check your spam folder if you don't see the email
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent text-center border-0 pt-0 pb-2">
+                            <p class="mb-0">
+                                <a href="{{ path('app_forgot_password_request') }}" class="text-info font-weight-bold">
+                                    <i class="fa fa-arrow-left me-1"></i> Try again
+                                </a>
+                                <span class="mx-2 text-muted">|</span>
+                                <a href="{{ path('app_log_in') }}" class="text-info font-weight-bold">
+                                    Back to login <i class="fa fa-arrow-right ms-1"></i>
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px) saturate(120%);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.18);
+            position: relative;
+            z-index: 10;
+        }
+
+        .text-info {
+            color: #fd7e14 !important;
+        }
+
+        .alert-light {
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Fix for footer */
+        .footer-section {
+            position: relative;
+            z-index: 5;
+        }
+    </style>
+{% endblock %}

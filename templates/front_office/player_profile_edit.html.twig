@@ -1,6 +1,11 @@
 {% extends 'front_office_dashboard/base.html.twig' %}
 {% form_theme form 'bootstrap_5_layout.html.twig' %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+{% endblock %}
+
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
@@ -20,285 +25,562 @@
 
     <div class="edit-profile-section py-5">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <div class="edit-profile-card bg-white rounded-lg shadow">
-                        <div class="card-header p-4 border-bottom">
-                            <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i> Update Your Profile</h4>
+            <div class="row">
+                <!-- Profile Picture Column -->
+                <div class="col-lg-4">
+                    <div class="profile-card bg-white rounded-lg shadow overflow-hidden mb-4">
+                        <div class="profile-header bg-gradient-primary position-relative">
+                            <div class="profile-cover" style="height: 120px; background-color: #e41b23;"></div>
+                            <div class="profile-avatar-wrapper">
+                                {% if user.profilepicture %}
+                                    <img src="{{ asset('uploads/profile/' ~ user.profilepicture) }}"
+                                         alt="Profile Picture"
+                                         id="profile-picture-preview"
+                                         class="profile-avatar"
+                                         onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
+                                {% else %}
+                                    <img src="{{ asset('assets/images/default-avatar.png') }}"
+                                         alt="Default Profile Picture"
+                                         id="profile-picture-preview"
+                                         class="profile-avatar">
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="card-body p-4">
-                            {% for label, messages in app.flashes %}
-                                {% for message in messages %}
-                                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                {% endfor %}
-                            {% endfor %}
+                        <div class="profile-body text-center px-4 py-4">
+                            <h3 class="player-name mb-1">{{ user.firstname }} {{ user.lastname }}</h3>
+                            <span class="player-role d-block text-muted mb-3">{{ user.role }}</span>
 
-                            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'edit-profile-form'}}) }}
-                            <div class="row">
-                                <!-- Profile Picture Section -->
-                                <div class="col-lg-4">
-                                    <div class="profile-picture-upload-container text-center mb-4">
-                                        <div class="profile-picture-wrapper mb-3">
-                                            {% if user.profilepicture %}
-                                                <img src="{{ asset('uploads/profile/' ~ user.profilepicture) }}"
-                                                     alt="Profile Picture"
-                                                     id="profile-picture-preview"
-                                                     class="profile-picture-preview"
-                                                     onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
-                                            {% else %}
-                                                <img src="{{ asset('assets/images/default-avatar.png') }}"
-                                                     alt="Default Profile Picture"
-                                                     id="profile-picture-preview"
-                                                     class="profile-picture-preview">
-                                            {% endif %}
-                                        </div>
-                                        <div class="upload-btn-wrapper">
-                                            {{ form_row(form.profilepicture) }}
-                                            <small class="form-text text-muted mt-2">Recommended: Square image, at least 300×300 pixels</small>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="upload-btn-wrapper mt-3">
+                                {{ form_row(form.profilepicture, {'label': 'Change Profile Picture', 'attr': {'class': 'profile-pic-input', 'onchange': 'previewImage(this)'}}) }}
+                                <small class="form-text text-muted mt-2">Recommended: Square image, at least 300×300 pixels</small>
+                            </div>
 
-                                <!-- Profile Form Section -->
-                                <div class="col-lg-8">
-                                    <div class="form-section mb-4">
-                                        <h5 class="section-title"><i class="fas fa-user me-2"></i> Personal Information</h5>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                {{ form_row(form.firstname) }}
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                {{ form_row(form.lastname) }}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                {{ form_row(form.email) }}
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                {{ form_row(form.phonenumber) }}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                {{ form_row(form.dateofbirth) }}
-                                            </div>
-                                        </div>
+                            <div class="player-stats mt-4">
+                                <div class="row g-0">
+                                    <div class="col-6 stat-item border-end">
+                                        <div class="stat-value">{{ user.isActive ? 'Active' : 'Inactive' }}</div>
+                                        <div class="stat-label">Status</div>
                                     </div>
-
-                                    <div class="form-section mb-4">
-                                        <h5 class="section-title"><i class="fas fa-lock me-2"></i> Change Password</h5>
-                                        <div class="mb-3">
-                                            {{ form_row(form.currentPassword) }}
-                                        </div>
-                                        <div class="mb-3">
-                                            {{ form_row(form.newPassword) }}
-                                        </div>
-                                    </div>
-
-                                    <div class="form-actions text-end">
-                                        <a href="{{ path('app_player_profile') }}" class="btn-cancel">
-                                            <i class="fas fa-times me-2"></i> Cancel
-                                        </a>
-                                        <button type="submit" class="btn-save-profile">
-                                            <i class="fas fa-save me-2"></i> Save Changes
-                                        </button>
+                                    <div class="col-6 stat-item">
+                                        <div class="stat-value">{{ user.createdat|date('Y') }}</div>
+                                        <div class="stat-label">Joined</div>
                                     </div>
                                 </div>
                             </div>
-                            {{ form_end(form) }}
                         </div>
                     </div>
+
+                    <!-- Tips Card -->
+                    <div class="tips-card bg-white rounded-lg shadow overflow-hidden">
+                        <div class="card-header border-bottom p-3">
+                            <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i> Profile Tips</h5>
+                        </div>
+                        <div class="card-body p-3">
+                            <ul class="tips-list">
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Keep your contact information up-to-date</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Use a clear, professional profile picture</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Make sure your password is secure</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Regularly update your profile</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Form Column -->
+                <div class="col-lg-8">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'edit-profile-form', 'novalidate': 'novalidate'}}) }}
+
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label }} alert-dismissible fade show mb-4" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    <!-- Personal Information Card -->
+                    <div class="profile-info-card bg-white rounded-lg shadow mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center p-4 border-bottom">
+                            <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i> Personal Information</h4>
+                            <div class="header-actions">
+                                <span class="badge member-since">Member since {{ user.createdat|date('F Y') }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.firstname, {'attr': {'class': 'form-control-custom'}}) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.lastname, {'attr': {'class': 'form-control-custom'}}) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.email, {'attr': {'class': 'form-control-custom'}}) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.phonenumber, {'attr': {'class': 'form-control-custom'}}) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.dateofbirth, {'attr': {'class': 'form-control-custom'}}) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Update Card -->
+                    <div class="password-card bg-white rounded-lg shadow mb-4">
+                        <div class="card-header p-4 border-bottom">
+                            <h4 class="mb-0"><i class="fas fa-lock me-2"></i> Update Password</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.currentPassword, {'attr': {'class': 'form-control-custom'}}) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.newPassword, {'attr': {'class': 'form-control-custom'}}) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Face Recognition Card -->
+                    <div class="face-recognition-card bg-white rounded-lg shadow mb-4">
+                        <div class="card-header p-4 border-bottom">
+                            <h4 class="mb-0"><i class="fas fa-camera me-2"></i> Face Recognition Setup</h4>
+                            <small class="text-muted d-block mt-1">Ensure good lighting and face the camera directly</small>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="face-capture-container text-center">
+                                        <div class="camera-frame mb-4">
+                                            <div class="camera-overlay">
+                                                <div class="face-guide"></div>
+                                            </div>
+                                            <video id="video" width="320" height="240" autoplay muted playsinline></video>
+                                            <canvas id="canvas" width="320" height="240" class="d-none"></canvas>
+                                            <img id="photo" class="preview-image d-none" alt="Your face">
+                                        </div>
+                                        <div class="camera-controls">
+                                            <button type="button" class="btn-camera" id="startCamera">
+                                                <i class="fas fa-video"></i>
+                                                <span>Start</span>
+                                            </button>
+                                            <button type="button" class="btn-camera btn-capture" id="capture" disabled>
+                                                <i class="fas fa-camera"></i>
+                                                <span>Capture</span>
+                                            </button>
+                                            <button type="button" class="btn-camera btn-stop" id="stopCamera" disabled>
+                                                <i class="fas fa-stop"></i>
+                                                <span>Stop</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Status Messages -->
+                                        <div class="face-status alert alert-info d-flex align-items-center" style="display:none;">
+                                            <div class="spinner-border spinner-border-sm me-2 d-none" role="status"></div>
+                                            <span class="status-text">Ready to start</span>
+                                        </div>
+
+                                        <!-- Hidden Form Field - Modified for better compatibility -->
+                                        {{ form_widget(form.faceData, {
+                                            'attr': {
+                                                'id': 'player_profile_faceData',
+                                                'class': 'd-none',
+                                                'data-face-format': 'descriptor'
+                                            }
+                                        }) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light py-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i> For best results: Remove glasses and ensure your face is clearly visible
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions-card bg-white rounded-lg shadow overflow-hidden">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ path('app_player_profile') }}" class="btn-cancel">
+                                    <i class="fas fa-arrow-left me-2"></i> Back to Profile
+                                </a>
+                                <button type="submit" class="btn-save-profile">
+                                    <i class="fas fa-save me-2"></i> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
                 </div>
             </div>
         </div>
     </div>
 
     <style>
-        .edit-profile-section {
-            background-color: #f5f7fa;
-            padding-top: 60px;
-            padding-bottom: 80px;
+        /* Face Recognition Styles */
+        .face-capture-container {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
 
-        .breadcrumb-area {
-            padding: 80px 0;
-            background-size: cover;
-            background-position: center;
+        .camera-frame {
             position: relative;
-            z-index: 1;
+            width: 320px;
+            height: 240px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
         }
 
-        .breadcrumb-area::before {
-            content: '';
+        .camera-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: -1;
+            z-index: 2;
+            pointer-events: none;
         }
 
-        .breadcrumb-content {
-            text-align: center;
-            color: white;
-        }
-
-        .page-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .page-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .page-list li {
-            position: relative;
-            padding-right: 15px;
-        }
-
-        .page-list li:not(:last-child)::after {
-            content: '/';
+        .face-guide {
             position: absolute;
-            right: 0;
             top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .page-list li a {
-            color: #e41b23;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .page-list li a:hover {
-            color: white;
-        }
-
-        .edit-profile-card {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
-            margin-bottom: 30px;
-        }
-
-        .edit-profile-card .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid #eee;
-        }
-
-        .section-title {
-            color: #333;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .profile-picture-wrapper {
-            position: relative;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 180px;
             height: 180px;
-            margin: 0 auto;
+            border: 3px dashed rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
         }
 
-        .profile-picture-preview {
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .btn-camera {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+            background: #0d6efd;
+            transition: all 0.2s ease;
+        }
+
+        .btn-camera:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+        }
+
+        .btn-camera.btn-capture {
+            background: #198754;
+        }
+
+        .btn-camera.btn-capture:hover {
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.2);
+        }
+
+        .btn-camera.btn-stop {
+            background: #dc3545;
+        }
+
+        .btn-camera.btn-stop:hover {
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+        }
+
+        .btn-camera:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #video {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
             object-fit: cover;
-            border: 5px solid #ffffff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
         }
 
-        .profile-picture-preview:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .form-section {
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .form-actions {
-            margin-top: 30px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-        }
-
-        .btn-save-profile {
-            padding: 12px 30px;
-            background-color: #e41b23;
-            color: white;
-            border-radius: 30px;
-            font-weight: 600;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-save-profile:hover {
-            background-color: #c01018;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(228, 27, 35, 0.3);
-        }
-
-        .btn-cancel {
-            padding: 12px 30px;
-            background-color: #6c757d;
-            color: white;
-            border-radius: 30px;
-            font-weight: 600;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-cancel:hover {
-            background-color: #5a6268;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
-        }
-
-        @media (max-width: 991px) {
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .btn-cancel, .btn-save-profile {
-                width: 100%;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 767px) {
-            .edit-profile-section {
-                padding-top: 40px;
-                padding-bottom: 60px;
-            }
-
-            .profile-picture-wrapper {
-                width: 150px;
-                height: 150px;
-            }
-
-            .section-title {
-                font-size: 1rem;
-            }
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     </style>
+
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-picture-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Face Recognition with face-api.js
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Elements
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const photo = document.getElementById('photo');
+            const startBtn = document.getElementById('startCamera');
+            const captureBtn = document.getElementById('capture');
+            const stopBtn = document.getElementById('stopCamera');
+            const faceStatus = document.querySelector('.face-status');
+
+            // Find input - try common Symfony ID patterns
+            const faceDataInput = document.getElementById('player_profile_faceData') ||
+                document.getElementById('form_faceData') ||
+                document.getElementById('faceData');
+
+            if (!faceDataInput) {
+                console.error('Face data input not found!');
+                showFaceStatus('System configuration error', 'danger');
+                return;
+            }
+
+            let stream = null;
+
+            // Debugging: Log initial state
+            console.log('Initializing face recognition...');
+            console.log('Video element:', video);
+            console.log('Face data input:', faceDataInput);
+
+            // Load FaceAPI models
+            async function loadModels() {
+                try {
+                    showFaceStatus('Loading face recognition models...', 'info', true);
+
+                    // Load models from their specific subdirectories
+                    await faceapi.nets.tinyFaceDetector.loadFromUri('/models/tiny_face_detector');
+                    console.log('TinyFaceDetector loaded');
+
+                    await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face_landmark_68');
+                    console.log('FaceLandmark68 loaded');
+
+                    await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face_recognition');
+                    console.log('FaceRecognition loaded');
+
+                    showFaceStatus('Models loaded successfully!', 'success');
+                    return true;
+
+                } catch (error) {
+                    console.error('Model loading error:', error);
+                    showFaceStatus('Failed to load models. Please check console for details.', 'danger');
+                    return false;
+                }
+            }
+
+            // Start Camera
+            startBtn.addEventListener('click', async () => {
+                console.log('Start camera button clicked');
+
+                if (!await loadModels()) {
+                    return;
+                }
+
+                try {
+                    console.log('Requesting camera access...');
+                    showFaceStatus('Accessing camera...', 'info', true);
+
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
+                        },
+                        audio: false
+                    });
+
+                    console.log('Camera access granted');
+                    video.srcObject = stream;
+
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        video.style.display = 'block';
+                        canvas.style.display = 'none';
+                        photo.style.display = 'none';
+
+                        startBtn.disabled = true;
+                        captureBtn.disabled = false;
+                        stopBtn.disabled = false;
+
+                        showFaceStatus('Camera started. Position your face in the frame.', 'info');
+                        console.log('Video is playing');
+                    };
+
+                } catch (error) {
+                    console.error('Camera error:', error);
+                    let errorMessage = 'Camera error: ';
+
+                    switch(error.name) {
+                        case 'NotAllowedError':
+                            errorMessage += 'Permission denied. Please allow camera access in browser settings.';
+                            break;
+                        case 'NotFoundError':
+                            errorMessage += 'No camera found.';
+                            break;
+                        case 'NotReadableError':
+                            errorMessage += 'Camera is already in use by another application.';
+                            break;
+                        case 'OverconstrainedError':
+                            errorMessage += 'Camera doesn\'t support requested constraints.';
+                            break;
+                        default:
+                            errorMessage += error.message;
+                    }
+
+                    showFaceStatus(errorMessage, 'danger');
+                }
+            });
+
+            // Capture Face
+            captureBtn.addEventListener('click', async () => {
+                if (!stream) {
+                    showFaceStatus('Please start the camera first', 'warning');
+                    return;
+                }
+
+                try {
+                    // Verify elements exist
+                    if (!canvas || !faceDataInput) {
+                        throw new Error('Required elements missing');
+                    }
+
+                    // Set canvas dimensions
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const context = canvas.getContext('2d');
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // Debug capture
+                    console.log('Capture dimensions:', canvas.width, 'x', canvas.height);
+                    const debugURI = canvas.toDataURL('image/jpeg');
+                    localStorage.setItem('last_capture', debugURI);
+
+                    // Detect faces
+                    showFaceStatus('Detecting...', 'info', true);
+                    const detections = await faceapi.detectAllFaces(
+                        canvas,
+                        new faceapi.TinyFaceDetectorOptions({
+                            inputSize: 512,
+                            scoreThreshold: 0.5
+                        })
+                    ).withFaceLandmarks().withFaceDescriptors();
+
+                    // Handle results
+                    if (detections.length === 0) {
+                        showFaceStatus('No face found', 'warning');
+                        return;
+                    }
+
+                    if (detections.length > 1) {
+                        showFaceStatus('Multiple faces detected', 'warning');
+                        return;
+                    }
+
+                    // Process detection
+                    const descriptor = detections[0].descriptor;
+                    const faceData = {
+                        image: canvas.toDataURL('image/jpeg'),
+                        descriptor: Array.from(descriptor),
+                        timestamp: new Date().toISOString()
+                    };
+
+                    faceDataInput.value = JSON.stringify(faceData);
+
+                    // Show preview
+                    photo.src = faceData.image;
+                    video.style.display = 'none';
+                    photo.style.display = 'block';
+
+                    showFaceStatus('Success! Face captured', 'success');
+                    console.log('Face data stored in input:', faceDataInput.id);
+
+                } catch (error) {
+                    console.error('Capture failed:', error);
+                    showFaceStatus('Error: ' + error.message, 'danger');
+
+                    // Additional debug info
+                    const pixelData = canvas.getContext('2d').getImageData(0, 0, 1, 1).data;
+                    console.log('First pixel data:', pixelData);
+                }
+            });
+
+            // Stop Camera
+            stopBtn.addEventListener('click', function() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                    video.srcObject = null;
+                    video.style.display = 'none';
+
+                    startBtn.disabled = false;
+                    captureBtn.disabled = true;
+                    stopBtn.disabled = true;
+
+                    showFaceStatus('Camera stopped', 'info');
+                }
+            });
+
+            function showFaceStatus(message, type, spinning = false) {
+                if (!faceStatus) return;
+
+                faceStatus.innerHTML = `
+            <div class="d-flex align-items-center">
+                ${spinning ? '<div class="spinner-border spinner-border-sm me-2" role="status"></div>' : ''}
+                <span>${message}</span>
+            </div>
+        `;
+                faceStatus.className = `alert alert-${type} face-status`;
+                faceStatus.style.display = 'flex';
+                console.log(`Status: ${message}`);
+            }
+
+            // Debug functions
+            window.debugLastCapture = () => {
+                const imgData = localStorage.getItem('last_capture');
+                if (imgData) {
+                    const win = window.open();
+                    win.document.write('<img src="' + imgData + '" style="max-width:100%">');
+                }
+            };
+
+            window.viewFaceData = () => {
+                if (faceDataInput.value) {
+                    console.log('Face data:', JSON.parse(faceDataInput.value));
+                } else {
+                    console.log('No face data stored');
+                }
+            };
+        });
+    </script>
 {% endblock %}

@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -11,14 +13,60 @@ use App\Entity\Team;
 use App\Entity\Tournoi;
 use App\Entity\User;
 
+
 final class AdminDashboardController extends AbstractController
 {
     #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
-    public function index(): Response
+    public function index(UserRepository $userRepository): Response
     {
-        #dd($this->getUser()?->getRoles()); // <- add this
+        // Get total users count
+        $totalUsers = $userRepository->count([]);
+        
+        // Get active users count (users with is_active = true)
+        $activeUsers = $userRepository->count(['is_active' => true]);
+        
+        // Get player users count (users with role = 'player')
+        $playerUsers = $userRepository->count(['role' => 'player']);
+        
+        // Get organizer users count (users with role = 'organizer')
+        $organizerUsers = $userRepository->count(['role' => 'organizer']);
+        
+        // Calculate user growth rate (this month vs last month)
+        $currentMonth = new \DateTime('first day of this month');
+        $lastMonth = new \DateTime('first day of last month');
+        
+        $usersThisMonth = $userRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdat >= :start')
+            ->setParameter('start', $currentMonth)
+            ->getQuery()
+            ->getSingleScalarResult();
+            
+        $usersLastMonth = $userRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdat >= :start AND u.createdat < :end')
+            ->setParameter('start', $lastMonth)
+            ->setParameter('end', $currentMonth)
+            ->getQuery()
+            ->getSingleScalarResult();
+            
+        $userGrowthRate = $usersLastMonth > 0 ? 
+            round(($usersThisMonth - $usersLastMonth) / $usersLastMonth * 100) : 100;
+        
+        // Get recent users
+        $recentUsers = $userRepository->createQueryBuilder('u')
+            ->orderBy('u.createdat', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+        
         return $this->render('admin_dashboard/dashboard.html.twig', [
-            'controller_name' => 'AdminDashboardController',
+            'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'playerUsers' => $playerUsers,
+            'organizerUsers' => $organizerUsers,
+            'userGrowthRate' => $userGrowthRate,
+            'recentUsers' => $recentUsers
         ]);
     }
 

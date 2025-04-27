@@ -41,3 +41,8 @@ services:
     App\EventListener\NoCacheListener:
         tags:
             - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+
+
+
+    App\Security\RequestMatcher\ApiRequestMatcher:
+            public: true
