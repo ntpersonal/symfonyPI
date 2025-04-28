@@ -1,0 +1,42 @@
+<div class="table-responsive p-0">
+    <table class="table align-items-center justify-content-center mb-0">
+        <thead>
+            <tr>
+                {# Colonne ID supprimée #}
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Team A</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Team B</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Score</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Match Time</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Location</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Tournament</th>
+                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+                <tr>
+                    <td>{{ match.teamAName is not empty ? match.teamAName : (match.teamA ? match.teamA.nom : 'N/A') }}</td>
+                    <td>{{ match.teamBName is not empty ? match.teamBName : (match.teamB ? match.teamB.nom : 'N/A') }}</td>
+                    <td>{{ match.scoreTeamA }} - {{ match.scoreTeamB }}</td>
+                    <td>{{ match.status }}</td>
+                    <td>{{ match.matchTime|date('Y-m-d H:i') }}</td>
+                    <td>{{ match.locationMatch }}</td>
+                    <td>{{ match.tournoi ? match.tournoi.nom : 'N/A' }}</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{{ path('app_matches_show', { id: match.id }) }}">Show</a>
+                        <a class="btn btn-warning btn-sm" href="{{ path('app_matches_edit', { id: match.id }) }}">Edit</a>
+                        <form method="post" action="{{ path('app_matches_delete', { id: match.id }) }}" style="display: inline-block" onsubmit="return confirm('Confirm delete?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ match.id) }}">
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="text-center">No matches found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

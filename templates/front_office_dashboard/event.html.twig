@@ -1,0 +1,291 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}event {% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block banner %}
+    <div class="banner banner1">
+            <div class="inner-page-banner banner-bg">
+                <div class="container">
+                    <div class="banner-content">
+                        <div class="page-path">
+                            <ul>
+                                <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                                <li><a class="current-page" href="#">Event</a></li>
+                            </ul>
+                        </div>
+                        <h1 class="banner-heading">EVENT LIST</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block content %}
+<div class="rts-events-section section-gap">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event1.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">How Do You GEt Ready For Match?</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event2.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">It's What you Were Waiting for This...</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event3.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">The Season Is Starting, Are You Ready?</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event4.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">Win a Jersey Of One Of sportius New Sign.</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event5.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">Win Two Tickets For Sportius VS Real Madrid</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event6.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">How Do You GEt Ready For Match?</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event7.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">Win a Jersey Of One Of sportius New Sign.</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event8.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">How Do You GEt Ready For Match?</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event9.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">It's What you Were Waiting for This...</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event10.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">Win Two Tickets For Sportius VS Real Madrid</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event11.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">Win a Jersey Of One Of sportius New Sign.</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-single">
+                        <div class="event-picture"><img src="{{ asset('assets/images/event/event12.jpg') }}" alt="event-picture">
+                            <div class="event-date-floating">
+                                <span class="day">20</span>
+                                <span class="month">JUN</span>
+                            </div>
+                        </div>
+
+                        <div class="contents">
+                            <div class="post-info">
+                                <span class="post-date"><i class="fal fa-clock"></i> Jun 8, 2024</span>
+                                <span class="post-location"><i class="fal fa-map-marker-alt"></i> New York, US</span>
+                            </div>
+                            <a href="event-details.html" class="event-title">The Season Is Starting, Are You Ready?</a>
+                            <p>Welcome to the official Sportius FC website.
+                                Get all the latest news, videos and ticket info
+                                as well as player profiles.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block footer %}
+    {{ parent() }}
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

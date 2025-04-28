@@ -1,0 +1,108 @@
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-5">Sponsored Content</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Current Sponsorships</h2>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Sponsor Name</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sponsorship in sponsorships %}
+                                        <tr>
+                                            <td>{{ sponsorship.sponsorName }}</td>
+                                            <td>{{ sponsorship.startDate|date('Y-m-d') }}</td>
+                                            <td>{{ sponsorship.endDate|date('Y-m-d') }}</td>
+                                            <td>
+                                                <span class="badge {% if sponsorship.status == 'Active' %}bg-success{% else %}bg-warning{% endif %}">
+                                                    {{ sponsorship.status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('app_sponsorship_details', {'id': sponsorship.id}) }}" class="btn btn-sm btn-primary">View Details</a>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">No sponsorships found</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Sponsorship Statistics</h2>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Active Sponsorships</h5>
+                                        <p class="card-text display-4">{{ stats.activeCount }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Revenue</h5>
+                                        <p class="card-text display-4">${{ stats.totalRevenue|number_format(2) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Average Duration</h5>
+                                        <p class="card-text display-4">{{ stats.avgDuration }} days</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .badge {
+            padding: 0.5em 1em;
+        }
+        .card {
+            margin-bottom: 1rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .display-4 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            line-height: 1.2;
+        }
+    </style>
+{% endblock %} 

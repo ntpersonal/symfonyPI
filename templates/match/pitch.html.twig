@@ -1,0 +1,70 @@
+{# templates/match/pitch.html.twig #}
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}Line-up & Pitch{% endblock %}
+
+{% block content %}
+  <div class="container py-5 text-center">
+    <h2>Line-up</h2>
+    <canvas id="pitch" width="600" height="800"
+            style="border:1px solid #333; background:#4CAF50;"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('pitch');
+    const ctx    = canvas.getContext('2d');
+
+    // draw pitch markings
+    function drawPitch() {
+      const W = canvas.width, H = canvas.height;
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+
+      // border
+      ctx.strokeRect(50, 50, W - 100, H - 100);
+      // halfway line
+      ctx.beginPath();
+      ctx.moveTo(50, H/2);
+      ctx.lineTo(W-50, H/2);
+      ctx.stroke();
+      // center circle
+      ctx.beginPath();
+      ctx.arc(W/2, H/2, 50, 0, Math.PI*2);
+      ctx.stroke();
+      // penalty areas
+      ctx.strokeRect(W/2 - 100, 50, 200, 100);
+      ctx.strokeRect(W/2 - 100, H - 150, 200, 100);
+    }
+
+    // your player data injected by Twig:
+    const playersHome = {{ playersHome|json_encode|raw }};
+    const playersAway = {{ playersAway|json_encode|raw }};
+
+    function drawPlayers() {
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      playersHome.forEach(p => {
+        // blue kit
+        ctx.fillStyle = '#2196F3';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 20, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.fillText(p.number, p.x, p.y + 5);
+      });
+      playersAway.forEach(p => {
+        // red kit
+        ctx.fillStyle = '#F44336';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 20, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.fillText(p.number, p.x, p.y + 5);
+      });
+    }
+
+    // on load
+    drawPitch();
+    drawPlayers();
+  </script>
+{% endblock %}

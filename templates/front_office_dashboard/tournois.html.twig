@@ -1,0 +1,221 @@
+{# templates/front_office_dashboard/tournois.html.twig #}
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}Tournois{% endblock %}
+
+{% block banner %}
+  <div class="banner banner1 position-relative">
+    <div class="inner-page-banner banner-bg overlay-dark">
+      <div class="container">
+        <div class="banner-content text-center py-5">
+          <div class="page-path mb-3">
+            <ul class="list-inline mb-0">
+              <li class="list-inline-item">
+                <a class="home-page-link text-white opacity-75 text-decoration-none"
+                   href="{{ path('app_home1') }}">Home</a>
+              </li>
+              <li class="list-inline-item text-white opacity-75">/</li>
+              <li class="list-inline-item">
+                <a class="current-page text-white fw-bold" href="#">Tournois</a>
+              </li>
+            </ul>
+          </div>
+          <h1 class="banner-heading text-uppercase text-white display-4 fw-bold mb-0">
+            ALL TOURNAMENTS
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="rts-tournaments-section section-gap py-5">
+    <div class="container">
+
+      {# ---------------------------------------------------------------- #}
+      {#                          LOCAL TOURNAMENTS                      #}
+      {# ---------------------------------------------------------------- #}
+      <div class="section-title text-center mb-5">
+        <h2 class="fw-bold position-relative d-inline-block pb-3 border-bottom border-3 border-primary">
+          Our Tournaments
+        </h2>
+        <p class="text-muted mt-3">Discover and participate in exciting tournaments</p>
+      </div>
+      <div class="row g-4">
+        {% for t in tournois %}
+          <div class="col-xl-4 col-md-6">
+            <div class="tournament-card bg-white shadow-sm rounded-3 overflow-hidden hover-scale transition-all border-0 h-100">
+              <div class="tournament-header bg-gradient p-4 text-center position-relative">
+                <div class="tournament-image mb-2">
+                  <img src="{{ asset('assets/images/sportify.png') }}"
+                       class="img-fluid rounded-circle border border-3 border-white shadow"
+                       width="80" alt="{{ t.nom }}">
+                </div>
+                <h4 class="tournament-name text-black mb-0 fw-bold">{{ t.nom }}</h4>
+                <span class="badge rounded-pill px-3 py-2 fs-6 mt-2 bg-{{ 
+                  t.status == 'FINISHED' ? 'success' :
+                  t.status == 'UPCOMING'  ? 'warning text-dark' :
+                  t.status == 'ONGOING'   ? 'danger' : 'info'
+                }}">
+                  {{ t.status|capitalize }}
+                </span>
+              </div><!-- /.tournament-header -->
+
+              <div class="tournament-details p-4">
+                <div class="detail-row d-flex justify-content-between mb-3">
+                  <span><i class="fas fa-running me-2"></i>Sport:</span>
+                  <span>{{ t.sportType ?: 'N/A' }}</span>
+                </div>
+                <div class="detail-row d-flex justify-content-between mb-3">
+                  <span><i class="fas fa-trophy me-2"></i>Format:</span>
+                  <span>{{ t.format ?: 'N/A' }}</span>
+                </div>
+                <div class="detail-row d-flex justify-content-between mb-3">
+                  <span><i class="far fa-calendar-alt me-2"></i>Duration:</span>
+                  <span>{{ t.startDate|date('M d') }} – {{ t.endDate|date('M d, Y') }}</span>
+                </div>
+                <div class="detail-row d-flex justify-content-between mb-3">
+                  <span><i class="fas fa-users me-2"></i>Teams:</span>
+                  <span>{{ t.nbEquipe }}</span>
+                </div>
+                <div class="detail-row d-flex justify-content-between mb-4">
+                  <span><i class="fas fa-map-marker-alt me-2"></i>Location:</span>
+                  <span>{{ t.tournoiLocation ?: '–' }}</span>
+                </div>
+
+                <div class="tournament-action text-center">
+                  <a href="{{ path('app_front_tournoi_show', { id: t.id }) }}"
+                     class="btn btn-outline-primary rounded-pill w-100 mb-2">
+                    View Matches
+                  </a>
+
+                  {# only show “Join” to organizers with a team //and app.user.team  data-team-id="{{ app.user.team.id }}"#}
+                  {% if app.user and is_granted('ROLE_ORGANIZER')  %}
+                    <button type="button"
+                            class="btn btn-primary rounded-pill w-100 join-btn"
+                           
+                            data-tournament-id="{{ t.id }}">
+                      Join Tournament
+                    </button>
+                  {% endif %}
+                </div>
+              </div><!-- /.tournament-details -->
+            </div><!-- /.tournament-card -->
+          </div><!-- /.col -->
+        {% else %}
+          <div class="col-12">
+            <div class="alert alert-info text-center p-5">
+              <i class="fas fa-info-circle fa-3x mb-3"></i>
+              <h4>No Tournaments Found</h4>
+              <p>There are currently no tournaments available.</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div><!-- /.row -->
+
+      {# ---------------------------------------------------------------- #}
+      {#                         EXTERNAL LEAGUES                        #}
+      {# ---------------------------------------------------------------- #}
+      {% if externalLeagues is not empty %}
+        <div class="section-title text-center mt-5 mb-4">
+          <h2 class="fw-bold position-relative d-inline-block pb-2 border-bottom border-primary">
+            All Leagues — Season {{ externalLeagues[0].league_season }}
+          </h2>
+        </div>
+
+        <div class="row g-4">
+          {% for league in externalLeagues %}
+            <div class="col-xl-4 col-md-6">
+              <div class="tournament-card bg-light shadow-sm rounded-3 overflow-hidden hover-scale border h-100">
+                <div class="tournament-header p-4 text-center">
+                  <img src="{{ league.league_logo }}"
+                       class="img-fluid rounded-circle border border-2 shadow-sm mb-2"
+                       width="70" alt="{{ league.league_name }}">
+                  <h4 class="tournament-name text-dark mb-1 fw-semibold">{{ league.league_name }}</h4>
+                  <div class="text-muted small">{{ league.country_name }}</div>
+                </div>
+
+                <div class="tournament-details p-3 text-center">
+                  <div class="text-muted small">Season: {{ league.league_season }}</div>
+                  {% set year = league.league_season|split('/')|first %}
+
+                  <a href="{{ path('app_front_league_fixtures', {
+                        leagueId: league.league_id,
+                        season:   year
+                      }) }}"
+                     class="btn btn-sm btn-outline-primary rounded-pill mt-3 mb-2">
+                    View Matches
+                  </a>
+
+                  {# only show “Join” to organizers who have a team //and app.user.team  data-team-id="{{ app.user.team.id }}" #}
+                  {% if app.user and is_granted('ROLE_ORGANIZER')  %}
+                    <button type="button"
+                            class="btn btn-sm btn-primary rounded-pill w-100 join-btn"
+                            
+                            data-tournament-id="{{ league.league_id }}">
+                      Join Tournament
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div><!-- /.row -->
+      {% endif %}
+
+    </div><!-- /.container -->
+  </div><!-- /.rts-tournaments-section -->
+{% endblock %}
+
+{% block footer %}
+  {{ parent() }}
+
+  <style>
+    .hover-scale {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-scale:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1)!important;
+    }
+  </style>
+
+  {# ========================================================================= #}
+  {#  JOIN‐TOURNAMENT AJAX (only for organizers)                              #}
+  {# ========================================================================= #}
+  {% if app.user and is_granted('ROLE_ORGANIZER') and app.user.team %}
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.join-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const teamId       = btn.dataset.teamId;
+            const tournamentId = btn.dataset.tournamentId;
+
+            fetch('{{ path('app_team_join_tournament') }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              body: JSON.stringify({ teamId, tournamentId })
+            })
+            .then(r => r.json())
+            .then(json => {
+              if (json.success) {
+                btn.textContent = 'Joined';
+                btn.disabled    = true;
+              } else {
+                alert('❌ ' + json.message);
+              }
+            })
+            .catch(err => {
+              console.error(err);
+              alert('⚠️ Could not join – see console for details.');
+            });
+          });
+        });
+      });
+    </script>
+  {% endif %}
+{% endblock %}
