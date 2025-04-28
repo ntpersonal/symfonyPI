@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Matches;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,14 +16,24 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\Ranking;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Tournoi;
-
+use App\Entity\User;
+use App\Service\ApiFootballService;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Security\Core\Security;
 final class TeamController extends AbstractController
 {
     private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
+    private $apiFootballService;
+    private $slugger;
+    private $logger;
+    public function __construct(LoggerInterface $logger,EntityManagerInterface $entityManager,ApiFootballService $apiFootballService,SluggerInterface $slugger)
     {
         $this->entityManager = $entityManager;
+        $this->apiFootballService = $apiFootballService;
+        $this->slugger = $slugger;
+        $this->logger = $logger;
     }
 
     #[Route('/admin/dashboard/Teams', name: 'app_admin_dashboard_teams', methods: ['GET', 'POST'])]
@@ -71,6 +82,11 @@ final class TeamController extends AbstractController
         
         if ($form->isSubmitted() && $form->isValid()) {
             try {
+                $logoFile = $form->get('logoPath')->getData();
+                if ($logoFile) {
+                    $newFilename = $this->handleFileUpload($logoFile);
+                    $team->setLogoPath($newFilename);
+                }
                 $entityManager->persist($team);
                 $entityManager->flush();
                 
@@ -93,8 +109,24 @@ final class TeamController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+    private function handleFileUpload($file)
+    {
+        // Generate a unique filename
+        $newFilename = md5(uniqid()).'.'.$file->guessExtension();
+        $uploadDir = 'C:/xampp4/htdocs/img/teams/';
+        
+        // Ensure the upload directory exists
+        if (!file_exists($uploadDir)) {
+            if (!mkdir($uploadDir, 0777, true)) {
+                throw new \RuntimeException('Failed to create upload directory: ' . $uploadDir);
+            }
+        }
 
- 
+        // Move the file to the upload directory
+        $file->move($uploadDir, $newFilename);
+        return $newFilename;
+    }
+    
     #[Route('/admin/teams/{id}/delete', name: 'app_admin_team_delete', methods: ['DELETE'])]
     public function deleteTeam(int $id, ManagerRegistry $doctrine): Response
     {
@@ -148,6 +180,7 @@ final class TeamController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Error updating team'], 500);
         }
     }
+  
 
    
 
@@ -213,4 +246,455 @@ final class TeamController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Failed to join tournament'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    #[Route('/api/teams/league/{leagueId}', name: 'api_teams_by_league', methods: ['GET'])]
+    public function getTeamsByLeague(int $leagueId, ApiFootballService $api_football): JsonResponse
+    {
+        try {
+            $teams = $api_football->getTeamsByLeague($leagueId);
+            return $this->json(['teams' => $teams]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    #[Route('/front/dashboard/assign-team', name: 'api_team_assign', methods: ['POST'])]
+    public function assignTeam(
+        Security $security,
+        Request $request,
+        ApiFootballService $apiFootball,
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger
+    ): JsonResponse {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $leagueId = $data['leagueId'] ?? null;
+            $leagueName = $data['leagueName'] ?? null;
+            $teamId = $data['teamId'] ?? null;
+            $teamName = $data['teamName'] ?? null;
+            $teamCount = $data['teamCount'] ?? null;
+            $logger->info('Attempting to assign team', [
+                'leagueId' => $leagueId,
+                'teamId' => $teamId,
+                'teamName' => $teamName
+            ]);
+    
+            if (!$leagueId || !$teamId || !$teamName || !$leagueName || !$teamCount) {
+                return $this->json([
+                    'error' => 'Missing required parameters',
+                    'received' => $data, // For debugging
+                    'required' => ['leagueId', 'teamId', 'teamName', 'leagueName', 'teamCount']
+                ], 400);
+            }
+            $logger->info('Received data', [
+                'data' => $data,
+                'types' => [
+                    'leagueId' => gettype($leagueId),
+                    'teamId' => gettype($teamId),
+                    'teamName' => gettype($teamName),
+                    'leagueName' => gettype($leagueName),
+                    'teamCount' => gettype($teamCount)
+                ]
+            ]);
+            /** @var User $user */
+            $user = $security->getUser();
+            if (!$user) {
+                return $this->json(['error' => 'User not authenticated'], 401);
+            }
+    
+            // Transaction for data integrity
+            $entityManager->beginTransaction();
+    
+            try {
+                // Tournament handling
+                $tournament = $entityManager->getRepository(Tournoi::class)->findOneBy(['nom' => $leagueName]) 
+                    ?? (new Tournoi())
+                        ->setNom($leagueName)
+                        ->setStartDate(new \DateTime())
+                        ->setEndDate((new \DateTime())->modify('+7 days'))
+                        ->setNbEquipe($teamCount);
+    
+                $entityManager->persist($tournament);
+    
+                // Team handling
+                $team = $entityManager->getRepository(Team::class)->findOneBy(['nom' => $teamName])
+                    ?? (new Team())
+                        ->setNom($teamName)
+                        ->setCategorie('Football')
+                        ->setModeJeu('EN_GROUPE')
+                        ->setTournoi($tournament);
+    
+                if (!$team->getId()) {
+                    $teamData = $apiFootball->getTeamData($teamId);
+                    if ($teamData && isset($teamData['team_badge'])) {
+                            $logoPath = $this->downloadAndSaveImage($teamData['team_badge'], 'teams');
+                            if ($logoPath) {
+                                $team->setLogoPath($logoPath); // Will store like "teams/abc123.jpg"
+                            }
+                        }
+                    // Set player count from API
+                    $playerCount = $teamData['player_count'] ?? 11;
+                    $team->setNombreJoueurs($playerCount);
+                    $entityManager->persist($team);
+                }
+                //3 fetch players
+                // 3. Fetch and store players
+                $players = $apiFootball->getTeamPlayers($teamId);
+                foreach ($players as $playerData) {
+                    $player = new User();
+                    $player->setFirstname($playerData['player_name'] ?? 'Unknown');
+                    $player->setLastname($playerData['player_name'] ?? 'Unknown');
+                    $player->setPosition($playerData['player_type'] ?? 'Unknown');
+                    if (isset($playerData['player_rating'])) {
+                        $rating = (float)$playerData['player_rating'];
+                        $scaledRating = (int)round($rating * 10); // Multiply by 10 and round
+                        $player->setRating($scaledRating);
+                    }
+                    if (isset($playerData['player_image'])) {
+                        $playerImagePath = $this->downloadAndSaveImage($playerData['player_image'], 'players');
+                        if ($playerImagePath) {
+                            $player->setProfilepicture($playerImagePath); // Will store like "players/def456.jpg"
+                        }
+                    }
+                    $player->setPosition($playerData['player_type'] ?? 'Unknown');
+                    $player->setRole('player');
+                    $player->setCreatedAt(new \DateTime());
+                    $player->setUpdatedAt(new \DateTime());
+                    $player->setDateofbirth(new \DateTime($playerData['player_birthdate'] ?? ''));
+                    $player->setResetCode(bin2hex(random_bytes(16)));
+                    $expiry = new \DateTime();
+                    $expiry->add(new \DateInterval('PT1H')); // 1 hour expiry
+                    $player->setResetCodeExpiry($expiry);
+                    $player->setTeam($team);
+                    $entityManager->persist($player);
+                }
+            
+                                //4 fetch matches of the team selected
+                $teamFixtures = $apiFootball->getTeamFixtures($teamId, $leagueId);
+                    foreach ($teamFixtures as $fixtureData) {
+                        if ($fixtureData['match_hometeam_id'] == $teamId || $fixtureData['match_awayteam_id'] == $teamId) {
+                        $match = new Matches();
+                        $match->setMatchTime(new \DateTime($fixtureData['match_date']));
+                        
+                        // Handle home team (check if exists or create new)
+                        $homeTeamName = $fixtureData['match_hometeam_name'];
+                        $homeTeamId = $fixtureData['match_hometeam_id'];
+                        $homeTeam = $entityManager->getRepository(Team::class)->findOneBy(['nom' => $homeTeamName]);
+                        if (!$homeTeam || $homeTeamId != $teamId) {
+                            $homeTeamData = $apiFootball->getTeamData($fixtureData['match_hometeam_id']);
+                            $homeTeam = (new Team())
+                                ->setNom($homeTeamName)
+                                ->setCategorie('Football')
+                                ->setModeJeu('EN_GROUPE')
+                                ->setNombreJoueurs($this->getTeamPlayerCount($apiFootball, $fixtureData['match_hometeam_id']))
+                                ->setTournoi($tournament);
+                        
+                            if ($homeTeamData && isset($homeTeamData['team_badge'])) {
+                                $logoPath = $this->downloadAndSaveImage($homeTeamData['team_badge'], 'teams');
+                                if ($logoPath) {
+                                    $homeTeam->setLogoPath($logoPath); // Will store like "teams/abc123.jpg"
+                                }
+                            }
+                        
+                            $entityManager->persist($homeTeam);
+                        }
+                        
+                        // Handle away team (check if exists or create new)
+                        $awayTeamName = $fixtureData['match_awayteam_name'];
+                        $awayTeamId = $fixtureData['match_awayteam_id'];
+                        $awayTeam = $entityManager->getRepository(Team::class)->findOneBy(['nom' => $awayTeamName]);
+                        if (!$awayTeam || $awayTeamId != $teamId) {
+                            $awayTeam = (new Team())
+                                ->setNom($awayTeamName)
+                                ->setCategorie('Football')
+                                ->setModeJeu('EN_GROUPE')
+                                ->setNombreJoueurs($this->getTeamPlayerCount($apiFootball, $fixtureData['match_awayteam_id']))
+                                ->setTournoi($tournament);
+                            
+                            // Get team data for the away team
+                            $awayTeamData = $apiFootball->getTeamData($fixtureData['match_awayteam_id']);
+                            if ($awayTeamData && isset($awayTeamData['team_badge'])) {
+                                $logoPath = $this->downloadAndSaveImage($awayTeamData['team_badge'], 'teams');
+                                if ($logoPath) {
+                                    $awayTeam->setLogoPath($logoPath); // Will store like "teams/abc123.jpg"
+                                }
+                            }
+                            
+                            $entityManager->persist($awayTeam);
+                        }
+                        
+                        $match->setTeamA($homeTeam);
+                        $match->setTeamB($awayTeam);
+                        $homeScore = isset($fixtureData['match_hometeam_score']) 
+                            ? (int)$fixtureData['match_hometeam_score'] 
+                            : 0;
+                        $match->setScoreTeamA($homeScore);
+
+                        // For away team score
+                        $awayScore = isset($fixtureData['match_awayteam_score']) 
+                            ? (int)$fixtureData['match_awayteam_score'] 
+                            : 0;
+                        $match->setScoreTeamB($awayScore);
+                        $match->setStatus($fixtureData['match_status']);
+                        $match->setLocationMatch($fixtureData['match_stadium']);
+                        $match->setTournoi($tournament);
+                        $entityManager->persist($match);
+                    }
+                }
+
+                //5 fetch matches of the other teams in the tournament
+                $allFixtures = $apiFootball->getTeamFixtures(0, $leagueId); // 0 to get all fixtures
+                    foreach ($allFixtures as $fixtureData) {
+                        if ($fixtureData['match_hometeam_id'] != $teamId && $fixtureData['match_awayteam_id'] != $teamId) {
+                            $match = new Matches();
+                            $match->setMatchTime(new \DateTime($fixtureData['match_date']));
+                            
+                            // Handle home team (check if exists or create new)
+                            $homeTeamName = $fixtureData['match_hometeam_name'];
+                            $homeTeam = $entityManager->getRepository(Team::class)->findOneBy(['nom' => $homeTeamName]);
+                            if ($homeTeam == null) {
+                                $homeTeamData = $apiFootball->getTeamData($fixtureData['match_hometeam_id']);
+                                $homeTeam = (new Team())
+                                    ->setNom($homeTeamName)
+                                    ->setCategorie('Football')
+                                    ->setModeJeu('EN_GROUPE')
+                                    ->setNombreJoueurs($this->getTeamPlayerCount($apiFootball, $fixtureData['match_hometeam_id']))
+                                    ->setTournoi($tournament);
+                            
+                                if ($homeTeamData && isset($homeTeamData['team_badge'])) {
+                                    $logoPath = $this->downloadAndSaveImage($homeTeamData['team_badge'], 'teams');
+                                    if ($logoPath) {
+                                        $homeTeam->setLogoPath($logoPath); // Will store like "teams/abc123.jpg"
+                                    }
+                                }
+                            
+                                $entityManager->persist($homeTeam);
+                            }
+                            
+                            // Handle away team (check if exists or create new)
+                            $awayTeamName = $fixtureData['match_awayteam_name'];
+                            $awayTeam = $entityManager->getRepository(Team::class)->findOneBy(['nom' => $awayTeamName]);
+                            if ($awayTeam == null) {
+                                $awayTeam = (new Team())
+                                    ->setNom($awayTeamName)
+                                    ->setCategorie('Football')
+                                    ->setModeJeu('EN_GROUPE')
+                                    ->setNombreJoueurs($this->getTeamPlayerCount($apiFootball, $fixtureData['match_awayteam_id']))
+                                    ->setTournoi($tournament);
+                                
+                                // Get team data for the away team
+                                $awayTeamData = $apiFootball->getTeamData($fixtureData['match_awayteam_id']);
+                                if ($awayTeamData && isset($awayTeamData['team_badge'])) {
+                                    $logoPath = $this->downloadAndSaveImage($awayTeamData['team_badge'], 'teams');
+                                    if ($logoPath) {
+                                        $awayTeam->setLogoPath($logoPath); // Will store like "teams/abc123.jpg"
+                                    }
+                                }
+                                
+                                $entityManager->persist($awayTeam);
+                            }
+                        
+                            $match->setTeamA($homeTeam);
+                            $match->setTeamB($awayTeam);
+                            $homeScore = isset($fixtureData['match_hometeam_score']) 
+                            ? (int)$fixtureData['match_hometeam_score'] 
+                            : 0;
+                        $match->setScoreTeamA($homeScore);
+
+                        // For away team score
+                        $awayScore = isset($fixtureData['match_awayteam_score']) 
+                            ? (int)$fixtureData['match_awayteam_score'] 
+                            : 0;
+                        $match->setScoreTeamB($awayScore);
+                            $match->setStatus($fixtureData['match_status']);
+                            
+                            $match->setLocationMatch($fixtureData['match_stadium']);
+                            $match->setTournoi($tournament);
+                            $entityManager->persist($match);
+                    }
+                }
+
+                //6 fetch standings of the tournament
+                $standings = $apiFootball->getLeagueStandings($leagueId);
+                foreach ($standings as $standingData) {
+                    $teamStanding = new Ranking();
+                    
+                    // Find or create team for the standing
+                    $teamName = $standingData['team_name'];
+                    $standingTeam = $entityManager->getRepository(Team::class)->findOneBy(['nom' => $teamName]);
+                    if (!$standingTeam) {
+                        $standingTeam = (new Team())
+                            ->setNom($teamName)
+                            ->setCategorie('Football')
+                            ->setModeJeu('EN_GROUPE')
+                            ->setNombreJoueurs($this->getTeamPlayerCount($apiFootball, $standingData['team_id']))
+                            ->setTournoi($tournament);
+                        $entityManager->persist($standingTeam);
+                    }
+                    
+                    $teamStanding->setTeam($standingTeam);
+                    $teamStanding->setPosition((int)($standingData['overall_league_position'] ?? 0));
+                    $teamStanding->setWins((int)($standingData['overall_league_W'] ?? 0));
+                    $teamStanding->setDraws((int)($standingData['overall_league_D'] ?? 0));
+                    $teamStanding->setLosses((int)($standingData['overall_league_L'] ?? 0));
+                    $teamStanding->setPoints((int)($standingData['overall_league_PTS'] ?? 0));
+                    $goalsScored = isset($standingData['overall_league_GF']) 
+                    ? (int)$standingData['overall_league_GF'] 
+                    : 0;
+                    $GoalsConceded = isset($standingData['overall_league_GA']) 
+                    ? (int)$standingData['overall_league_GA'] 
+                    : 0;
+                    $teamStanding->setGoalsScored($goalsScored);
+                    $teamStanding->setGoalsConceded($GoalsConceded);
+                    $teamStanding->setGoalDifference($goalsScored - $GoalsConceded);
+                    $teamStanding->setTournoi($tournament);
+                    $entityManager->persist($teamStanding);
+                }
+                //7 Assign team
+                $user->setTeam($team);
+                $entityManager->persist($user);
+                $entityManager->flush();
+                $entityManager->commit();
+    
+                $logger->info('Team assigned successfully', [
+                    'userId' => $user->getId(),
+                    'teamId' => $team->getId()
+                ]);
+    
+                return $this->json([
+                    'success' => true,
+                    'message' => 'Team assigned successfully',
+                    'teamId' => $team->getId(),
+                    'teamName' => $team->getNom(),
+                    'tournamentId' => $tournament->getId()
+                ]);
+    
+            } catch (\Exception $e) {
+                $entityManager->rollback();
+                $logger->error('Team assignment failed', ['error' => $e->getMessage()]);
+                throw $e;
+            }
+    
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => 'Assignment failed',
+                'message' => $e->getMessage(),
+                'trace' => $this->getParameter('kernel.environment') === 'dev' ? $e->getTraceAsString() : null
+            ], 500);
+        }
+    }
+    private function downloadAndSaveImage(string $imageUrl, string $subdirectory): ?string
+    {
+        // Validate URL
+        if (empty($imageUrl) || !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            error_log("Invalid image URL: {$imageUrl}");
+            return null;
+        }
+
+        // Base directory (matches your ImageController)
+        $baseDirectory = 'C:/xampp4/htdocs/img/';
+        $targetDirectory = $baseDirectory . $subdirectory . '/';
+
+        // Create directory if needed
+        if (!file_exists($targetDirectory)) {
+            if (!mkdir($targetDirectory, 0777, true) && !is_dir($targetDirectory)) {
+                error_log("Failed to create directory: {$targetDirectory}");
+                return null;
+            }
+        }
+
+        // Generate safe filename
+        $pathInfo = pathinfo(parse_url($imageUrl, PHP_URL_PATH));
+        $extension = $pathInfo['extension'] ?? 'jpg';
+        $filename = ($pathInfo['filename'] ?? md5($imageUrl)) . '.' . $extension;
+        $safeFilename = preg_replace('/[^a-zA-Z0-9\-\._]/', '', $filename);
+        $uniqueFilename = uniqid() . '_' . $safeFilename;
+        
+        $fullPath = $targetDirectory . $uniqueFilename;
+
+        // Download with error handling
+        try {
+            $context = stream_context_create([
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                    'cafile' => 'C:/xampp4/php/extras/ssl/cacert.pem'
+                ],
+                'http' => [
+                    'timeout' => 10,
+                    'ignore_errors' => true
+                ]
+            ]);
+
+            $imageData = file_get_contents($imageUrl, false, $context);
+            if ($imageData === false) {
+                throw new \RuntimeException("Download failed");
+            }
+
+            if (file_put_contents($fullPath, $imageData) === false) {
+                throw new \RuntimeException("File write failed");
+            }
+
+            // Return path relative to base directory for use in URLs
+            return trim($subdirectory . '/' . $uniqueFilename, '/');
+
+        } catch (\Exception $e) {
+            error_log("Image download failed: {$e->getMessage()} (URL: {$imageUrl})");
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+            return null;
+        }
+    }
+
+            // Create a helper method to get player count for a team
+        private function getTeamPlayerCount(ApiFootballService $apiFootball, int $teamId): int
+        {
+            try {
+                $teamData = $apiFootball->getTeamData($teamId);
+                return $teamData['player_count'] ?? 11; // Default to 11 if not available
+            } catch (\Exception $e) {
+                return 11; // Fallback value
+            }
+        }
+    
+    #[Route('/api/teams/create', name: 'api_teams_create', methods: ['POST'])]
+    public function createTeamApi(Request $request): JsonResponse
+    {
+        try {
+            $team = new Team();
+            $team->setNom($request->request->get('name'));
+            $team->setCategorie($request->request->get('category'));
+            $team->setNombreJoueurs((int)$request->request->get('nbPlayers'));
+            $team->setModeJeu($request->request->get('modeJeu'));
+            
+            /** @var UploadedFile $logoFile */
+            $logoFile = $request->files->get('logo');
+            if ($logoFile) {
+                $newFilename = $this->handleFileUpload($logoFile);
+                $team->setLogoPath($newFilename);
+            }
+
+            $this->entityManager->persist($team);
+            $this->entityManager->flush();
+            
+            // Assign to current user if needed
+            $user = $this->getUser();
+            if ($user) {
+               // $user->setTeam($team);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+            }
+            
+            return $this->json([
+                'success' => true,
+                'teamId' => $team->getId()
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+
 }
