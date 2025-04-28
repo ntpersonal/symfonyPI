@@ -11,6 +11,7 @@ use App\Service\ApiFootballService;
 use Symfony\Component\HttpFoundation\Request;
 use App\Repository\UserRepository;
 
+
 final class FrontOfficeController extends AbstractController
 {
     #[Route('/front/dashboard', name: 'app_front_office')]
@@ -94,6 +95,7 @@ final class FrontOfficeController extends AbstractController
     {
         return $this->render('front_office_dashboard/awards.html.twig');
     }
+
     #[Route('/front/dashboard/home2', name: 'app_home2')]
     public function home2(): Response
     {
@@ -117,6 +119,7 @@ final class FrontOfficeController extends AbstractController
     {
         return $this->render('front_office_dashboard/cart.html.twig');
     }
+
 
 
     #[Route('/front/dashboard/score', name: 'app_score')]
@@ -157,6 +160,7 @@ final class FrontOfficeController extends AbstractController
     public function about(): Response
     {
         return $this->render('front_office_dashboard/about.html.twig');
+
     }
 
     #[Route('/front/dashboard/shop', name: 'app_shop')]
@@ -186,7 +190,6 @@ final class FrontOfficeController extends AbstractController
     {
         return $this->render('front_office_dashboard/account.html.twig');
     }
-
 
 
     #[Route('/front/dashboard/faq', name: 'app_faq')]

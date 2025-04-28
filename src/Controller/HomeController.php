@@ -42,7 +42,6 @@ class HomeController extends AbstractController
     }
 
 
-
     #[Route('/single', name: 'app_single')]
     public function single(): Response
     {

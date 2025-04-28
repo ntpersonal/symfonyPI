@@ -400,7 +400,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
     #[ORM\OneToMany(targetEntity: Tournoi::class, mappedBy: 'user')]
     private Collection $tournois;
 
