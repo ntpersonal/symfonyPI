@@ -186,7 +186,12 @@
                                 
                                 <div class="col-md-4 mb-4">
                                     <div class="card team-card">
-                                        <img src="{{ team_logo(team.logoPath) }}" class="card-img-top" alt="{{ team.nom }}">
+                                        {% if team.logoPath %}
+                                        <img src="{{ path('app_image', {'subdirectory': 'teams', 'filename':team.logoPath|split('/')|last}) }}" 
+                                        alt="{{ team.nom }} logo">
+                                        {% else %}
+                                        <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+                                        {% endif %}
                                         <div class="card-body text-center">
                                             <h5 class="card-title">{{ team.nom }}</h5>
                                             <div class="team-meta mb-2">
@@ -647,47 +652,104 @@
     }
 async function assignTeamToUser(leagueId, teamId, teamName, leagueName, teamCount) {
     const confirmSelection = document.getElementById('confirm-selection');
-    confirmSelection.disabled = true;
-    confirmSelection.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
-        console.log("Sending:", {
-            leagueId: Number(leagueId),
-            teamId: Number(teamId), 
-            teamName: String(teamName),
-            leagueName: String(leagueName),
-            teamCount: Number(teamCount)
-        });
+    const teamSelectionModal = bootstrap.Modal.getInstance(
+        document.getElementById('teamSelectionModal')
+    );
+    
     try {
+        // Show loading state
+        confirmSelection.disabled = true;
+        confirmSelection.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
         const response = await fetch('/front/dashboard/assign-team', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+               'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-             body: JSON.stringify({
+            body: JSON.stringify({
                 leagueId: Number(leagueId),
-                teamId: Number(teamId),
+                teamId: parseInt(teamId), 
                 teamName: String(teamName).trim(),
                 leagueName: String(leagueName).trim(),
                 teamCount: Number(teamCount)
             })
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.message || 'Assignment failed');
+            const errorData = await response.json();
+            console.error("Backend error details:", errorData);
+            
+            // Handle specific error cases
+            if (errorData.error === 'This team already has a manager') {
+                throw new Error('This team is already managed by another user');
+            } else if (response.status === 400) {
+                throw new Error('Invalid team data. Please try again.');
+            } else {
+                throw new Error(errorData.message || `Server error (${response.status})`);
+            }
         }
 
+        const data = await response.json();
+        
+        // Success handling
         showSuccessMessage('Team assigned successfully!');
-        setTimeout(() => window.location.reload(), 1500);
+        
+        // Close modal after delay
+        setTimeout(() => {
+            if (teamSelectionModal) {
+                teamSelectionModal.hide();
+            }
+            
+            // Refresh page or update UI
+            window.location.reload();
+        }, 1500);
 
     } catch (error) {
-        console.error("Full error details:", error);
-        showErrorMessage(error.message || 'Failed to assign team');
-    } finally {
+        console.error("Full error details:", {
+            error: error,
+            message: error.message,
+            stack: error.stack
+        });
+        
+        // User-friendly error messages
+        const errorMessage = error.message.includes('Failed to fetch') 
+            ? 'Network error - please check your connection'
+            : error.message;
+            
+        showErrorMessage(errorMessage);
+        
+        // Re-enable button on error
         confirmSelection.disabled = false;
         confirmSelection.innerHTML = 'Confirm Selection';
+        
+        // For debugging - remove in production
+        if (console && console.error) {
+            console.error('Assignment error:', {
+                leagueId,
+                teamId, 
+                teamName,
+                leagueName,
+                teamCount,
+                error: error.toString()
+            });
+        }
     }
+}
+
+// Helper functions (make sure these exist in your code)
+function showSuccessMessage(message) {
+    // Example using Bootstrap toast
+    const toast = new bootstrap.Toast(document.getElementById('successToast'));
+    document.getElementById('toastSuccessMessage').textContent = message;
+    toast.show();
+}
+
+function showErrorMessage(message) {
+    // Example using Bootstrap toast
+    const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+    document.getElementById('toastErrorMessage').textContent = message;
+    toast.show();
 }
     
 
