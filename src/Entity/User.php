@@ -193,7 +193,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     #[ORM\Column(name: 'phonenumber', type: 'string', nullable: true)]
-    #[Assert\NotBlank(message: 'phone number is required')]
     #[Assert\Regex(
         pattern: '/^[0-9+\s()-]{8,20}$/',
         message: 'Please enter a valid phone number'
@@ -214,7 +213,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'dateofbirth', type: 'date', nullable: false)]
     #[Assert\NotBlank(message: 'Date of birth is required')]
     #[Assert\Type(type: \DateTimeInterface::class, message: 'Please enter a valid date in YYYY-MM-DD format')]
-    #[Assert\LessThanOrEqual(value: '-5 years', message: 'User must be at least 5 years old')]
+    #[Assert\LessThanOrEqual(value: '-16 years', message: 'User must be at least 16 years old')]
     private ?\DateTimeInterface $dateofbirth = null;
 
     public function getDateofbirth(): ?\DateTimeInterface
@@ -224,7 +223,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setDateofbirth(?\DateTimeInterface $dateofbirth): self
     {
-
         $this->dateofbirth = $dateofbirth;
         return $this;
     }
@@ -243,11 +241,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
+
+
+
+
+
     #[ORM\Column(name: 'coachinglicense', type: 'string', nullable: true)]
     #[Assert\When(
-        expression: "this.getRole() === 'ROLE_COACH'",
+        expression: "this.getRole() === 'organizer'",
         constraints: [
-            new Assert\NotBlank(message: 'Coaching license is required for coaches'),
+            new Assert\NotBlank(message: 'Coaching license is required for organizers'),
             new Assert\Length(
                 min: 5,
                 max: 20,
@@ -603,6 +607,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFaceData(?string $faceData): self
     {
         $this->faceData = $faceData;
+        return $this;
+    }
+
+    #[ORM\Column(name: "googleId", type: "string", nullable: true)]
+    private ?string $googleId = null;
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
         return $this;
     }
 }

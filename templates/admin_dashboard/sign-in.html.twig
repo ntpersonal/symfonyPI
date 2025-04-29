@@ -2,103 +2,146 @@
 
 {% block title %}Sign In - Soccer{% endblock %}
 
-
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Add reCAPTCHA styles -->
+    <style>
+        .g-recaptcha {
+            margin: 15px 0;
+        }
+        
+        /* Add custom styles for sign-in page */
+        .sign-in-container {
+            min-height: calc(100vh - 300px);
+            display: flex;
+            align-items: center;
+            padding: 80px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .sign-in-container {
+                padding: 60px 0;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <div class="hero overlay d-flex align-items-center" style="background-image: url('{{ asset('assets/images/bg_3.jpg') }}'); min-height: calc(100vh - 120px); padding-top: 300px; padding-bottom: 110px;">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-5 col-md-7 col-12">
-                    <div class="card glass-card border-0 rounded-3 shadow-sm p-3 mb-4" style="max-width: 450px; margin: 0 auto;">
-                        <div class="card-header bg-transparent text-center py-2 border-0">
-                            <h3 class="font-weight-bold text-dark mb-1">Sign In</h3>
-                            <p class="mb-0 text-muted">Enter your credentials</p>
-                        </div>
-                        <div class="card-body p-3">
-                            {% if error %}
-                                <div class="alert alert-danger text-center mb-3">{{ error.messageKey|trans(error.messageData, 'reset_password') }}</div>
-                            {% endif %}
+    <div class="hero overlay" style="background-image: url('{{ asset('assets/images/bg_3.jpg') }}');">
+        <div class="sign-in-container">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5 col-md-7 col-12">
+                        <div class="card glass-card border-0 rounded-3 shadow-sm p-3 mb-4" style="max-width: 450px; margin: 0 auto;">
+                            <div class="card-header bg-transparent text-center py-2 border-0">
+                                <h3 class="font-weight-bold text-dark mb-1">Sign In</h3>
+                                <p class="mb-0 text-muted">Enter your credentials</p>
+                            </div>
+                            <div class="card-body p-3">
+                                {% if error %}
+                                    <div class="alert alert-danger text-center mb-3">{{ error.messageKey|trans(error.messageData, 'reset_password') }}</div>
+                                {% endif %}
 
-                            <!-- Face Recognition Login -->
-                            <div class="face-login-container text-center mb-4">
-                                <button type="button" class="btn btn-face-login w-100 mb-3" id="faceLoginBtn">
-                                    <i class="fas fa-user-circle me-2"></i>Sign in with Face Recognition
-                                </button>
-                                <div class="face-capture-container d-none">
-                                    <div class="camera-frame mb-4">
-                                        <div class="camera-overlay">
-                                            <div class="face-guide"></div>
+                                <!-- Face Recognition Login -->
+                                <div class="face-login-container text-center mb-4">
+                                    <button type="button" class="btn btn-face-login w-100 mb-3" id="faceLoginBtn">
+                                        <i class="fas fa-user-circle me-2"></i>Sign in with Face Recognition
+                                    </button>
+                                    <div class="face-capture-container d-none">
+                                        <!-- Email input for face recognition -->
+                                        <div class="email-verification mb-4">
+                                            <div class="form-group">
+                                                <label for="faceLoginEmail" class="form-label">Enter your email first</label>
+                                                <input type="email" class="form-control rounded-pill" id="faceLoginEmail" placeholder="Your registered email">
+                                                <div class="invalid-feedback" id="emailError"></div>
+                                            </div>
+                                            <button type="button" class="btn btn-info btn-block rounded-pill py-2 mt-3" id="verifyEmailBtn">
+                                                Verify Email
+                                            </button>
                                         </div>
-                                        <video id="loginVideo" width="320" height="240" autoplay muted playsinline></video>
-                                        <canvas id="loginCanvas" width="320" height="240" class="d-none"></canvas>
-                                        <img id="loginPhoto" class="preview-image d-none" alt="Your face">
+                                        
+                                        <!-- Face capture UI (initially hidden) -->
+                                        <div class="face-capture-ui d-none">
+                                            <div class="camera-frame mb-4">
+                                                <div class="camera-overlay">
+                                                    <div class="face-guide"></div>
+                                                </div>
+                                                <video id="loginVideo" width="320" height="240" autoplay muted playsinline></video>
+                                                <canvas id="loginCanvas" width="320" height="240" class="d-none"></canvas>
+                                                <img id="loginPhoto" class="preview-image d-none" alt="Your face">
+                                            </div>
+                                            <div class="camera-controls">
+                                                <button type="button" class="btn-camera" id="startLoginCamera">
+                                                    <i class="fas fa-video"></i>
+                                                    <span>Start</span>
+                                                </button>
+                                                <button type="button" class="btn-camera btn-capture" id="captureLogin">
+                                                    <i class="fas fa-camera"></i>
+                                                    <span>Capture</span>
+                                                </button>
+                                                <button type="button" class="btn-camera btn-stop" id="stopLoginCamera">
+                                                    <i class="fas fa-stop"></i>
+                                                    <span>Stop</span>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="camera-controls">
-                                        <button type="button" class="btn-camera" id="startLoginCamera">
-                                            <i class="fas fa-video"></i>
-                                            <span>Start</span>
-                                        </button>
-                                        <button type="button" class="btn-camera btn-capture" id="captureLogin">
-                                            <i class="fas fa-camera"></i>
-                                            <span>Capture</span>
-                                        </button>
-                                        <button type="button" class="btn-camera btn-stop" id="stopLoginCamera">
-                                            <i class="fas fa-stop"></i>
-                                            <span>Stop</span>
-                                        </button>
+                                </div>
+
+                                <!-- Regular Login Form -->
+                                <form method="post" action="{{ path('app_log_in') }}">
+                                    <div class="mb-3">
+                                        <label for="inputEmail" class="form-label">Email</label>
+                                        <input name="email" type="email" class="form-control rounded-pill" id="inputEmail" placeholder="Email" value="{{ last_username }}" required autofocus>
                                     </div>
+                                    <div class="mb-3 position-relative">
+                                        <label for="inputPassword" class="form-label d-flex justify-content-between">
+                                            <span>Password</span>
+                                            <a href="{{ path('app_forgot_password_request') }}" class="text-info small fw-bold">Forgot password?</a>
+                                        </label>
+                                        <input name="password" type="password" class="form-control rounded-pill pe-5" id="inputPassword" placeholder="Password" required>
+                                        <span class="position-absolute" style="top: 42px; right: 20px; cursor: pointer;" onclick="togglePassword()">
+                                            <i class="fa fa-eye" id="togglePasswordIcon"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="rememberMe" name="_remember_me" checked>
+                                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                                    </div>
+                                    
+                                    <!-- Add Google reCAPTCHA -->
+                                    <div class="g-recaptcha mb-3" data-sitekey="6LeVOicrAAAAAJGkAle749IDqjafJ_MAO9r2CtpE"></div>
+                                    
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                                    <div class="d-grid mt-4">
+                                        <button type="submit" class="btn btn-info btn-block rounded-pill py-2">Sign In</button>
+                                    </div>
+                                </form>
+
+                                <!-- Divider -->
+                                <div class="divider d-flex align-items-center my-4">
+                                    <span class="divider-line flex-grow-1"></span>
+                                    <span class="px-3 text-muted small">OR SIGN IN WITH</span>
+                                    <span class="divider-line flex-grow-1"></span>
+                                </div>
+
+                                <!-- Social Login Buttons -->
+                                <div class="social-login d-flex justify-content-center gap-3 mb-2">
+                                    <a href="{{ path('connect_google_start') }}" class="btn btn-social rounded-circle d-flex align-items-center justify-content-center">
+                                        <img src="{{ asset('assets/images/icons/google.svg') }}" alt="Google" width="20" height="20" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/icons/google.svg';">
+                                    </a>
+                                    <a class="btn btn-social rounded-circle d-flex align-items-center justify-content-center">
+                                        <img src="{{ asset('assets/images/icons/facebook.svg') }}" alt="Facebook" width="20" height="20" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/icons/facebook.svg';">
+                                    </a>
+
                                 </div>
                             </div>
-
-                            <!-- Regular Login Form -->
-                            <form method="post" action="{{ path('app_log_in') }}">
-                                <div class="mb-3">
-                                    <label for="inputEmail" class="form-label">Email</label>
-                                    <input name="email" type="email" class="form-control rounded-pill" id="inputEmail" placeholder="Email" value="{{ last_username }}" required autofocus>
-                                </div>
-                                <div class="mb-3 position-relative">
-                                    <label for="inputPassword" class="form-label d-flex justify-content-between">
-                                        <span>Password</span>
-                                        <a href="{{ path('app_forgot_password_request') }}" class="text-info small fw-bold">Forgot password?</a>
-                                    </label>
-                                    <input name="password" type="password" class="form-control rounded-pill pe-5" id="inputPassword" placeholder="Password" required>
-                                    <span class="position-absolute" style="top: 42px; right: 20px; cursor: pointer;" onclick="togglePassword()">
-                                        <i class="fa fa-eye" id="togglePasswordIcon"></i>
-                                    </span>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="rememberMe" name="_remember_me" checked>
-                                    <label class="form-check-label" for="rememberMe">Remember me</label>
-                                </div>
-                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                                <div class="d-grid mt-4">
-                                    <button type="submit" class="btn btn-info btn-block rounded-pill py-2">Sign In</button>
-                                </div>
-                            </form>
-
-                            <!-- Divider -->
-                            <div class="divider d-flex align-items-center my-4">
-                                <span class="divider-line flex-grow-1"></span>
-                                <span class="px-3 text-muted small">OR SIGN IN WITH</span>
-                                <span class="divider-line flex-grow-1"></span>
+                            <div class="card-footer bg-transparent text-center border-0 pt-0 pb-2">
+                                <p class="mb-0 text-muted">Don't have an account?
+                                    <a href="{{ path('app_sign_up') }}" class="text-info font-weight-bold">Sign Up</a>
+                                </p>
                             </div>
-
-                            <!-- Social Login Buttons -->
-                            <div class="social-login d-flex justify-content-center gap-3 mb-2">
-                                <a href="{{ path('connect_google_start') }}" class="btn btn-social rounded-circle d-flex align-items-center justify-content-center">
-                                    <img src="{{ asset('assets/images/icons/google.svg') }}" alt="Google" width="20" height="20" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/icons/google.svg';">
-                                </a>
-                                <a class="btn btn-social rounded-circle d-flex align-items-center justify-content-center">
-                                    <img src="{{ asset('assets/images/icons/facebook.svg') }}" alt="Facebook" width="20" height="20" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/icons/facebook.svg';">
-                                </a>
-
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent text-center border-0 pt-0 pb-2">
-                            <p class="mb-0 text-muted">Don't have an account?
-                                <a href="{{ path('app_sign_up') }}" class="text-info font-weight-bold">Sign Up</a>
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -330,6 +373,11 @@
             // Elements
             const faceLoginBtn         = document.getElementById('faceLoginBtn');
             const faceCaptureContainer = document.querySelector('.face-capture-container');
+            const emailVerification    = document.querySelector('.email-verification');
+            const faceCaptureUI        = document.querySelector('.face-capture-ui');
+            const verifyEmailBtn       = document.getElementById('verifyEmailBtn');
+            const faceLoginEmail       = document.getElementById('faceLoginEmail');
+            const emailError           = document.getElementById('emailError');
             const video                = document.getElementById('loginVideo');
             const canvas               = document.getElementById('loginCanvas');
             const photo                = document.getElementById('loginPhoto');
@@ -337,6 +385,7 @@
             const captureButton        = document.getElementById('captureLogin');
             const stopButton           = document.getElementById('stopLoginCamera');
             const FACE_LOGIN_URL       = "{{ path('app_face_login') }}";
+            const VERIFY_EMAIL_URL     = "{{ path('app_verify_email_for_face_login') }}";
 
             // Status div
             const statusDiv = document.createElement('div');
@@ -345,6 +394,7 @@
 
             let stream = null;
             let modelsLoaded = false;
+            let verifiedEmail = null;
 
             // 1) Reveal the face-capture UI
             faceLoginBtn.addEventListener('click', () => {
@@ -352,9 +402,77 @@
                 faceCaptureContainer.classList.remove('d-none');
                 faceLoginBtn.classList.add('d-none');
                 statusDiv.classList.remove('d-none');
+                statusDiv.className = 'alert alert-info mt-3';
+                statusDiv.textContent = 'Please enter your email to continue with face recognition.';
             });
 
-            // 2) Load models on demand
+            // 2) Verify email before proceeding with face recognition
+            verifyEmailBtn.addEventListener('click', async () => {
+                const email = faceLoginEmail.value.trim();
+                
+                if (!email) {
+                    emailError.textContent = 'Email is required';
+                    faceLoginEmail.classList.add('is-invalid');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    emailError.textContent = 'Please enter a valid email address';
+                    faceLoginEmail.classList.add('is-invalid');
+                    return;
+                }
+                
+                statusDiv.className = 'alert alert-info mt-3';
+                statusDiv.textContent = 'Verifying email...';
+                
+                try {
+                    const response = await fetch(VERIFY_EMAIL_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ email: email }),
+                        credentials: 'include'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Email verified, show face capture UI
+                        emailVerification.classList.add('d-none');
+                        faceCaptureUI.classList.remove('d-none');
+                        verifiedEmail = email;
+                        
+                        statusDiv.className = 'alert alert-success mt-3';
+                        statusDiv.textContent = 'Email verified. Please position your face in the frame.';
+                        
+                        // Load face recognition models
+                        if (!modelsLoaded) {
+                            await loadModels();
+                        }
+                    } else {
+                        emailError.textContent = data.message || 'Email not found or not registered for face recognition';
+                        faceLoginEmail.classList.add('is-invalid');
+                        statusDiv.className = 'alert alert-danger mt-3';
+                        statusDiv.textContent = data.message || 'Email not found or not registered for face recognition';
+                    }
+                } catch (error) {
+                    console.error('Email verification error:', error);
+                    emailError.textContent = 'Error verifying email. Please try again.';
+                    faceLoginEmail.classList.add('is-invalid');
+                    statusDiv.className = 'alert alert-danger mt-3';
+                    statusDiv.textContent = 'Error verifying email. Please try again.';
+                }
+            });
+
+            // Email validation helper
+            function isValidEmail(email) {
+                const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            // 3) Load models on demand
             async function loadModels() {
                 try {
                     statusDiv.className = 'alert alert-info mt-3';
@@ -377,7 +495,7 @@
                 }
             }
 
-            // 3) Start camera
+            // 4) Start camera
             startButton.addEventListener('click', () => {
                 (async () => {
                     statusDiv.className = 'alert alert-info mt-3';
@@ -414,11 +532,17 @@
                 });
             });
 
-            // 4) Capture + recognize + send to backend
+            // 5) Capture + recognize + send to backend
             captureButton.addEventListener('click', async function () {
                 if (!stream) {
                     statusDiv.className = 'alert alert-warning mt-3';
                     statusDiv.textContent = 'Please start the camera first';
+                    return;
+                }
+
+                if (!verifiedEmail) {
+                    statusDiv.className = 'alert alert-warning mt-3';
+                    statusDiv.textContent = 'Please verify your email first';
                     return;
                 }
 
@@ -458,7 +582,7 @@
                     // Debug info
                     console.log('Sending descriptor:', Array.from(descriptor));
                     
-                    const response = await fetch('{{ path("app_face_login") }}', {
+                    const response = await fetch(FACE_LOGIN_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -466,7 +590,8 @@
                         },
                         body: JSON.stringify({
                             image: imageData,
-                            descriptor: Array.from(descriptor)
+                            descriptor: Array.from(descriptor),
+                            email: verifiedEmail
                         }),
                         credentials: 'include' // Important for sessions
                     });
@@ -493,6 +618,11 @@
                     } else {
                         statusDiv.className = 'alert alert-danger mt-3';
                         statusDiv.textContent = data.message || 'Recognition failed. Try again or use email login.';
+                        
+                        // Log debug info to console for developers only
+                        if (data.debug) {
+                            console.log('Face recognition debug info:', data.debug);
+                        }
                     }
                 } catch (error) {
                     console.error('❌ Face detection error:', error);
@@ -501,22 +631,37 @@
                 }
             });
 
-            // 5) Stop camera
+            // 6) Stop camera (and go back to just the "Face Login" button)
             stopButton.addEventListener('click', () => {
+                // stop the stream
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                     stream = null;
                 }
-                video.srcObject = null;
-                video.style.display = 'none';
-                statusDiv.className = 'alert alert-info mt-3';
-                statusDiv.textContent = 'Camera stopped';
-            });
+                // hide video / canvas / photo preview
+                video.style.display  = 'none';
+                canvas.style.display = 'none';
+                photo.style.display  = 'none';
 
-            // 6) Cleanup
+                // hide the face-capture container
+                faceCaptureContainer.classList.add('d-none');
+
+                // show the face login button again
+                faceLoginBtn.classList.remove('d-none');
+
+                // reset status bar
+                statusDiv.classList.add('d-none');
+            });
+            // 7) Cleanup
             window.addEventListener('beforeunload', () => {
                 if (stream) stream.getTracks().forEach(t => t.stop());
             });
         });
     </script>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Add Google reCAPTCHA script -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 {% endblock %}

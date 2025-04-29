@@ -50,11 +50,6 @@
                             <h3 class="player-name mb-1">{{ user.firstname }} {{ user.lastname }}</h3>
                             <span class="player-role d-block text-muted mb-3">{{ user.role }}</span>
 
-                            <div class="upload-btn-wrapper mt-3">
-                                {{ form_row(form.profilepicture, {'label': 'Change Profile Picture', 'attr': {'class': 'profile-pic-input', 'onchange': 'previewImage(this)'}}) }}
-                                <small class="form-text text-muted mt-2">Recommended: Square image, at least 300×300 pixels</small>
-                            </div>
-
                             <div class="player-stats mt-4">
                                 <div class="row g-0">
                                     <div class="col-6 stat-item border-end">
@@ -98,6 +93,30 @@
                             </div>
                         {% endfor %}
                     {% endfor %}
+
+                    <!-- Profile Picture Upload -->
+                    <div class="profile-picture-card bg-white rounded-lg shadow mb-4">
+                        <div class="card-header p-4 border-bottom">
+                            <h4 class="mb-0"><i class="fas fa-image me-2"></i> Profile Picture</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="upload-btn-wrapper">
+                                        {{ form_row(form.profilepicture, {
+                                            'label': 'Change Profile Picture',
+                                            'attr': {
+                                                'class': 'form-control profile-pic-input',
+                                                'onchange': 'previewImage(this)',
+                                                'accept': 'image/*'
+                                            }
+                                        }) }}
+                                        <small class="form-text text-muted mt-2">Recommended: Square image, at least 300×300 pixels</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Personal Information Card -->
                     <div class="profile-info-card bg-white rounded-lg shadow mb-4">
@@ -228,6 +247,83 @@
     </div>
 
     <style>
+        /* Profile Card Styles */
+        .profile-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-header {
+            position: relative;
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-top: -75px;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid #ffffff;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .player-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 10px;
+            color: #333;
+        }
+
+        .player-role {
+            font-size: 1rem;
+            color: #777;
+            font-weight: 500;
+        }
+
+        .player-stats {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .stat-item {
+            padding: 10px 15px;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .upload-btn-wrapper {
+            margin-top: 20px;
+        }
+
+        .profile-pic-input {
+            margin-bottom: 10px;
+        }
+
         /* Face Recognition Styles */
         .face-capture-container {
             background: #ffffff;
@@ -335,12 +431,70 @@
 
     <script>
         function previewImage(input) {
+            console.log('Profile picture input changed:', input);
+            console.log('Files:', input.files);
+            
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profile-picture-preview').src = e.target.result;
+                const file = input.files[0];
+                console.log('Selected file:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    input.value = '';
+                    return;
                 }
-                reader.readAsDataURL(input.files[0]);
+
+                // Validate file size (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size must be less than 2MB');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    console.log('File successfully read');
+                    const preview = document.getElementById('profile-picture-preview');
+                    if (preview) {
+                        preview.src = e.target.result;
+                        console.log('Preview updated with:', e.target.result.substring(0, 50) + '...');
+                    } else {
+                        console.error('Preview element not found');
+                        // Create a preview element if it doesn't exist
+                        const previewContainer = document.querySelector('.profile-avatar-wrapper');
+                        if (previewContainer) {
+                            const newPreview = document.createElement('img');
+                            newPreview.id = 'profile-picture-preview';
+                            newPreview.className = 'profile-avatar';
+                            newPreview.alt = 'Profile Picture Preview';
+                            newPreview.src = e.target.result;
+                            // Replace existing image if any
+                            const existingImage = previewContainer.querySelector('img');
+                            if (existingImage) {
+                                previewContainer.replaceChild(newPreview, existingImage);
+                            } else {
+                                previewContainer.appendChild(newPreview);
+                            }
+                            console.log('Created new preview element');
+                        }
+                    }
+                }
+
+                reader.onerror = function(e) {
+                    console.error('Error reading file:', e);
+                    alert('Error reading file. Please try again.');
+                    input.value = '';
+                }
+
+                reader.readAsDataURL(file);
+            } else {
+                console.log('No file selected or input invalid');
             }
         }
 

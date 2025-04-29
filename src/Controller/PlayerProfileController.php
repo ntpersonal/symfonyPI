@@ -58,33 +58,54 @@ class PlayerProfileController extends AbstractController
 
         $form = $this->createForm(PlayerProfileType::class, $user);
         $form->handleRequest($request);
+        $this->logger->info('Handling profile edit form submission');
 
         if ($form->isSubmitted()) {
+            $this->logger->info('Form submitted');
+            $this->logger->info('Form data: ' . json_encode($request->request->all()));
+            $this->logger->info('Files: ' . json_encode($_FILES));
+            
             if ($form->isValid()) {
+                $this->logger->info('Form is valid');
                 try {
                     $entityManager = $doctrine->getManager();
 
                     // Handle profile picture upload
                     $profilePictureFile = $form->get('profilepicture')->getData();
+                    $this->logger->info('Profile picture data: ' . ($profilePictureFile ? 'File received' : 'No file'));
+                    
                     if ($profilePictureFile) {
-                        $fileName = md5(uniqid()) . '.' . $profilePictureFile->guessExtension();
-                        $uploadDir = $this->getParameter('profile_pictures_directory');
-
-                        if (!file_exists($uploadDir)) {
-                            mkdir($uploadDir, 0777, true);
-                        }
-
-                        $profilePictureFile->move($uploadDir, $fileName);
-
-                        // Remove old profile picture if exists
-                        if ($user->getProfilepicture()) {
-                            $oldFile = $uploadDir . '/' . $user->getProfilepicture();
-                            if (file_exists($oldFile)) {
-                                unlink($oldFile);
+                        try {
+                            $this->logger->info('Processing profile picture upload');
+                            $this->logger->info('Original filename: ' . $profilePictureFile->getClientOriginalName());
+                            $this->logger->info('File size: ' . $profilePictureFile->getSize());
+                            $this->logger->info('MIME type: ' . $profilePictureFile->getMimeType());
+                            
+                            $fileName = $this->handleFileUpload($profilePictureFile);
+                            $this->logger->info('File uploaded successfully: ' . $fileName);
+                            
+                            // Remove old profile picture if exists
+                            if ($user->getProfilepicture()) {
+                                $oldFile = $this->getParameter('profile_pictures_directory') . '/' . $user->getProfilepicture();
+                                $this->logger->info('Checking old file: ' . $oldFile);
+                                if (file_exists($oldFile)) {
+                                    unlink($oldFile);
+                                    $this->logger->info('Old file deleted');
+                                } else {
+                                    $this->logger->info('Old file not found: ' . $oldFile);
+                                }
                             }
-                        }
 
-                        $user->setProfilepicture($fileName);
+                            $user->setProfilepicture($fileName);
+                            $this->logger->info('Profile picture name set in user entity: ' . $fileName);
+                        } catch (\Exception $e) {
+                            $this->logger->error('Error uploading profile picture: ' . $e->getMessage());
+                            $this->logger->error('Stack trace: ' . $e->getTraceAsString());
+                            $this->addFlash('error', 'Error uploading profile picture: ' . $e->getMessage());
+                            return $this->redirectToRoute('app_player_profile_edit');
+                        }
+                    } else {
+                        $this->logger->info('No profile picture file provided');
                     }
 
                     // Handle password update
@@ -131,16 +152,20 @@ class PlayerProfileController extends AbstractController
                     // Persist the updated user entity
                     $entityManager->persist($user);
                     $entityManager->flush();
+                    $this->logger->info('User entity persisted successfully');
 
                     $this->addFlash('success', 'Profile updated successfully!');
                     return $this->redirectToRoute('app_player_profile');
                 } catch (\Exception $e) {
+                    $this->logger->error('Error updating profile: ' . $e->getMessage());
+                    $this->logger->error('Stack trace: ' . $e->getTraceAsString());
                     $this->addFlash('error', 'Error updating profile: ' . $e->getMessage());
                 }
             } else {
                 // Collect all form errors
                 $errors = [];
                 foreach ($form->getErrors(true) as $error) {
+                    $this->logger->error('Form error: ' . $error->getMessage());
                     $errors[] = $error->getMessage();
                 }
                 $this->addFlash('error', 'Form contains errors: ' . implode(', ', $errors));
@@ -170,5 +195,51 @@ class PlayerProfileController extends AbstractController
         // Here you would normally generate the face descriptor
         // For now, we'll return the base64 image as-is
         return $imageData;
+    }
+    
+    /**
+     * Handles file upload for profile pictures
+     */
+    private function handleFileUpload($file)
+    {
+        try {
+            // Generate a unique filename
+            $newFilename = md5(uniqid()).'.'.$file->guessExtension();
+            $uploadDir = $this->getParameter('profile_pictures_directory');
+            
+            $this->logger->info('Upload directory: ' . $uploadDir);
+            $this->logger->info('New filename: ' . $newFilename);
+            
+            // Ensure the upload directory exists
+            if (!file_exists($uploadDir)) {
+                $this->logger->info('Creating upload directory: ' . $uploadDir);
+                if (!mkdir($uploadDir, 0777, true)) {
+                    $error = error_get_last();
+                    $this->logger->error('Failed to create directory: ' . ($error ? $error['message'] : 'Unknown error'));
+                    throw new \RuntimeException('Failed to create upload directory: ' . $uploadDir);
+                }
+            }
+
+            // Check directory permissions
+            if (!is_writable($uploadDir)) {
+                $this->logger->error('Upload directory is not writable: ' . $uploadDir);
+                throw new \RuntimeException('Upload directory is not writable: ' . $uploadDir);
+            }
+
+            // Move the file to the upload directory
+            $this->logger->info('Moving file to: ' . $uploadDir . '/' . $newFilename);
+            $file->move($uploadDir, $newFilename);
+            
+            if (!file_exists($uploadDir . '/' . $newFilename)) {
+                $this->logger->error('File was not successfully moved to destination');
+                throw new \RuntimeException('File upload failed: file not found in destination');
+            }
+            
+            $this->logger->info('File successfully uploaded to: ' . $uploadDir . '/' . $newFilename);
+            return $newFilename;
+        } catch (\Exception $e) {
+            $this->logger->error('Error in handleFileUpload: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

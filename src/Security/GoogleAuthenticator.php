@@ -76,6 +76,12 @@ class GoogleAuthenticator extends AbstractAuthenticator
                 $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $userIdentifier]);
 
                 if ($existingUser) {
+                    // Update existing user with Google ID if not already set
+                    if (!$existingUser->getGoogleId()) {
+                        $existingUser->setGoogleId($googleUser->getId());
+                        $this->entityManager->persist($existingUser);
+                        $this->entityManager->flush();
+                    }
                     return $existingUser;
                 }
 
@@ -91,6 +97,7 @@ class GoogleAuthenticator extends AbstractAuthenticator
                 $user->setResetCode('');
                 $user->setResetCodeExpiry(new \DateTime());
                 $user->setFaceData($googleData['picture'] ?? '');
+                $user->setGoogleId($googleUser->getId());
 
                 // Set the birthday if available, otherwise use a default date
                 if ($birthday) {
@@ -124,7 +131,16 @@ class GoogleAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?RedirectResponse
     {
-        return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
+        $user = $token->getUser();
+        
+        // Check if user has already completed their profile (has password and role)
+        if ($user instanceof User && $user->getPassword() && $user->getRole()) {
+            // User has already completed their profile, redirect to home page
+            return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
+        }
+        
+        // User needs to complete their profile
+        return new RedirectResponse($this->urlGenerator->generate('app_google_complete_profile'));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?RedirectResponse

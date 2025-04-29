@@ -81,7 +81,7 @@
         </li>
       </ul>
     </div>
-    
+
   </aside>
 
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
@@ -124,9 +124,9 @@
                   <div class="col-8">
                     <div class="numbers">
                       <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Users</p>
-                      <h5 class="font-weight-bolder mb-0">{{ totalUsers }}</h5>
+                      <h5 class="font-weight-bolder mb-0">{{ totalUsers|default(0) }}</h5>
                       <p class="mb-0">
-                        <span class="text-success text-sm font-weight-bolder">+{{ userGrowthRate }}%</span>
+                        <span class="text-success text-sm font-weight-bolder">+{{ userGrowthRate|default(0) }}%</span>
                         this month
                       </p>
                     </div>
@@ -149,9 +149,9 @@
                   <div class="col-8">
                     <div class="numbers">
                       <p class="text-sm mb-0 text-uppercase font-weight-bold">Active Users</p>
-                      <h5 class="font-weight-bolder mb-0">{{ activeUsers }}</h5>
+                      <h5 class="font-weight-bolder mb-0">{{ activeUsers|default(0) }}</h5>
                       <p class="mb-0">
-                        <span class="text-success text-sm font-weight-bolder">{{ (activeUsers / totalUsers * 100)|round }}%</span>
+                        <span class="text-success text-sm font-weight-bolder">{{ totalUsers|default(0) > 0 ? ((activeUsers|default(0) / totalUsers|default(1) * 100)|round) : 0 }}%</span>
                         of total users
                       </p>
                     </div>
@@ -174,9 +174,9 @@
                   <div class="col-8">
                     <div class="numbers">
                       <p class="text-sm mb-0 text-uppercase font-weight-bold">Players</p>
-                      <h5 class="font-weight-bolder mb-0">{{ playerUsers }}</h5>
+                      <h5 class="font-weight-bolder mb-0">{{ playerUsers|default(0) }}</h5>
                       <p class="mb-0">
-                        <span class="text-info text-sm font-weight-bolder">{{ (playerUsers / totalUsers * 100)|round }}%</span>
+                        <span class="text-info text-sm font-weight-bolder">{{ totalUsers|default(0) > 0 ? ((playerUsers|default(0) / totalUsers|default(1) * 100)|round) : 0 }}%</span>
                         of total users
                       </p>
                     </div>
@@ -199,9 +199,9 @@
                   <div class="col-8">
                     <div class="numbers">
                       <p class="text-sm mb-0 text-uppercase font-weight-bold">Organizers</p>
-                      <h5 class="font-weight-bolder mb-0">{{ organizerUsers }}</h5>
+                      <h5 class="font-weight-bolder mb-0">{{ organizerUsers|default(0) }}</h5>
                       <p class="mb-0">
-                        <span class="text-warning text-sm font-weight-bolder">{{ (organizerUsers / totalUsers * 100)|round }}%</span>
+                        <span class="text-warning text-sm font-weight-bolder">{{ totalUsers|default(0) > 0 ? ((organizerUsers|default(0) / totalUsers|default(1) * 100)|round) : 0 }}%</span>
                         of total users
                       </p>
                     </div>
@@ -217,78 +217,81 @@
           </div>
         </div>
 
-        <!-- User Distribution Chart -->
+        {% if registrationLabels is defined and registrationData is defined %}
+        <!-- Charts Row -->
         <div class="row mt-4">
-          <div class="col-12">
-            <div class="card z-index-2">
-              <div class="card-header pb-0 pt-3 bg-transparent">
-                <h6 class="text-capitalize">User Distribution</h6>
+          <!-- User Registration Trend Chart -->
+          <div class="col-lg-8 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0">
+                <div class="d-flex justify-content-between">
+                  <h6 class="mb-0">User Registration Trend</h6>
+                  <div class="dropdown">
+                    <button class="btn btn-link text-secondary mb-0" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa fa-ellipsis-v text-xs"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Action</a></li>
+                      <li><a class="dropdown-item" href="#">Another action</a></li>
+                      <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               <div class="card-body p-3">
                 <div class="chart">
-                  <canvas id="userDistributionChart" class="chart-canvas" height="300"></canvas>
+                  <canvas id="registrationChart" class="chart-canvas" height="300"></canvas>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Recent Users Table -->
-        <div class="row mt-4">
-          <div class="col-12">
-            <div class="card mb-4">
+          
+          <!-- User Age Distribution Chart -->
+          <div class="col-lg-4">
+            <div class="card">
               <div class="card-header pb-0">
-                <h6>Recent Users</h6>
+                <h6 class="mb-0">Age Distribution</h6>
               </div>
-              <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                  <table class="table align-items-center mb-0">
-                    <thead>
-                      <tr>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">User</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Role</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Rating</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Joined</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for user in recentUsers %}
-                        <tr>
-                          <td>
-                            <div class="d-flex px-2 py-1">
-                              <div>
-                                <img src="{{ user.profilepicture ? asset('uploads/profile_pictures/' ~ user.profilepicture) : asset('assets/img/default-avatar.png') }}" class="avatar avatar-sm me-3" alt="user avatar">
-                              </div>
-                              <div class="d-flex flex-column justify-content-center">
-                                <h6 class="mb-0 text-sm">{{ user.firstname }} {{ user.lastname }}</h6>
-                                <p class="text-xs text-secondary mb-0">{{ user.email }}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <p class="text-xs font-weight-bold mb-0">{{ user.role }}</p>
-                          </td>
-                          <td class="align-middle text-center text-sm">
-                            <span class="badge badge-sm {{ user.isIsActive() ? 'bg-gradient-success' : 'bg-gradient-secondary' }}">
-                              {{ user.isIsActive() ? 'Active' : 'Inactive' }}
-                            </span>
-                          </td>
-                          <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">{{ user.rating ?: 'N/A' }}</span>
-                          </td>
-                          <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">{{ user.createdat|date('Y-m-d') }}</span>
-                          </td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+              <div class="card-body p-3">
+                <div class="chart">
+                  <canvas id="ageDistributionChart" class="chart-canvas" height="300"></canvas>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        
+        <!-- Second Row of Charts -->
+        <div class="row mt-4">
+          <!-- User Activity by Role Chart -->
+          <div class="col-lg-6 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0">
+                <h6 class="mb-0">User Activity by Role</h6>
+              </div>
+              <div class="card-body p-3">
+                <div class="chart">
+                  <canvas id="userActivityChart" class="chart-canvas" height="300"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- User Ratings Distribution Chart -->
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header pb-0">
+                <h6 class="mb-0">User Ratings Distribution</h6>
+              </div>
+              <div class="card-body p-3">
+                <div class="chart">
+                  <canvas id="userRatingsChart" class="chart-canvas" height="300"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
       </div>
     {% endblock %}
 
@@ -335,15 +338,96 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    // User Distribution Chart
-    const userDistributionCtx = document.getElementById('userDistributionChart').getContext('2d');
-    new Chart(userDistributionCtx, {
+    {% if registrationLabels is defined and registrationData is defined %}
+    // User Registration Trend Chart
+    const registrationCtx = document.getElementById('registrationChart').getContext('2d');
+    new Chart(registrationCtx, {
+      type: 'line',
+      data: {
+        labels: {{ registrationLabels|json_encode|raw }},
+        datasets: [{
+          label: 'New Users',
+          data: {{ registrationData|json_encode|raw }},
+          borderColor: '#5e72e4',
+          backgroundColor: 'rgba(94, 114, 228, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#5e72e4',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#5e72e4',
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: false,
+            callbacks: {
+              label: function(context) {
+                return context.parsed.y + ' new users';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e9ecef',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Age Distribution Chart
+    const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+    new Chart(ageCtx, {
       type: 'doughnut',
       data: {
-        labels: ['Players', 'Organizers', 'Admins'],
+        labels: Object.keys({{ ageDistribution|json_encode|raw }}),
         datasets: [{
-          data: [{{ playerUsers }}, {{ organizerUsers }}, {{ totalUsers - playerUsers - organizerUsers }}],
-          backgroundColor: ['#17c1e8', '#e9ecef', '#3A416F'],
+          data: Object.values({{ ageDistribution|json_encode|raw }}),
+          backgroundColor: [
+            '#5e72e4',
+            '#11cdef',
+            '#fb6340',
+            '#2dce89',
+            '#f5365c'
+          ],
           borderWidth: 0
         }]
       },
@@ -352,11 +436,174 @@
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: 'bottom'
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: false
+          }
+        },
+        cutout: '70%'
+      }
+    });
+
+    // User Activity by Role Chart
+    const activityCtx = document.getElementById('userActivityChart').getContext('2d');
+    new Chart(activityCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Players', 'Organizers', 'Admins'],
+        datasets: [
+          {
+            label: 'Active',
+            data: [
+              {{ activeByRole.player }},
+              {{ activeByRole.organizer }},
+              {{ activeByRole.Admin }}
+            ],
+            backgroundColor: '#2dce89',
+            borderRadius: 4
+          },
+          {
+            label: 'Inactive',
+            data: [
+              {{ inactiveByRole.player }},
+              {{ inactiveByRole.organizer }},
+              {{ inactiveByRole.Admin }}
+            ],
+            backgroundColor: '#f5365c',
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e9ecef',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
           }
         }
       }
     });
+
+    // User Ratings Distribution Chart
+    const ratingsCtx = document.getElementById('userRatingsChart').getContext('2d');
+    new Chart(ratingsCtx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys({{ ratingDistribution|json_encode|raw }}),
+        datasets: [{
+          label: 'Users',
+          data: Object.values({{ ratingDistribution|json_encode|raw }}),
+          backgroundColor: [
+            '#f5365c',
+            '#fb6340',
+            '#ffd600',
+            '#2dce89',
+            '#11cdef'
+          ],
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+              label: function(context) {
+                return context.parsed.y + ' users';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e9ecef',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          }
+        }
+      }
+    });
+    {% endif %}
 
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -364,4 +611,4 @@
       return new bootstrap.Tooltip(tooltipTriggerEl)
     });
   </script>
-{% endblock %} 
+{% endblock %}
