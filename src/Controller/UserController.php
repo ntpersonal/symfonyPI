@@ -56,18 +56,18 @@ final class UserController extends AbstractController
         $activeUsers = $userRepository->count(['is_active' => true]);
         $playerUsers = $userRepository->count(['role' => 'player']);
         $organizerUsers = $userRepository->count(['role' => 'organizer']);
-        
+
         // Calculate user growth rate
         $currentMonth = new \DateTime('first day of this month');
         $lastMonth = new \DateTime('first day of last month');
-        
+
         $usersThisMonth = $userRepository->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.createdat >= :start')
             ->setParameter('start', $currentMonth)
             ->getQuery()
             ->getSingleScalarResult();
-            
+
         $usersLastMonth = $userRepository->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.createdat >= :start AND u.createdat < :end')
@@ -75,8 +75,8 @@ final class UserController extends AbstractController
             ->setParameter('end', $currentMonth)
             ->getQuery()
             ->getSingleScalarResult();
-            
-        $userGrowthRate = $usersLastMonth > 0 ? 
+
+        $userGrowthRate = $usersLastMonth > 0 ?
             round(($usersThisMonth - $usersLastMonth) / $usersLastMonth * 100) : 100;
 
         // Get recent users
@@ -98,7 +98,7 @@ final class UserController extends AbstractController
                     'role' => $user->getRole(),
                     'isActive' => $user->isIsActive(),
                     'profilepicture' => $user->getProfilepicture(),
-                    'team' => $user->getTeam() ? ['name' => $user->getTeam()->getName()] : null,
+                    'team' => $user->getTeam() ? ['name' => $user->getTeam()->getNom()] : null,
                     'csrfToken' => $this->container->get('security.csrf.token_manager')->getToken('delete' . $user->getId())->getValue()
                 ];
             }
@@ -141,18 +141,18 @@ final class UserController extends AbstractController
                 $now = new \DateTime();
                 $user->setCreatedat($now);
                 $user->setUpdatedat($now);
-                
+
                 // Set default values for reset code fields
                 $user->setResetCode(bin2hex(random_bytes(16))); // Generate a random reset code
                 $user->setResetCodeExpiry($now->modify('+24 hours')); // Set expiry to 24 hours from now
-                
+
                 // Get the plainPassword from the form since it's not mapped to the entity
                 $plainPassword = $form->get('password')->getData();
 
                 if (!$plainPassword) {
                     throw new \InvalidArgumentException('Password is required for new users');
                 }
-                
+
                 // Hash the password
                 $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashedPassword);
@@ -176,7 +176,7 @@ final class UserController extends AbstractController
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             // If form was submitted but validation failed, display errors
             $this->addFlash('error', 'Unable to create user. Please check the form for errors.');
-            
+
             // Add specific validation errors as flash messages
             foreach ($form->getErrors(true) as $error) {
                 $this->addFlash('error', $error->getMessage());
@@ -300,7 +300,7 @@ final class UserController extends AbstractController
         // Generate a unique filename
         $newFilename = md5(uniqid()).'.'.$file->guessExtension();
         $uploadDir = $this->getParameter('profile_pictures_directory');
-        
+
         // Ensure the upload directory exists
         if (!file_exists($uploadDir)) {
             if (!mkdir($uploadDir, 0777, true)) {

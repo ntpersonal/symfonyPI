@@ -48,20 +48,8 @@
                                         <i class="fas fa-user-circle me-2"></i>Sign in with Face Recognition
                                     </button>
                                     <div class="face-capture-container d-none">
-                                        <!-- Email input for face recognition -->
-                                        <div class="email-verification mb-4">
-                                            <div class="form-group">
-                                                <label for="faceLoginEmail" class="form-label">Enter your email first</label>
-                                                <input type="email" class="form-control rounded-pill" id="faceLoginEmail" placeholder="Your registered email">
-                                                <div class="invalid-feedback" id="emailError"></div>
-                                            </div>
-                                            <button type="button" class="btn btn-info btn-block rounded-pill py-2 mt-3" id="verifyEmailBtn">
-                                                Verify Email
-                                            </button>
-                                        </div>
-                                        
-                                        <!-- Face capture UI (initially hidden) -->
-                                        <div class="face-capture-ui d-none">
+                                        <!-- Face capture UI -->
+                                        <div class="face-capture-ui">
                                             <div class="camera-frame mb-4">
                                                 <div class="camera-overlay">
                                                     <div class="face-guide"></div>
@@ -89,10 +77,11 @@
                                 </div>
 
                                 <!-- Regular Login Form -->
-                                <form method="post" action="{{ path('app_log_in') }}">
+                                <form method="post" action="{{ path('app_log_in') }}" id="loginForm">
                                     <div class="mb-3">
                                         <label for="inputEmail" class="form-label">Email</label>
                                         <input name="email" type="email" class="form-control rounded-pill" id="inputEmail" placeholder="Email" value="{{ last_username }}" required autofocus>
+                                        <div class="invalid-feedback" id="emailError"></div>
                                     </div>
                                     <div class="mb-3 position-relative">
                                         <label for="inputPassword" class="form-label d-flex justify-content-between">
@@ -352,7 +341,6 @@
     </style>
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script>
         // Toggle password visibility
         function togglePassword() {
@@ -369,21 +357,26 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             console.log('✅ DOM loaded: Starting Face Recognition Script');
+            
+            // Check if face-api.js is loaded
+            if (typeof faceapi === 'undefined') {
+                console.error('❌ face-api.js is not loaded! Check the script tag and network tab.');
+                return;
+            }
+            console.log('✅ face-api.js loaded successfully');
 
             // Elements
             const faceLoginBtn         = document.getElementById('faceLoginBtn');
             const faceCaptureContainer = document.querySelector('.face-capture-container');
-            const emailVerification    = document.querySelector('.email-verification');
             const faceCaptureUI        = document.querySelector('.face-capture-ui');
-            const verifyEmailBtn       = document.getElementById('verifyEmailBtn');
-            const faceLoginEmail       = document.getElementById('faceLoginEmail');
-            const emailError           = document.getElementById('emailError');
             const video                = document.getElementById('loginVideo');
             const canvas               = document.getElementById('loginCanvas');
             const photo                = document.getElementById('loginPhoto');
             const startButton          = document.getElementById('startLoginCamera');
             const captureButton        = document.getElementById('captureLogin');
             const stopButton           = document.getElementById('stopLoginCamera');
+            const inputEmail           = document.getElementById('inputEmail');
+            const emailError           = document.getElementById('emailError');
             const FACE_LOGIN_URL       = "{{ path('app_face_login') }}";
             const VERIFY_EMAIL_URL     = "{{ path('app_verify_email_for_face_login') }}";
 
@@ -396,36 +389,39 @@
             let modelsLoaded = false;
             let verifiedEmail = null;
 
-            // 1) Reveal the face-capture UI
-            faceLoginBtn.addEventListener('click', () => {
+            // 1) Reveal the face-capture UI and verify email
+            faceLoginBtn.addEventListener('click', async () => {
                 console.log('👤 Face login button clicked');
-                faceCaptureContainer.classList.remove('d-none');
-                faceLoginBtn.classList.add('d-none');
-                statusDiv.classList.remove('d-none');
-                statusDiv.className = 'alert alert-info mt-3';
-                statusDiv.textContent = 'Please enter your email to continue with face recognition.';
-            });
-
-            // 2) Verify email before proceeding with face recognition
-            verifyEmailBtn.addEventListener('click', async () => {
-                const email = faceLoginEmail.value.trim();
+                
+                // Get email from the main form
+                const email = inputEmail.value.trim();
+                console.log('Email from form:', email);
                 
                 if (!email) {
                     emailError.textContent = 'Email is required';
-                    faceLoginEmail.classList.add('is-invalid');
+                    inputEmail.classList.add('is-invalid');
                     return;
                 }
                 
                 if (!isValidEmail(email)) {
                     emailError.textContent = 'Please enter a valid email address';
-                    faceLoginEmail.classList.add('is-invalid');
+                    inputEmail.classList.add('is-invalid');
                     return;
                 }
                 
+                // Clear any previous errors
+                emailError.textContent = '';
+                inputEmail.classList.remove('is-invalid');
+                
+                // Show face capture container
+                faceCaptureContainer.classList.remove('d-none');
+                faceLoginBtn.classList.add('d-none');
+                statusDiv.classList.remove('d-none');
                 statusDiv.className = 'alert alert-info mt-3';
                 statusDiv.textContent = 'Verifying email...';
                 
                 try {
+                    console.log('Sending email verification request to:', VERIFY_EMAIL_URL);
                     const response = await fetch(VERIFY_EMAIL_URL, {
                         method: 'POST',
                         headers: {
@@ -436,12 +432,12 @@
                         credentials: 'include'
                     });
                     
+                    console.log('Email verification response status:', response.status);
                     const data = await response.json();
+                    console.log('Email verification response data:', data);
                     
                     if (data.success) {
-                        // Email verified, show face capture UI
-                        emailVerification.classList.add('d-none');
-                        faceCaptureUI.classList.remove('d-none');
+                        // Email verified, proceed with face recognition
                         verifiedEmail = email;
                         
                         statusDiv.className = 'alert alert-success mt-3';
@@ -453,26 +449,34 @@
                         }
                     } else {
                         emailError.textContent = data.message || 'Email not found or not registered for face recognition';
-                        faceLoginEmail.classList.add('is-invalid');
+                        inputEmail.classList.add('is-invalid');
                         statusDiv.className = 'alert alert-danger mt-3';
                         statusDiv.textContent = data.message || 'Email not found or not registered for face recognition';
+                        
+                        // Hide face capture container and show face login button again
+                        faceCaptureContainer.classList.add('d-none');
+                        faceLoginBtn.classList.remove('d-none');
                     }
                 } catch (error) {
                     console.error('Email verification error:', error);
                     emailError.textContent = 'Error verifying email. Please try again.';
-                    faceLoginEmail.classList.add('is-invalid');
+                    inputEmail.classList.add('is-invalid');
                     statusDiv.className = 'alert alert-danger mt-3';
                     statusDiv.textContent = 'Error verifying email. Please try again.';
+                    
+                    // Hide face capture container and show face login button again
+                    faceCaptureContainer.classList.add('d-none');
+                    faceLoginBtn.classList.remove('d-none');
                 }
             });
 
             // Email validation helper
             function isValidEmail(email) {
-                const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                return re.test(String(email).toLowerCase());
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
             }
 
-            // 3) Load models on demand
+            // 2) Load models on demand
             async function loadModels() {
                 try {
                     statusDiv.className = 'alert alert-info mt-3';
@@ -495,7 +499,7 @@
                 }
             }
 
-            // 4) Start camera
+            // 3) Start camera
             startButton.addEventListener('click', () => {
                 (async () => {
                     statusDiv.className = 'alert alert-info mt-3';
@@ -532,7 +536,7 @@
                 });
             });
 
-            // 5) Capture + recognize + send to backend
+            // 4) Capture + recognize + send to backend
             captureButton.addEventListener('click', async function () {
                 if (!stream) {
                     statusDiv.className = 'alert alert-warning mt-3';
@@ -540,21 +544,17 @@
                     return;
                 }
 
-                if (!verifiedEmail) {
-                    statusDiv.className = 'alert alert-warning mt-3';
-                    statusDiv.textContent = 'Please verify your email first';
-                    return;
-                }
-
                 statusDiv.className = 'alert alert-info mt-3';
                 statusDiv.textContent = 'Processing face detection...';
 
                 try {
+                    console.log('Starting face detection process');
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
                     const context = canvas.getContext('2d');
                     context.drawImage(video, 0, 0);
 
+                    console.log('Running face detection with TinyFaceDetector');
                     const detections = await faceapi
                         .detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions({
                             inputSize: 512,
@@ -562,6 +562,8 @@
                         }))
                         .withFaceLandmarks()
                         .withFaceDescriptors();
+
+                    console.log('Face detection results:', detections.length > 0 ? 'Face detected' : 'No face detected');
 
                     if (detections.length === 0) {
                         statusDiv.className = 'alert alert-warning mt-3';
@@ -580,7 +582,8 @@
                     statusDiv.textContent = 'Processing face recognition...';
 
                     // Debug info
-                    console.log('Sending descriptor:', Array.from(descriptor));
+                    console.log('Sending face login request to:', FACE_LOGIN_URL);
+                    console.log('Using verified email:', verifiedEmail);
                     
                     const response = await fetch(FACE_LOGIN_URL, {
                         method: 'POST',
@@ -595,6 +598,8 @@
                         }),
                         credentials: 'include' // Important for sessions
                     });
+
+                    console.log('Face login response status:', response.status);
 
                     // First check if response is OK
                     if (!response.ok) {
@@ -631,7 +636,7 @@
                 }
             });
 
-            // 6) Stop camera (and go back to just the "Face Login" button)
+            // 5) Stop camera (and go back to just the "Face Login" button)
             stopButton.addEventListener('click', () => {
                 // stop the stream
                 if (stream) {
@@ -652,7 +657,7 @@
                 // reset status bar
                 statusDiv.classList.add('d-none');
             });
-            // 7) Cleanup
+            // 6) Cleanup
             window.addEventListener('beforeunload', () => {
                 if (stream) stream.getTracks().forEach(t => t.stop());
             });

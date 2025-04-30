@@ -26,6 +26,7 @@ class FaceRecognitionController extends AbstractController
     #[Route('/api/verify-email-for-face-login', name: 'app_verify_email_for_face_login', methods: ['POST'])]
     public function verifyEmailForFaceLogin(Request $request): JsonResponse
     {
+        // Immediately set the response type
         $response = new JsonResponse();
         $response->headers->set('Content-Type', 'application/json');
 
@@ -55,7 +56,7 @@ class FaceRecognitionController extends AbstractController
             if (!$user) {
                 $response->setData([
                     'success' => false,
-                    'message' => 'Email not found in our database'
+                    'message' => 'Email not found in our records.'
                 ]);
                 $response->setStatusCode(Response::HTTP_NOT_FOUND);
                 return $response;
@@ -65,16 +66,15 @@ class FaceRecognitionController extends AbstractController
             if (!$user->getFaceData()) {
                 $response->setData([
                     'success' => false,
-                    'message' => 'This email is not registered for face recognition'
+                    'message' => 'This email is not registered for face recognition. Please register your face first.'
                 ]);
-                $response->setStatusCode(Response::HTTP_BAD_REQUEST);
+                $response->setStatusCode(Response::HTTP_FORBIDDEN);
                 return $response;
             }
 
-            // Email verified and user has face data
             $response->setData([
                 'success' => true,
-                'message' => 'Email verified successfully'
+                'message' => 'Email verified successfully.'
             ]);
 
             return $response;
@@ -91,7 +91,7 @@ class FaceRecognitionController extends AbstractController
             $this->logger->error('Email verification error: '.$e->getMessage());
             $response->setData([
                 'success' => false,
-                'message' => 'An error occurred during email verification'
+                'message' => 'An error occurred during email verification. Please try again.'
             ]);
             $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
             return $response;
@@ -129,13 +129,9 @@ class FaceRecognitionController extends AbstractController
 
             // Find user by email
             $user = $this->userRepository->findOneBy(['email' => $email]);
-            
+
             if (!$user) {
                 throw new \InvalidArgumentException('User not found');
-            }
-            
-            if (!$user->getFaceData()) {
-                throw new \InvalidArgumentException('User does not have face data registered');
             }
 
             // Get stored face data
@@ -143,15 +139,16 @@ class FaceRecognitionController extends AbstractController
             if (!$storedData || !isset($storedData['descriptor'])) {
                 throw new \InvalidArgumentException('Invalid face data format');
             }
-            
+
             $storedDescriptor = $storedData['descriptor'];
-            
+
             // Compare face descriptors
             $similarity = $this->compareFaceDescriptors($liveDescriptor, $storedDescriptor);
-            $threshold = 0.4; // More lenient threshold
-            
+
             $this->logger->info(sprintf('Face comparison for user %d: similarity = %f', $user->getId(), $similarity));
-            
+
+            // Check if similarity is above threshold
+            $threshold = 0.4; // More lenient threshold
             if ($similarity < $threshold) {
                 $response->setData([
                     'success' => false,
@@ -175,7 +172,8 @@ class FaceRecognitionController extends AbstractController
                 'success' => true,
                 'redirectUrl' => $this->generateUrl('app_front_office'),
                 'debug' => [
-                    'similarity' => $similarity
+                    'similarity' => $similarity,
+                    'userId' => $user->getId()
                 ]
             ]);
 
