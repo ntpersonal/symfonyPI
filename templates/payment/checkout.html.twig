@@ -1,0 +1,222 @@
+{% extends 'Home/base.html.twig' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block body %}
+<div class="hero-section" style="background-image: url('{{ asset('assets/images/bg_1.jpg') }}');">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mx-auto text-center">
+                <h1 class="text-white">Checkout</h1>
+                <p>Complete your order</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="text-dark">Payment Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ path('payment_process') }}" method="post" id="payment-form">
+                            <div class="mb-3">
+                                <label for="email" class="form-label text-dark">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ app.user ? app.user.email : '' }}" required>
+                                <small class="text-muted">Order confirmation will be sent to this email</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label text-dark">Delivery Address</label>
+                                <input type="text" class="form-control" id="address" name="address" 
+                                       {% if app.request.method == 'POST' and not app.request.request.get('address') %}
+                                           class="form-control is-invalid"
+                                       {% else %}
+                                           class="form-control"
+                                       {% endif %}
+                                       minlength="10" maxlength="255" required>
+                                <small class="text-muted">Your products will be delivered to this address (minimum 10 characters)</small>
+                                {% if app.request.method == 'POST' and not app.request.request.get('address') %}
+                                    <div class="invalid-feedback">
+                                        Please provide a valid delivery address.
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label text-dark">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       {% if app.request.method == 'POST' and not app.request.request.get('phone') %}
+                                           class="form-control is-invalid"
+                                       {% else %}
+                                           class="form-control"
+                                       {% endif %}
+                                       pattern="[0-9]{8,}" required>
+                                <small class="text-muted">For delivery coordination (minimum 8 digits)</small>
+                                {% if app.request.method == 'POST' and not app.request.request.get('phone') %}
+                                    <div class="invalid-feedback">
+                                        Please provide a valid phone number (minimum 8 digits).
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="name" class="form-label text-dark">Name on Card</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="card_number" class="form-label text-dark">Card Number</label>
+                                <input type="text" class="form-control" id="card_number" name="card_number" placeholder="XXXX XXXX XXXX XXXX" value="4242 4242 4242 4242" required>
+                                <small class="text-muted">For testing, use: 4242 4242 4242 4242</small>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="expiry" class="form-label text-dark">Expiry Date</label>
+                                    <input type="text" class="form-control" id="expiry" name="expiry" placeholder="MM/YY" value="12/25" required>
+                                    <small class="text-muted">For testing, use: 12/25</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cvv" class="form-label text-dark">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" name="cvv" placeholder="XXX" value="123" required>
+                                    <small class="text-muted">For testing, use: 123</small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="payment_method" class="form-label text-dark">Payment Method</label>
+                                <select class="form-select" id="payment_method" name="payment_method" required>
+                                    <option value="">Select payment method</option>
+                                    <option value="credit_card" selected>Credit Card</option>
+                                    <option value="debit_card">Debit Card</option>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">Complete Payment</button>
+                                <a href="{{ path('payment_cancel') }}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-5">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="text-dark">Order Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cartItems %}
+                                        <tr>
+                                            <td>{{ item.product.nameproduct }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>${{ (item.product.getPriceproduct() * item.quantity)|number_format(2, '.', ',') }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2">Total:</th>
+                                        <th>${{ total|number_format(2, '.', ',') }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-dark">Shipping Information</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if app.user %}
+                            <p><strong>Name:</strong> {{ app.user.email }}</p>
+                            <p><strong>Email:</strong> {{ app.user.email }}</p>
+                        {% else %}
+                            <p class="text-danger">Please log in to complete your purchase.</p>
+                            <a href="{{ path('app_login') }}" class="btn btn-primary">Log In</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Ensure the form is submitted correctly
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentForm = document.getElementById('payment-form');
+        
+        paymentForm.addEventListener('submit', function(event) {
+            console.log('Form is being submitted');
+            // You can add validation here if needed
+        });
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple client-side validation
+        const form = document.getElementById('payment-form');
+        form.addEventListener('submit', function(event) {
+            const cardNumber = document.getElementById('card_number').value.replace(/\s/g, '');
+            const cvv = document.getElementById('cvv').value;
+            const expiry = document.getElementById('expiry').value;
+            
+            let isValid = true;
+            
+            // Very basic validation - in a real app, you'd use a proper validation library
+            if (!/^\d{16}$/.test(cardNumber.replace(/\s/g, ''))) {
+                alert('Please enter a valid 16-digit card number');
+                isValid = false;
+            }
+            
+            if (!/^\d{3,4}$/.test(cvv)) {
+                alert('Please enter a valid CVV (3 or 4 digits)');
+                isValid = false;
+            }
+            
+            if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+                alert('Please enter a valid expiry date (MM/YY)');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+        
+        // Format card number with spaces
+        const cardInput = document.getElementById('card_number');
+        cardInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            e.target.value = formattedValue;
+        });
+    });
+</script>
+{% endblock %}

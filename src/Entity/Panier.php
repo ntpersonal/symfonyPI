@@ -29,34 +29,6 @@ class Panier
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'paniers')]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id')]
-    private ?Product $product = null;
-
-    public function getProduct(): ?Product
-    {
-        return $this->product;
-    }
-
-    public function setProduct(?Product $product): self
-    {
-        $this->product = $product;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $quantity = null;
-
-    public function getQuantity(): ?int
-    {
-        return $this->quantity;
-    }
-
-    public function setQuantity(?int $quantity): self
-    {
-        $this->quantity = $quantity;
-        return $this;
-    }
 
     #[ORM\Column(type: 'decimal', nullable: true)]
     private ?float $total = null;
@@ -86,18 +58,17 @@ class Panier
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'paniers')]
-    #[ORM\JoinColumn(name: 'client_id', referencedColumnName: 'id')]
-    private ?User $user = null;
+    #[ORM\Column(type: 'integer', name: 'client_id', nullable: true)]
+    private ?int $client_id = null;
 
-    public function getUser(): ?User
+    public function getClientId(): ?int
     {
-        return $this->user;
+        return $this->client_id;
     }
 
-    public function setUser(?User $user): self
+    public function setClientId(?int $client_id): self
     {
-        $this->user = $user;
+        $this->client_id = $client_id;
         return $this;
     }
 
