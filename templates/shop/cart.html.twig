@@ -15,6 +15,22 @@
 
 <div class="site-section">
     <div class="container">
+        {# FLASH MESSAGES #}
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('warning') %}
+            <div class="alert alert-warning">
+                {{ message }}
+            </div>
+        {% endfor %}
         <div class="row mb-5">
             <div class="col-lg-12">
                 <div class="widget-next-match">
@@ -69,7 +85,7 @@
 
         <div class="text-end mt-3">
             <a href="{{ path('app_shop') }}" class="btn btn-secondary">Continue Shopping</a>
-            <a href="{{ path('app_shop_checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+            <a href="{{ path('payment_checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
         </div>
     {% else %}
         <p>Your cart is empty.</p>

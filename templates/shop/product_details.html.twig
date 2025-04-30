@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.nameproduct }} - Details{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Fix for overlapping text in product details page */
+        .product-detail-container {
+            margin-top: 50px; /* Reduced top margin to match other pages */
+            padding-top: 30px;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+        }
+        
+        .product-title {
+            font-size: 2.2rem;
+            color: #222;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: block;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 10px;
+        }
+        
+        .product-info-section {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Improve description readability */
+        .product-description {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #0d6efd;
+        }
+        
+        .product-description h4 {
+            color: #222;
+            font-weight: bold;
+        }
+        
+        .product-description p {
+            color: #333; /* Darker text for better readability */
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        /* Larger category and stock badges */
+        .product-badges .badge {
+            font-size: 1rem;
+            padding: 8px 12px;
+            margin-right: 8px;
+            font-weight: 600;
+        }
+        
+        /* Product header styling */
+        .product-header {
+            background-color: #222;
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+        
+        .product-header h2 {
+            margin: 0;
+            font-weight: 700;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- Product Header Section - Similar to other pages -->
+<div class="product-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2>{{ product.nameproduct }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container product-detail-container">
+    <div class="row">
+        <div class="col-md-6">
+            {% if product.image %}
+                <img src="{{ asset('uploads/products/' ~ product.image) }}" class="img-fluid rounded shadow" alt="{{ product.nameproduct }}">
+            {% else %}
+                <div class="bg-light rounded shadow d-flex align-items-center justify-content-center" style="height: 300px;">
+                    <span class="text-muted">No image available</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6 product-info-section">
+            <h1 class="product-title">{{ product.nameproduct }}</h1>
+            
+            <div class="mb-3 product-badges">
+                <span class="badge bg-primary">{{ product.category }}</span>
+                {% if product.stock == 'yes' %}
+                    <span class="badge bg-success">In Stock</span>
+                {% else %}
+                    <span class="badge bg-danger">Out of Stock</span>
+                {% endif %}
+            </div>
+            
+            <h3 class="text-primary mb-3">${{ product.priceproduct }}</h3>
+            
+            {% if product.productdescription %}
+                <div class="mb-4 product-description">
+                    <h4>Description</h4>
+                    <p>{{ product.productdescription|nl2br }}</p>
+                </div>
+            {% else %}
+                <div class="mb-4">
+                    <p class="text-muted">No description available for this product.</p>
+                    
+                    <a href="{{ path('app_product_details', {'id': product.id, 'generate_description': 'true'}) }}" 
+                       class="btn btn-sm btn-outline-primary">
+                        Generate AI Description
+                    </a>
+                </div>
+            {% endif %}
+            
+            {% if product.stock == 'yes' %}
+                <form action="{{ path('cart_add', {'id': product.id}) }}" method="post" class="mb-4">
+                    <div class="input-group mb-3">
+                        <input type="number" name="quantity" class="form-control" value="1" min="1">
+                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                    </div>
+                </form>
+            {% else %}
+                <button class="btn btn-secondary mb-4" disabled>Out of Stock</button>
+            {% endif %}
+            
+            <a href="{{ path('app_shop') }}" class="btn btn-outline-secondary">Back to Shop</a>
+        </div>
+    </div>
+</div>
+
+<!-- Product Recommendations Section -->
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">You May Also Like</h3>
+                </div>
+                <div class="card-body">
+                    {{ render(controller('App\\ProductRecommendationBundle\\Controller\\RecommendationController::showRecommendations', { 'product': product, 'limit': 4 }), {ignore_errors: true}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">More Products You Might Like</h3>
+                </div>
+                <div class="card-body">
+                    {{ render(controller('App\\ProductRecommendationBundle\\Controller\\RecommendationController::showAllStrategies', { 'product': product, 'limit': 3 }), {ignore_errors: true}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

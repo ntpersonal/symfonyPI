@@ -49,3 +49,5 @@ security:
     - { path: ^/signup, roles: PUBLIC_ACCESS }
     - { path: ^/debug/auth, roles: PUBLIC_ACCESS }
     - { path: ^/front, roles: [ROLE_PLAYER, ROLE_ORGANIZER, ROLE_ADMIN] }
+    - { path: ^/payment, roles: PUBLIC_ACCESS}
+    - { path: ^/product, roles: PUBLIC_ACCESS }

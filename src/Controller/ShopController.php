@@ -6,13 +6,17 @@ use App\Entity\Product;
 use App\Entity\Order;
 use App\Entity\Panier;
 use App\Form\OrderType;
+use App\Service\ImageSearchService;
+use App\Service\DeepSeekImageService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/shop')]
 class ShopController extends AbstractController
@@ -39,6 +43,93 @@ class ShopController extends AbstractController
             'searchTerm' => $searchTerm,
             'selectedCategory' => $category,
             'selectedStock' => $stock,
+            'imageSearch' => false
+        ]);
+    }
+    
+    #[Route('/image-search', name: 'app_shop_image_search')]
+    public function imageSearch(Request $request, ManagerRegistry $doctrine, SessionInterface $session, SluggerInterface $slugger, DeepSeekImageService $imageAnalysisService): Response
+    {
+        $imageFile = $request->files->get('image_search');
+        $category = $request->query->get('category');
+        $stock = $request->query->get('stock');
+        
+        $products = [];
+        $uploadedImagePath = null;
+        $analysisResults = null;
+        
+        if ($imageFile) {
+            $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+            
+            // Move the file to the temporary directory
+            try {
+                $tempDir = $this->getParameter('kernel.project_dir') . '/public/uploads/temp';
+                if (!file_exists($tempDir)) {
+                    mkdir($tempDir, 0777, true);
+                }
+                
+                $imageFile->move($tempDir, $newFilename);
+                $uploadedImagePath = $tempDir . '/' . $newFilename;
+                
+                // Get all products from the repository
+                $repository = $doctrine->getRepository(Product::class);
+                $allProducts = $repository->findAll();
+                
+                // Apply category and stock filters if needed
+                if ($category || $stock) {
+                    $allProducts = $repository->search(null, $category, $stock);
+                }
+                
+                // Analyze the image with our local analysis service
+                $analysisResults = $imageAnalysisService->analyzeImage($uploadedImagePath);
+                
+                // Check if there was an error in the analysis
+                if (isset($analysisResults['error'])) {
+                    $this->addFlash('warning', 'Image analysis encountered an issue: ' . $analysisResults['error'] . '. Using basic search instead.');
+                    // Fallback to basic search if AI fails
+                    $products = array_slice($allProducts, 0, min(6, count($allProducts)));
+                } else {
+                    // Find similar products based on the image analysis
+                    $products = $imageAnalysisService->findSimilarProducts($analysisResults, $allProducts);
+                    
+                    // Add a success message with some of the detected labels
+                    if (!empty($analysisResults['labels'])) {
+                        $detectedLabels = array_slice($analysisResults['labels'], 0, 3);
+                        $labelTexts = array_map(function($label) {
+                            return $label['description'];
+                        }, $detectedLabels);
+                        
+                        $this->addFlash('success', 'Image analysis detected: ' . implode(', ', $labelTexts) . '. Showing relevant products.');
+                    }
+                }
+                
+                // Clean up the temporary file after processing
+                if (file_exists($uploadedImagePath)) {
+                    unlink($uploadedImagePath);
+                }
+                
+            } catch (FileException $e) {
+                $this->addFlash('error', 'There was an error uploading your image.');
+                return $this->redirectToRoute('app_shop');
+            }
+        } else {
+            return $this->redirectToRoute('app_shop');
+        }
+        
+        // Get cart items count from session
+        $cart = $session->get('cart', []);
+        $cartCount = array_sum($cart);
+        
+        return $this->render('shop/index.html.twig', [
+            'products' => $products,
+            'cartCount' => $cartCount,
+            'searchTerm' => null,
+            'selectedCategory' => $category,
+            'selectedStock' => $stock,
+            'imageSearch' => true,
+            'aiAnalysis' => $analysisResults
         ]);
     }
 
@@ -81,7 +172,7 @@ class ShopController extends AbstractController
         // Check if user is logged in
         if (!$this->getUser()) {
             $this->addFlash('error', 'Please log in to add items to cart');
-            return $this->redirectToRoute('app_shop_login');
+            return $this->redirectToRoute('app_login');
         }
         
         // Check if product is in stock
@@ -142,7 +233,7 @@ class ShopController extends AbstractController
     public function checkout(Request $request, SessionInterface $session, ManagerRegistry $doctrine): Response
     {
         if (!$this->getUser()) {
-            return $this->redirectToRoute('app_shop_login');
+            return $this->redirectToRoute('app_login');
         }
         
         $cart = $session->get('cart', []);
@@ -185,6 +276,54 @@ class ShopController extends AbstractController
         
         return $this->render('shop/checkout.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+    
+    #[Route('/product/{id}', name: 'app_product_details')]
+    public function productDetails(
+        $id, 
+        ManagerRegistry $doctrine, 
+        SessionInterface $session, 
+        Request $request, 
+        \App\Service\ProductDescriptionGenerator $descriptionGenerator
+    ): Response
+    {
+        $product = $doctrine->getRepository(Product::class)->find($id);
+        
+        if (!$product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+        
+        // Get cart items count from session for the header
+        $cart = $session->get('cart', []);
+        $cartCount = array_sum($cart);
+        
+        // Check if we need to generate a description
+        $generateDescription = $request->query->get('generate_description');
+        if ($generateDescription) {
+            // Generate the description using the injected service
+            $description = $descriptionGenerator->generateDescription(
+                $product->getNameproduct(), // Use correct property name
+                $product->getCategory()
+            );
+            
+            // Update the product with the new description
+            $product->setProductdescription($description);
+            
+            // Save to database
+            $entityManager = $doctrine->getManager();
+            $entityManager->persist($product);
+            $entityManager->flush();
+            
+            $this->addFlash('success', 'Product description generated successfully!');
+            
+            // Redirect to remove the query parameter
+            return $this->redirectToRoute('app_product_details', ['id' => $id]);
+        }
+        
+        return $this->render('shop/product_details.html.twig', [
+            'product' => $product,
+            'cartCount' => $cartCount
         ]);
     }
 }

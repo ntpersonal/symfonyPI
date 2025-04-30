@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GreaterThan;
@@ -21,13 +22,16 @@ class ProductType extends AbstractType
         $builder
             ->add('nameproduct', TextType::class, [
                 'label' => 'Product Name',
-                'attr' => ['class' => 'form-control'],
+                'attr' => [
+                    'class' => 'form-control',
+                    'novalidate' => 'novalidate'
+                ],
             ])
             ->add('priceproduct', IntegerType::class, [
                 'label' => 'Price',
                 'attr' => [
                     'class' => 'form-control',
-                    'min' => 1,
+                    'novalidate' => 'novalidate'
                 ],
                 'constraints' => [
                     new NotBlank(['message' => 'Please enter a price']),
@@ -68,6 +72,16 @@ class ProductType extends AbstractType
                         ],
                         'mimeTypesMessage' => 'ERROR: Only JPG, JPEG and PNG files are allowed!',
                     ])
+                ],
+            ])
+            ->add('productdescription', TextareaType::class, [
+                'label' => 'Product Description',
+                'required' => false,
+                'mapped' => true,  // Ensure this field is mapped to the entity
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 5,
+                    'placeholder' => 'Enter product description or use the AI generator'
                 ],
             ]);
     }

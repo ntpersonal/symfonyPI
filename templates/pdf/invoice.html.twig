@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ order.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .invoice-header {
+            background-color: #f97316; /* Changed from blue (#0ea5e9) to orange */
+            color: white;
+            padding: 20px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .invoice-title {
+            text-align: right;
+        }
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .invoice-details-left, .invoice-details-right {
+            flex: 1;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .invoice-table th, .invoice-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .invoice-table th {
+            background-color: #f8f9fa;
+        }
+        .invoice-total {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .invoice-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .total-row {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge-success {
+            background-color: #10b981;
+            color: white;
+        }
+        .badge-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .badge-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <div class="logo">SPORTIFY</div>
+            <div class="invoice-title">
+                <h1>INVOICE</h1>
+                <p>#{{ order.id }}</p>
+            </div>
+        </div>
+        
+        <div class="invoice-details">
+            <div class="invoice-details-left">
+                <h3>Bill To:</h3>
+                <p>
+                    <strong>{{ order.user ? order.user.email : 'Customer' }}</strong><br>
+                    Customer ID: {{ order.user ? order.user.id : 'N/A' }}
+                </p>
+            </div>
+            <div class="invoice-details-right">
+                <h3>Invoice Details:</h3>
+                <p>
+                    <strong>Invoice Date:</strong> {{ date|date('Y-m-d') }}<br>
+                    <strong>Order Date:</strong> {{ order.date|date('Y-m-d H:i') }}<br>
+                    <strong>Status:</strong> 
+                    <span class="badge {% if order.status == 'paid' %}badge-success{% elseif order.status == 'pending' %}badge-warning{% else %}badge-secondary{% endif %}">
+                        {{ order.status|capitalize }}
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if order.product %}
+                    <tr>
+                        <td>{{ order.product.nameproduct }}</td>
+                        <td>${{ order.product.getPriceproduct()|number_format(2, '.', ',') }}</td>
+                        <td>{{ order.quantityOrder }}</td>
+                        <td>${{ order.totalAmount|number_format(2, '.', ',') }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No items found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right;">Total:</td>
+                    <td>${{ order.totalAmount|number_format(2, '.', ',') }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        <div class="invoice-footer">
+            <p>Thank you for your business!</p>
+            <p>&copy; {{ "now"|date('Y') }} Sportify. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
