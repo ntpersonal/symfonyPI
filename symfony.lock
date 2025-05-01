@@ -70,8 +70,11 @@
             "version": "1.18",
             "ref": "f45b5dd173a27873ab19f5e3180b2f661c21de02"
         },
+    
         "files": [
             "./config/packages/http_discovery.yaml"
+        ]
+        },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.18",
         "recipe": {
