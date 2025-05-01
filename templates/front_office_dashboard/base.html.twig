@@ -190,19 +190,19 @@
                                 </div>
                                 <div class="dropdown-menu" id="profileMenu">
                                     <a href="{{ path('app_player_profile') }}" class="dropdown-item">
-                                        <i class="fas fa-user"></i> My Profile
+                                        <i class="fas fa-user" style="color: red;"></i> My Profile
                                     </a>
                                     <a href="{{ path('app_player_profile_edit') }}" class="dropdown-item">
-                                        <i class="fas fa-cog"></i> Profile Settings
+                                        <i class="fas fa-cog" style="color: red;"></i> Profile Settings
                                     </a>
                                     <a href="{{ path('app_reclamation_my') }}" class="dropdown-item">
-                                        <i class="fas fa-cog"></i> My tickets
+                                        <i class="fas fa-cog" style="color: red;"></i> My tickets
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <form action="{{ path('app_log_out') }}" method="post" id="logout-form" style="display: inline;">
                                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
                                         <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                            <i class="fas fa-sign-out-alt" style="color: red;"></i> Logout
                                         </button>
                                     </form>
                                 </div>

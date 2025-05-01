@@ -47,6 +47,7 @@ class AddUserType extends AbstractType
                     'placeholder' => 'Enter email address'
                 ]
             ])
+
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'mapped' => false,
@@ -99,7 +100,7 @@ class AddUserType extends AbstractType
             ])
             ->add('phonenumber', TextType::class, [
                 'label' => 'Phone Number',
-                'required' => false,
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Enter phone number'

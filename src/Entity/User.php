@@ -213,7 +213,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'dateofbirth', type: 'date', nullable: false)]
     #[Assert\NotBlank(message: 'Date of birth is required')]
     #[Assert\Type(type: \DateTimeInterface::class, message: 'Please enter a valid date in YYYY-MM-DD format')]
-    #[Assert\LessThanOrEqual(value: '-5 years', message: 'User must be at least 5 years old')]
+    #[Assert\LessThanOrEqual(value: '-16 years', message: 'User must be at least 16 years old')]
     private ?\DateTimeInterface $dateofbirth = null;
 
     public function getDateofbirth(): ?\DateTimeInterface
@@ -223,7 +223,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setDateofbirth(?\DateTimeInterface $dateofbirth): self
     {
-
         $this->dateofbirth = $dateofbirth;
         return $this;
     }
@@ -242,11 +241,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
+
+
+
+
+
     #[ORM\Column(name: 'coachinglicense', type: 'string', nullable: true)]
     #[Assert\When(
-        expression: "this.getRole() === 'ROLE_COACH'",
+        expression: "this.getRole() === 'organizer'",
         constraints: [
-            new Assert\NotBlank(message: 'Coaching license is required for coaches'),
+            new Assert\NotBlank(message: 'Coaching license is required for organizers'),
             new Assert\Length(
                 min: 5,
                 max: 20,
@@ -563,5 +568,68 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return (string)$this->email;
+    }
+
+
+    #[ORM\Column(nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $tokenCreatedAt = null;
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+        return $this;
+    }
+
+    public function getTokenCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->tokenCreatedAt;
+    }
+
+    public function setTokenCreatedAt(?\DateTimeInterface $tokenCreatedAt): static
+    {
+        $this->tokenCreatedAt = $tokenCreatedAt;
+        return $this;
+    }
+
+    public function isResetTokenExpired(): bool
+    {
+        return $this->tokenCreatedAt !== null &&
+            (new \DateTime()) > $this->tokenCreatedAt->modify('+1 hour');
+    }
+
+    #[ORM\Column(name: "faceData", type: "text", nullable: true)]
+    private ?string $faceData = null;
+
+    public function getFaceData(): ?string
+    {
+        return $this->faceData;
+    }
+
+    public function setFaceData(?string $faceData): self
+    {
+        $this->faceData = $faceData;
+        return $this;
+    }
+
+    #[ORM\Column(name: "googleId", type: "string", nullable: true)]
+    private ?string $googleId = null;
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+        return $this;
     }
 }

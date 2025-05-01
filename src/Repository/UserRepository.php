@@ -16,6 +16,55 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+
+
+    public function countUsersRegisteredThisMonth(): int
+    {
+        $now = new \DateTime();
+        $firstDayOfMonth = new \DateTime($now->format('Y-m-01'));
+
+        return $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdat >= :start_date')
+            ->setParameter('start_date', $firstDayOfMonth)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countUsersRegisteredLastMonth(): int
+    {
+        $now = new \DateTime();
+        $firstDayOfCurrentMonth = new \DateTime($now->format('Y-m-01'));
+        $firstDayOfLastMonth = (clone $firstDayOfCurrentMonth)->modify('-1 month');
+
+        return $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdat >= :start_date')
+            ->andWhere('u.createdat < :end_date')
+            ->setParameter('start_date', $firstDayOfLastMonth)
+            ->setParameter('end_date', $firstDayOfCurrentMonth)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Find all users who have face data registered
+     * 
+     * @return User[] Returns an array of User objects with face data
+     */
+    public function findUsersWithFaceData(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.faceData IS NOT NULL')
+            ->andWhere('u.faceData != :empty')
+            ->setParameter('empty', '')
+            ->getQuery()
+            ->getResult();
+    }
+
+
+
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

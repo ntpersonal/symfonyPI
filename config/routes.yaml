@@ -1,3 +1,14 @@
+connect_google_start:
+    path: /connect/google
+    controller: App\Controller\ConnectController::connectGoogle
+
+connect_google_check:
+    path: /connect/google/check
+
+
+
+
+
 # app_admin:
 #     path: /listUsers
 #     controller: App\Controller\UserController::admin

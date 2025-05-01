@@ -17,33 +17,119 @@ use App\Form\AddUserType;
 use App\Form\EditUserType;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use App\Repository\UserRepository;
 
 final class UserController extends AbstractController
 {
     #[Route('/admin/dashboard/users', name: 'app_admin_dashboard_users')]
-    public function index(Request $request, ManagerRegistry $doctrine, PaginatorInterface $paginator): Response
+    public function index(Request $request, ManagerRegistry $doctrine, PaginatorInterface $paginator, UserRepository $userRepository): Response
     {
-        $query = $doctrine->getRepository(User::class)->createQueryBuilder('u')
+        $search = $request->query->get('q');
+        $queryBuilder = $doctrine->getRepository(User::class)->createQueryBuilder('u');
+
+        if ($search) {
+            $queryBuilder
+                ->where('u.firstname LIKE :search')
+                ->orWhere('u.lastname LIKE :search')
+                ->orWhere('u.email LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        $query = $queryBuilder
             ->orderBy('u.createdat', 'DESC')
             ->addOrderBy('u.id', 'DESC')
             ->getQuery();
 
         $pagination = $paginator->paginate(
             $query,
-            $request->query->getInt('page', 1), // Current page number
-            5 // Users per page
+            $request->query->getInt('page', 1),
+            5, // Set to 5 users per page
+            [
+                'defaultSortFieldName' => 'u.createdat',
+                'defaultSortDirection' => 'desc',
+                'distinct' => false
+            ]
         );
 
+        // Get dashboard statistics
+        $totalUsers = $userRepository->count([]);
+        $activeUsers = $userRepository->count(['is_active' => true]);
+        $playerUsers = $userRepository->count(['role' => 'player']);
+        $organizerUsers = $userRepository->count(['role' => 'organizer']);
+
+        // Calculate user growth rate
+        $currentMonth = new \DateTime('first day of this month');
+        $lastMonth = new \DateTime('first day of last month');
+
+        $usersThisMonth = $userRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdat >= :start')
+            ->setParameter('start', $currentMonth)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $usersLastMonth = $userRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdat >= :start AND u.createdat < :end')
+            ->setParameter('start', $lastMonth)
+            ->setParameter('end', $currentMonth)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $userGrowthRate = $usersLastMonth > 0 ?
+            round(($usersThisMonth - $usersLastMonth) / $usersLastMonth * 100) : 100;
+
+        // Get recent users
+        $recentUsers = $userRepository->createQueryBuilder('u')
+            ->orderBy('u.createdat', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
+        // Check if it's an AJAX request
+        if ($request->isXmlHttpRequest()) {
+            $users = [];
+            foreach ($pagination as $user) {
+                $users[] = [
+                    'id' => $user->getId(),
+                    'firstname' => $user->getFirstname(),
+                    'lastname' => $user->getLastname(),
+                    'email' => $user->getEmail(),
+                    'role' => $user->getRole(),
+                    'isActive' => $user->isIsActive(),
+                    'profilepicture' => $user->getProfilepicture(),
+                    'team' => $user->getTeam() ? ['name' => $user->getTeam()->getNom()] : null,
+                    'csrfToken' => $this->container->get('security.csrf.token_manager')->getToken('delete' . $user->getId())->getValue()
+                ];
+            }
+
+            return $this->json([
+                'users' => $users,
+                'pagination' => [
+                    'currentPage' => $pagination->getCurrentPageNumber(),
+                    'totalPages' => $pagination->getPageCount(),
+                    'totalItems' => $pagination->getTotalItemCount(),
+                    'itemsPerPage' => $pagination->getItemNumberPerPage()
+                ]
+            ]);
+        }
+
+        // Normal page render if not AJAX
         $teams = $doctrine->getRepository(Team::class)->findAll();
 
         return $this->render('admin_dashboard/users/index.html.twig', [
             'pagination' => $pagination,
             'teams' => $teams,
+            'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'playerUsers' => $playerUsers,
+            'organizerUsers' => $organizerUsers,
+            'userGrowthRate' => $userGrowthRate,
+            'recentUsers' => $recentUsers
         ]);
     }
-
     #[Route('/admin/dashboard/users/new', name: 'app_admin_dashboard_user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, ManagerRegistry $doctrine, UserPasswordHasherInterface $passwordHasher, SluggerInterface $slugger): Response
+    public function new(Request $request, ManagerRegistry $doctrine, UserPasswordHasherInterface $passwordHasher, SluggerInterface $slugger, UserRepository $userRepository): Response
     {
         $user = new User();
         $form = $this->createForm(AddUserType::class, $user);
@@ -55,18 +141,18 @@ final class UserController extends AbstractController
                 $now = new \DateTime();
                 $user->setCreatedat($now);
                 $user->setUpdatedat($now);
-                
+
                 // Set default values for reset code fields
                 $user->setResetCode(bin2hex(random_bytes(16))); // Generate a random reset code
                 $user->setResetCodeExpiry($now->modify('+24 hours')); // Set expiry to 24 hours from now
-                
+
                 // Get the plainPassword from the form since it's not mapped to the entity
                 $plainPassword = $form->get('password')->getData();
 
                 if (!$plainPassword) {
                     throw new \InvalidArgumentException('Password is required for new users');
                 }
-                
+
                 // Hash the password
                 $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashedPassword);
@@ -90,20 +176,30 @@ final class UserController extends AbstractController
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             // If form was submitted but validation failed, display errors
             $this->addFlash('error', 'Unable to create user. Please check the form for errors.');
-            
+
             // Add specific validation errors as flash messages
             foreach ($form->getErrors(true) as $error) {
                 $this->addFlash('error', $error->getMessage());
             }
         }
 
+        // Get dashboard statistics for the template
+        $totalUsers = $userRepository->count([]);
+        $activeUsers = $userRepository->count(['is_active' => true]);
+        $playerUsers = $userRepository->count(['role' => 'player']);
+        $organizerUsers = $userRepository->count(['role' => 'organizer']);
+
         return $this->render('admin_dashboard/users/new.html.twig', [
             'form' => $form->createView(),
+            'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'playerUsers' => $playerUsers,
+            'organizerUsers' => $organizerUsers
         ]);
     }
 
     #[Route('/admin/dashboard/users/{id}/edit', name: 'app_admin_dashboard_user_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user, ManagerRegistry $doctrine, UserPasswordHasherInterface $passwordHasher, SluggerInterface $slugger): Response
+    public function edit(Request $request, User $user, ManagerRegistry $doctrine, UserPasswordHasherInterface $passwordHasher, SluggerInterface $slugger, UserRepository $userRepository): Response
     {
         // Store original profile picture path before form handling
         $originalProfilePicture = $user->getProfilepicture();
@@ -152,9 +248,19 @@ final class UserController extends AbstractController
             }
         }
 
+        // Get dashboard statistics for the template
+        $totalUsers = $userRepository->count([]);
+        $activeUsers = $userRepository->count(['is_active' => true]);
+        $playerUsers = $userRepository->count(['role' => 'player']);
+        $organizerUsers = $userRepository->count(['role' => 'organizer']);
+
         return $this->render('admin_dashboard/users/edit.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
+            'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'playerUsers' => $playerUsers,
+            'organizerUsers' => $organizerUsers
         ]);
     }
 
@@ -194,7 +300,7 @@ final class UserController extends AbstractController
         // Generate a unique filename
         $newFilename = md5(uniqid()).'.'.$file->guessExtension();
         $uploadDir = $this->getParameter('profile_pictures_directory');
-        
+
         // Ensure the upload directory exists
         if (!file_exists($uploadDir)) {
             if (!mkdir($uploadDir, 0777, true)) {

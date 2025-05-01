@@ -9,9 +9,7 @@ parameters:
     product_images_directory: '%kernel.project_dir%/public/uploads/products'
     api_football_key: '%env(API_FOOTBALL_KEY)%'  # Use environment variable for sensitive data
     gemini_api_key: '%env(string:GEMINI_API_KEY)%'
-    
-    
-
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -53,3 +51,8 @@ services:
     App\EventListener\NoCacheListener:
         tags:
             - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+
+
+
+    App\Security\RequestMatcher\ApiRequestMatcher:
+            public: true

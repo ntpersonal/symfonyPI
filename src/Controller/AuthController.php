@@ -3,16 +3,27 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\ResetPasswordRequestFormType;
+use App\Form\SignUpType;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Psr\Log\LoggerInterface;
 
 class AuthController extends AbstractController
 {
@@ -22,108 +33,66 @@ class AuthController extends AbstractController
         Request $request,
         ManagerRegistry $doctrine,
         UserPasswordHasherInterface $passwordHasher,
-        ValidatorInterface $validator
+        LoggerInterface $logger
     ): Response {
         $user = new User();
+        $form = $this->createForm(SignUpType::class, $user);
+        $form->handleRequest($request);
 
+        // Debug form submission
         if ($request->isMethod('POST')) {
-            $data = $request->request->all();
-
-            // Run manual Assert validation
-            $constraints = new Assert\Collection([
-                'firstname' => [
-                    new Assert\NotBlank(['message' => 'First name is required.']),
-                    new Assert\Length(['min' => 2, 'minMessage' => 'First name must be at least {{ limit }} characters.']),
-                    new Assert\Regex([
-                        'pattern' => '/^[a-zA-Z]+$/',
-                        'message' => 'First name should contain only letters.'
-                    ])
-                ],
-                'lastname' => [
-                    new Assert\NotBlank(['message' => 'Last name is required.']),
-                    new Assert\Length(['min' => 2, 'minMessage' => 'Last name must be at least {{ limit }} characters.']),
-                    new Assert\Regex([
-                        'pattern' => '/^[a-zA-Z]+$/',
-                        'message' => 'Last name should contain only letters.'
-                    ])
-                ],
-                'email' => [
-                    new Assert\NotBlank(['message' => 'Email is required.']),
-                    new Assert\Email(['message' => 'Invalid email address.']),
-                ],
-                'password' => [
-                    new Assert\NotBlank(['message' => 'Password is required.']),
-                    new Assert\Regex([
-                        'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/',
-                        'message' => 'Password must contain at least 8 characters, including an uppercase letter, a number, and a special character.'
-                    ]),
+            $logger->info('Form submitted');
+            
+            if ($form->isSubmitted()) {
+                $logger->info('Form is submitted');
                 
-                ],
-                'role' => [
-                    new Assert\NotBlank(['message' => 'Role is required.']),
-                    new Assert\Choice(['choices' => ['player', 'organizer'], 'message' => 'Invalid role.']),
-                ],
-                'dateofbirth' => [
-                    new Assert\NotBlank(['message' => 'Date of birth is required.']),
-                    new Assert\Date(['message' => 'Invalid date format.']),
-                ],
-                'coachinglicense' => $data['role'] === 'organizer'
-                    ? [
-                        new Assert\NotBlank(['message' => 'Coaching license is required for organizer.']),
-                        new Assert\Length(['min' => 3, 'minMessage' => 'Coaching license must be at least {{ limit }} characters.']),
-                    ]
-                    : new Assert\Optional(),
-            ]);
+                if ($form->isValid()) {
+                    $logger->info('Form is valid');
+                    
+                    // Set additional fields
+                    $user->setCreatedat(new \DateTime());
+                    $user->setUpdatedat(new \DateTime());
+                    $user->setIsActive(true);
+                    $user->setReset_code('');
+                    $user->setReset_code_expiry(new \DateTime());
+                    $user->setFavourite(false);
 
-            $violations = $validator->validate($data, $constraints);
+                    // Password hashing
+                    $hashedPassword = $passwordHasher->hashPassword($user, $form->get('password')->getData());
+                    $user->setPassword($hashedPassword);
 
-            if (count($violations) > 0) {
-                foreach ($violations as $violation) {
-                    $this->addFlash('error', $violation->getMessage());
+                    // Handle file upload
+                    $profilePicture = $form->get('profilePicture')->getData();
+                    if ($profilePicture) {
+                        $fileName = md5(uniqid()) . '.' . $profilePicture->guessExtension();
+                        $profilePicture->move($this->getParameter('profile_pictures_directory'), $fileName);
+                        $user->setProfilepicture($fileName);
+                    }
+
+                    // Save to database
+                    $entityManager = $doctrine->getManager();
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Your account has been created successfully. You can now log in.');
+                    return $this->redirectToRoute('app_log_in');
+                } else {
+                    $logger->error('Form validation failed');
+                    $errors = [];
+                    foreach ($form->getErrors(true) as $error) {
+                        $errors[] = $error->getMessage();
+                        $logger->error('Form error: ' . $error->getMessage());
+                    }
+                    $this->addFlash('error', 'Please correct the errors in the form: ' . implode(', ', $errors));
                 }
-                return $this->render('admin_dashboard/sign-up.html.twig', ['user' => $user]);
+            } else {
+                $logger->error('Form is not submitted');
             }
-
-            // Now set fields on User object
-            $user->setFirstname($data['firstname']);
-            $user->setLastname($data['lastname']);
-            $user->setEmail($data['email']);
-            $user->setRole($data['role']);
-            $user->setCreatedat(new \DateTime());
-            $user->setUpdatedat(new \DateTime());
-            $user->setDateofbirth(new \DateTime($data['dateofbirth']));
-            $user->setIsActive(true);
-            $user->setReset_code('');
-            $user->setReset_code_expiry(new \DateTime());
-            $user->setFavourite(false);
-
-            if ($data['role'] === 'organizer') {
-                $user->setCoachinglicense($data['coachinglicense']);
-            }
-
-            // Password hashing
-            $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
-            $user->setPassword($hashedPassword);
-
-            // Handle file upload
-            if ($request->files->has('profilePicture')) {
-                $file = $request->files->get('profilePicture');
-                if ($file !== null) {
-                    $fileName = md5(uniqid()) . '.' . $file->guessExtension();
-                    $file->move($this->getParameter('profile_pictures_directory'), $fileName);
-                    $user->setProfilepicture($fileName);
-                }
-            }
-
-            // Save to database
-            $entityManager = $doctrine->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_log_in');
         }
 
-        return $this->render('admin_dashboard/sign-up.html.twig', ['user' => $user]);
+        return $this->render('admin_dashboard/sign-up.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/login', name: 'app_log_in', methods: ['GET', 'POST'])]
@@ -143,4 +112,6 @@ class AuthController extends AbstractController
     {
         // This method can be empty - it will be intercepted by the logout key on your firewall
     }
+
+
 }
