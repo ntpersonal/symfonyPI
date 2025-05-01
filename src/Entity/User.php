@@ -400,7 +400,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
     #[ORM\OneToMany(targetEntity: Tournoi::class, mappedBy: 'user')]
     private Collection $tournois;
 
@@ -543,15 +542,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        $roles = ['ROLE_USER'];
-        if ($this->role === 'player') {
-            $roles[] = 'ROLE_PLAYER';
-        } elseif ($this->role === 'organizer') {
-            $roles[] = 'ROLE_ORGANIZER';
-        } elseif ($this->role === 'Admin') {
-            $roles[] = 'ROLE_ADMIN';
-        }
-        return $roles;
+        // $roles = ['ROLE_USER'];
+        // if ($this->role === 'player') {
+        //     $roles[] = 'ROLE_PLAYER';
+        // } elseif ($this->role === 'organizer') {
+        //     $roles[] = 'ROLE_ORGANIZER';
+        // } elseif ($this->role === 'Admin') {
+        //     $roles[] = 'ROLE_ADMIN';
+        // }
+        // return $roles;
+        return ['ROLE_' . strtoupper($this->role)];
+
     }
 
     public function eraseCredentials(): void

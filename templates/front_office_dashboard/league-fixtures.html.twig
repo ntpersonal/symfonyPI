@@ -1,0 +1,60 @@
+{# templates/front_office_dashboard/league-fixtures.html.twig #}
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}Fixtures — Season {{ season }}{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <h2 class="mb-4">Fixtures for League {{ leagueId }} — Season {{ season }}</h2>
+
+    {% if fixtures is empty %}
+      <div class="alert alert-info">No matches found for this league/season.</div>
+    {% else %}
+      <div class="row g-4">
+        {% for f in fixtures %}
+          <div class="col-xl-3 col-md-6">
+            <div class="match-card bg-white shadow-sm rounded-3 overflow-hidden hover-scale transition-all h-100">
+              <div class="match-teams text-center pt-4 px-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  {# home team #}
+                  {% set homeLogo = f.team_home_badge ?: asset('assets/images/sportify.png') %}
+                  <div class="team text-center" style="width:40%">
+                    <img src="{{ homeLogo }}"
+                         class="img-fluid rounded-circle border border-2 shadow-sm mb-2"
+                         style="width:70px;height:70px"
+                         alt="{{ f.match_hometeam_name }}">
+                    <h6 class="team-name text-truncate fw-bold">{{ f.match_hometeam_name }}</h6>
+                  </div>
+
+                  <div class="vs-badge fw-bold fs-5">VS</div>
+
+                  {# away team #}
+                  {% set awayLogo = f.team_away_badge ?: asset('assets/images/sportify.png') %}
+                  <div class="team text-center" style="width:40%">
+                    <img src="{{ awayLogo }}"
+                         class="img-fluid rounded-circle border border-2 shadow-sm mb-2"
+                         style="width:70px;height:70px"
+                         alt="{{ f.match_awayteam_name }}">
+                    <h6 class="team-name text-truncate fw-bold">{{ f.match_awayteam_name }}</h6>
+                  </div>
+                </div>
+              </div>
+
+              <div class="match-details text-center p-3">
+                <div class="match-date mb-2">
+                  <i class="far fa-calendar-alt me-2"></i>{{ f.match_date }}
+                </div>
+                <div class="match-time mb-3">
+                  <i class="far fa-clock me-2"></i>{{ f.match_time }}
+                </div>
+                <div class="match-action">
+                  <a href="#" class="btn btn-outline-primary rounded-pill w-100">Details</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
