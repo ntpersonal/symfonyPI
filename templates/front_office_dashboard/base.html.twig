@@ -1,36 +1,155 @@
 {% block stylesheets %}
-    
     <!--================= Favicon =================-->
     <link rel="apple-touch-icon" href="{{ asset('assets/images/fav.png') }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/fav.png') }}">
-    <!--================= Bootstrap V5 CSS =================-->
+    
+    <!--================= Core CSS Files =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap2.min.css') }}">
-    <!--================= Font Awesome 5 CSS =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/all.min.css') }}">
-    <!--================= RT Icons CSS =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/rt-icons.css') }}">
-    <!--================= Animate css =================-->
+    
+    <!--================= Plugin CSS Files =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/animate.min.css') }}">
-    <!--================= Magnific popup Plugin =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/magnific-popup2.css') }}">
-    <!--================= Animate css =================-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/magnific.css') }}">
-    <!--================= Animate css =================-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/animate.min.css') }}">
-    <!--================= Swiper Slider Plugin =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/swiper-bundle.min.css') }}">
-    <!--================= Mobile Menu CSS =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/metisMenu.css') }}">
-    <!--================= Main Menu CSS =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/rtsmenu.css') }}">
-    <!--================= Main Stylesheet =================-->
+    
+    <!--================= Main Stylesheets =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/variables/variable1.css') }}">
-    <!--================= Main Stylesheet =================-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
-{% endblock %}
+    
+    <style>
+        /* Notification System */
+        .notification-bell-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        #notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        #notifications-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            width: 350px;
+            max-height: 500px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+        
+        .notification-item {
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left-width: 3px !important;
+        }
+        
+        .notification-item.unread {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        .notification-item:hover {
+            background-color: #f8f9fa !important;
+        }
+        
+        #notification-count {
+            font-size: 0.75rem;
+        }
+        
+        /* User Profile Dropdown */
+        .user-profile-dropdown {
+            position: relative;
+            margin-left: 20px;
+        }
+        
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-trigger:hover {
+            background: #f8f9fa;
+        }
+        
+        .profile-picture {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 50%;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            margin-right: 5px;
+            color: #333;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            min-width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            display: none;
+            margin-top: 10px;
+            z-index: 1000;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 5px 0;
+        }
 
-{% block body %}
-    <!--================= Preloader Section Start Here =================-->
+    </style>
+{% endblock %}
+{% block navbar %}
+<!--================= Preloader Section Start Here =================-->
     <div id="rts__preloader">
         <div class="main-fader responsive-height-comments">
             <div class="loader">
@@ -137,40 +256,122 @@
                                         </ul>
                                     </li>
                                     <li><a class="menu-item" href="{{ path('app_front_office_contact') }}">Contact</a></li>
+                                    
                                 </ul>
+                                  
                             </nav>
                         </div>
                         <div class="header-action-items header-action-items1">
-                            <div class="search-part">
-                                <div class="search-icon action-item icon"><i class="rt-search"></i></div>
-                                <div class="search-input-area">
-                                    <div class="container">
-                                        <div class="search-input-inner">
-                                            <select class="custom-select select-hidden">
-                                                <option value="hide">All Catagorys</option>
-                                                <option value="all">All</option>
-                                                <option value="league">League</option>
-                                                <option value="club">Club</option>
-                                                <option value="team">Team</option>
-                                                <option value="player">Player</option>
-                                                <option value="match">Match</option>
-                                                <option value="score">Score</option>
-                                            </select>
-                                            <div class="input-div">
-                                                <div class="search-input-icon"><i class="rt-search mr--10"></i></div>
-                                                <input id="searchInput1" class="search-input" type="text" placeholder="Search by keyword or #">
-                                            </div>
-                                            <div class="search-close-icon"><i class="rt-xmark"></i></div>
-                                        </div>
+          
+                
+                        <!-- Header Actions -->
+                    <div class="header-action-items header-action-items1">
+                                                    {# …your bell icon… #}
+                        {% set notifCount = is_granted('ROLE_ORGANIZER') ? teamRequests|length
+                                        : is_granted('ROLE_PLAYER')    ? playerRequests|length
+                                        : 0 %}
+                        <div class="notification-bell-container position-relative d-inline-block">
+                        <div id="notification-bell" class="position-relative" style="cursor:pointer">
+                        <i class="fas fa-bell" style="font-size:1.5rem;color:#fff;"></i>
+                        {% if notifCount > 0 %}
+                            <span id="notification-count"
+                                class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                            {{ notifCount }}
+                            </span>
+                        {% endif %}
+                        </div>
+
+                          <div id="notifications-panel" class="card d-none notifications-panel" style="y-index:100; z-index: 1000;">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Notifications</span>
+                            <button id="clear-notifications" class="btn btn-sm btn-link">Clear All</button>
+                        </div>
+                        <div id="notifications-list" class="list-group list-group-flush">
+                            {# ORGANIZER: show incoming team-join requests #}
+                            {% if is_granted('ROLE_ORGANIZER') %}
+                            {% if teamRequests is empty %}
+                                <div class="list-group-item text-muted">
+                                No pending join requests
+                                </div>
+                            {% else %}
+                                {% for req in teamRequests %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                     <img src="{{ req.player.profilepicture 
+                                                        ? asset('uploads/profile/' ~ req.player.profilepicture) 
+                                                        : asset('assets/images/default-avatar.png') }}" 
+                                                        alt="{{ req.player.firstname }}'s profile picture"
+                                                        class="rounded-circle"
+                                                        style="width: 40px; height: 40px; object-fit: cover;"
+                                                        onerror="this.onerror=null; this.src='{{ asset('assets/images/default-avatar.png') }}';">
+                                   
+
+                                    <div>
+                                        <strong>{{ req.player.firstname }} {{ req.player.lastname }}</strong><br>
+                                        <small>Wants to join your team</small>
+                                    </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                    <small class="badge bg-secondary">{{ req.createdAt|date('H:i') }}</small>
+                                    <div class="btn-group">
+                                <button
+                                class="btn btn-sm reject-request"
+                                data-url="{{ path('team_request_reject', {'id': req.id}) }}"
+                                >
+                                <i class="fas fa-times"></i>
+                                </button>
+                                <button
+                                class="btn btn-sm accept-request"
+                                data-url="{{ path('team_request_accept', {'id': req.id}) }}"
+                                >
+                                <i class="fas fa-check"></i>
+                                </button>
+
+                                    </div>
                                     </div>
                                 </div>
-                            </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            {# PLAYER: show status of your own requests #}
+                            {% elseif is_granted('ROLE_PLAYER') %}
+                            {% if playerRequests is empty %}
+                                <div class="list-group-item text-muted">You have no notifications</div>
+                            {% else %}
+                                {% for req in playerRequests %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ path('app_image', {
+                                                    'subdirectory': 'teams',
+                                                    'filename': req.team.logoPath|split('/')|last
+                                                }) }}"
+                                        class="rounded-circle" style="width:40px;height:40px;object-fit:cover;">
+                                    <div>
+                                        <strong>{{ req.team.nom }}</strong><br>
+                                        <small>Request status: {{ req.status|capitalize }}</small>
+                                    </div>
+                                    </div>
+                                    <small class="badge bg-secondary">{{ req.createdAt|date('H:i') }}</small>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            {# everyone else #}
+                            {% else %}
+                            <div class="list-group-item text-muted">No notifications available</div>
+                            {% endif %}
+                        </div>
+                        </div>
+                        </div>
+                        </div>
                             <div class="cart action-item">
                                 <div class="cart-nav">
                                     <div class="basket-icon cart-icon icon"><a href="#0"><i class="fal fa-shopping-basket"></i></a></div>
                                 </div>
                             </div>
-                            {% if app.user %}
+                        <!-- User Profile Dropdown -->
+                         {% if app.user %}
                             <div class="user-profile-dropdown action-item">
                                 <div class="profile-trigger" id="profileDropdown">
                                     <div class="profile-picture">
@@ -178,7 +379,7 @@
                                             <img src="{{ asset('uploads/profile/' ~ app.user.profilepicture) }}" 
                                                  alt="Profile Picture" 
                                                  class="rounded-circle"
-                                                 onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
+                                                 onerror="this.src='{{ asset('assets/images/logo_1.png') }}'">
                                         {% else %}
                                             <img src="{{ asset('assets/images/default-avatar.png') }}" 
                                                  alt="Default Profile Picture" 
@@ -220,6 +421,9 @@
                 </div>
             </div>
         </div>
+    </header>
+{% endblock %}
+{% block body %}
         <div class="cart-bar">
             <div class="cart-header">
                 <h3 class="cart-heading">MY CART (3 ITEMS)</h3>
@@ -594,93 +798,215 @@
     <script src="{{ asset('assets/js/aos.js') }}"></script>
     <!--================= Main Script =================-->
     <script src="{{ asset('assets/js/main2.js') }}"></script>
-{% endblock %} 
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Mercure connection only if user is logged in
+    {% if app.user %}
+        let eventSource = null;
+        
+        const initializeMercure = () => {
+            try {
+                   const mercureUrl = new URL('{{ mercure_subscribe_url('/user/' ~ app.user.id ~ '/notifications') }}');
+                mercureUrl.searchParams.append('topic', '/user/{{ app.user.id }}/notifications');
+                
+                // Add team requests topic for organizers
+                {% if app.user.team is not null %}
+                    mercureUrl.searchParams.append('topic', '/team/{{ app.user.team.id }}/requests');
+                {% endif %}
 
-<style>
-.user-profile-dropdown {
-    position: relative;
-    margin-left: 20px;
-}
+                eventSource = new EventSource(mercureUrl);
 
-.profile-trigger {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 30px;
-    transition: all 0.3s ease;
-}
+                eventSource.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    handleMercureNotification(data);
+                };
 
-.profile-trigger:hover {
-    background: #f8f9fa;
-}
+                eventSource.onerror = (error) => {
+                    console.error('Mercure connection error:', error);
+                };
 
-.profile-picture {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
+                // Load existing notifications from database
+                fetch('/api/notifications')
+                    .then(response => response.json())
+                    .then(notifications => {
+                        notifications.forEach(notification => {
+                            addNotification(notification.message, notification.type, {
+                                teamId: notification.teamId,
+                                requestId: notification.requestId
+                            });
+                        });
+                    });
 
-.profile-picture img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+            } catch (error) {
+                console.error('Mercure initialization failed:', error);
+            }
+        };
 
-.user-name {
-    font-weight: 500;
-    margin-right: 5px;
-    color: #333;
-}
+        const handleMercureNotification = (data) => {
+            // Handle different notification types
+            switch(data.type) {
+                case 'team_join_accepted':
+                case 'team_join_rejected':
+                    handleTeamJoinResponse(data);
+                    break;
+                
+                case 'new_team_request':
+                    handleNewTeamRequest(data);
+                    break;
+                
+                default:
+                    addNotification(data.message, data.type || 'info', {
+                        teamId: data.teamId,
+                        requestId: data.requestId
+                    });
+            }
+        };
 
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: #fff;
-    min-width: 200px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    padding: 10px 0;
-    display: none;
-    margin-top: 10px;
-    z-index: 1000;
-}
+        const handleTeamJoinResponse = (data) => {
+            const button = document.getElementById('confirm-selection-Player');
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = 'Confirm Selection';
+                if (data.type === 'team_join_accepted') {
+                    window.location.reload();
+                }
+            }
+            addNotification(data.message, data.type, {
+                teamId: data.teamId
+            });
+        };
 
-.dropdown-menu.show {
-    display: block;
-}
+        const handleNewTeamRequest = (data) => {
+            const requestsList = document.getElementById('requests-list');
+            if (requestsList) {
+                const existingRequest = requestsList.querySelector(`[data-request-id="${data.request.id}"]`);
+                if (!existingRequest) {
+                    const requestElement = createRequestElement(data.request);
+                    requestsList.prepend(requestElement);
+                    updateRequestCounter(1);
+                }
+            }
+            addNotification(data.message, 'info', {
+                teamId: data.teamId,
+                requestId: data.request.id
+            });
+        };
 
-.dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    color: #333;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
+        const createRequestElement = (request) => {
+            const element = document.createElement('div');
+            element.className = 'list-group-item';
+            element.dataset.requestId = request.id;
+            element.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">${request.playerName}</h6>
+                        <small class="text-muted">${new Date(request.createdAt).toLocaleString()}</small>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-success accept-request" data-request-id="${request.id}">Accept</button>
+                        <button class="btn btn-sm btn-danger reject-request" data-request-id="${request.id}">Reject</button>
+                    </div>
+                </div>
+            `;
+            return element;
+        };
 
-.dropdown-item i {
-    margin-right: 10px;
-    width: 20px;
-    text-align: center;
-}
+        const updateRequestCounter = (change) => {
+            const counter = document.getElementById('request-count');
+            if (counter) {
+                let current = parseInt(counter.textContent) || 0;
+                current += change;
+                counter.textContent = current;
+                counter.style.display = current > 0 ? 'block' : 'none';
+            }
+        };
 
-.dropdown-item:hover {
-    background: #f8f9fa;
-    color: #007bff;
-}
+        // Initialize Mercure connection
+        initializeMercure();
+    {% endif %}
 
-.dropdown-divider {
-    height: 1px;
-    background: #e9ecef;
-    margin: 5px 0;
-}
-</style>
+    });
+    // Toggle notifications panel
+    document.getElementById('notification-bell')?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const panel = document.getElementById('notifications-panel');
+        if (panel) panel.classList.toggle('d-none');
+    });
 
-<script>
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+        const panel = document.getElementById('notifications-panel');
+        if (panel && !e.target.closest('#notifications-panel') && !e.target.closest('#notification-bell')) {
+            panel.classList.add('d-none');
+        }
+    });
+    // Add new notification
+    function addNotification(message, type = 'info', data = {}) {
+        const notificationId = Date.now();
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        const notificationElement = document.createElement('div');
+        notificationElement.className = `list-group-item notification-item unread border-start border-${getBorderColor(type)}`;
+        notificationElement.dataset.id = notificationId;
+        notificationElement.innerHTML = `
+            <div class="d-flex w-100 justify-content-between">
+                <div class="mb-1">${message}</div>
+                <small class="text-muted">${timeString}</small>
+            </div>
+            ${data.teamId ? `<div class="small text-muted">Team ID: ${data.teamId}</div>` : ''}
+        `;
+        
+        notificationElement.addEventListener('click', () => markAsRead(notificationId));
+        
+        const list = document.getElementById('notifications-list');
+        if (list) {
+            list.prepend(notificationElement);
+            unreadCount++;
+            updateCounter();
+            
+            const noNotifications = document.getElementById('no-notifications');
+            if (noNotifications) noNotifications.classList.add('d-none');
+            
+            if (list.children.length > maxNotifications) {
+                list.lastChild.remove();
+            }
+        }
+    }
+
+    // Mark notification as read
+    function markAsRead(notificationId) {
+        const notification = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+        if (notification && notification.classList.contains('unread')) {
+            notification.classList.remove('unread', 'border-start');
+            unreadCount--;
+            updateCounter();
+        }
+    }
+
+    // Clear all notifications
+    document.getElementById('clear-notifications')?.addEventListener('click', function() {
+        const list = document.getElementById('notifications-list');
+        const noNotifications = document.getElementById('no-notifications');
+        
+        if (list) {
+            list.innerHTML = '';
+            unreadCount = 0;
+            updateCounter();
+        }
+        if (noNotifications) noNotifications.classList.remove('d-none');
+    });
+function getBorderColor(type) {
+        const colors = {
+            'success': 'success',
+            'warning': 'warning',
+            'error': 'danger',
+            'info': 'primary'
+        };
+        return colors[type] || 'primary';
+    }
+    </script>
+    <script>
 document.addEventListener('DOMContentLoaded', function() {
     const profileTrigger = document.getElementById('profileDropdown');
     const profileMenu = document.getElementById('profileMenu');
@@ -699,3 +1025,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script> 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // helper to attach behaviour to a button selector
+  function wireButtons(selector) {
+    document.querySelectorAll(selector).forEach(btn => {
+      btn.addEventListener('click', async e => {
+        e.preventDefault();
+        const url = btn.dataset.url;
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          if (!res.ok) {
+            const json = await res.json().catch(() => null);
+            alert(json?.error || 'Something went wrong');
+            return;
+          }
+          // on success, reload to clear out that notif
+          window.location.reload();
+        } catch (err) {
+          console.error(err);
+          alert('Network error');
+        }
+      });
+    });
+  }
+
+  wireButtons('.accept-request');
+  wireButtons('.reject-request');
+});
+</script>
+
+{% endblock %} 

@@ -12,17 +12,45 @@ final class TeamManagerCheckerController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}
     
-    public function isTeamManager(Team $team): bool
+    public function isTeamManager(Team $team,User $user): bool
     {
-        $manager = $this->entityManager->getRepository(User::class)
-            ->createQueryBuilder('u')
-            ->where('u.team = :team')
-            ->andWhere('u.role LIKE :role')
-            ->setParameter('team', $team)
-            ->setParameter('role', '%ROLE_MANAGER%')
+        return
+            $user->getTeam()?->getId() === $team->getId()
+            && $user->getRole() === 'organizer'
+        ;
+    }
+ 
+    /**
+     * Returns true if the team has any manager assigned
+     */
+    public function hasTeamManager(Team $team): bool
+    {
+        $managerCount = $this->entityManager->getRepository(Team::class)
+            ->createQueryBuilder('t')
+            ->select('COUNT(u.id)')
+            ->join('t.users', 'u')  // Changed from 't.user' to 't.users'
+            ->where('t.id = :teamid')
+            ->andWhere('u.role LIKE :role')  // Using 'role' (singular) as in your entity
+            ->setParameter('teamid', $team->getId())
+            ->setParameter('role', '%ORGANIZER%')  // Changed to match your role values
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getSingleScalarResult();
 
-        return $manager !== null;
+        return $managerCount > 0;
+    }
+
+    /**
+     * Gets all teams that have at least one manager
+     * @return Team[]
+     */
+    public function getManagedTeams(): array
+    {
+        return $this->entityManager->getRepository(Team::class)
+            ->createQueryBuilder('t')
+            ->join('t.user', 'u')
+            ->where('u.role LIKE :role')
+            ->setParameter('role', '%ROLE_ORGANIZER%')
+            ->getQuery()
+            ->getResult();
     }
 }

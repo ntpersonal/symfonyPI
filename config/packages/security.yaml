@@ -48,3 +48,4 @@ security:
     - { path: ^/signup, roles: PUBLIC_ACCESS }
     - { path: ^/debug/auth, roles: PUBLIC_ACCESS }
     - { path: ^/front, roles: [ROLE_PLAYER, ROLE_ORGANIZER] }
+    - { path: ^/\.well-known/mercure, roles: PUBLIC_ACCESS }

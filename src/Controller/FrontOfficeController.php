@@ -14,7 +14,9 @@ use App\Service\ApiFootballService;
 use SebastianBergmann\Environment\Console;
 use Symfony\Component\Security\Core\Security;
 use App\Entity\Ranking;
+use App\Entity\TeamRequest;
 use App\Entity\User;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 final class FrontOfficeController extends AbstractController
@@ -27,26 +29,77 @@ final class FrontOfficeController extends AbstractController
     }
 
     #[Route('/front/dashboard', name: 'app_front_office')]
-    public function index(): Response
+    public function index(Security $security, EntityManagerInterface $em): Response
     {
-        // TODO: Replace this with actual player data from your database
+        /** @var User|null $user */
+        $user = $security->getUser();
+
+        $data = $this->getTeamRequestsData($user, $em);
+
+        // your sample player payload
         $player = [
-            'id' => 1,
-            'name' => 'John Doe',
-            'role' => 'FORWARD',
-            'description' => 'There are so many sports available in the world nowadays, but we can categorize them by the numbers of players, the three main categories are individual sport, dual sport.'
+            'id'          => 1,
+            'name'        => 'John Doe',
+            'role'        => 'FORWARD',
+            'description' => 'There are so many sports available in the world nowadays…'
         ];
 
         return $this->render('front_office_dashboard/index.html.twig', [
             'controller_name' => 'FrontOfficeController',
-            'player' => $player
+            'player'          => $player,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
     #[Route('/front/dashboard/home1', name: 'app_home1')]
-    public function home1(): Response
+    public function home1(Security $security, EntityManagerInterface $em): Response
     {
-        return $this->render('front_office_dashboard/index.html.twig');
+        /** @var User|null $user */
+        $user = $security->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $data = $this->getTeamRequestsData($user, $em);
+
+        // note: same variable names as in index()
+        return $this->render('front_office_dashboard/index.html.twig', [
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
+        ]);
+    }
+    
+    private function getTeamRequestsData(?User $user, EntityManagerInterface $em): array
+    {
+        if (!$user) {
+            return ['teamRequests' => [], 'playerRequests' => []];
+        }
+
+        $team = $user->getTeam();
+
+        // only users with ROLE_ORGANIZER see team requests
+        $teamRequests = [];
+        if ($this->isGranted('ROLE_ORGANIZER') && $team) {
+            $teamRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'team'   => $team,
+                'status' => 'pending',
+            ]);
+        }
+
+        // only users with ROLE_PLAYER see their own requests
+        $playerRequests = [];
+        if ($this->isGranted('ROLE_PLAYER')) {
+            $playerRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'player' => $user,
+                'status' => 'pending',
+            ]);
+        }
+
+        return [
+            'teamRequests'   => $teamRequests,
+            'playerRequests' => $playerRequests,
+        ];
     }
         #[Route('/front/dashboard/team', name: 'app_team', methods: ['GET','POST'])]
     public function team(
@@ -61,6 +114,9 @@ final class FrontOfficeController extends AbstractController
         if (!$user) {
             return $this->json(['error' => 'User not authenticated'], 401);
         }
+
+        $data = $this->getTeamRequestsData($user, $entityManager);
+
         $team = $user->getTeam();
         if ($request->isMethod('GET')) {
         $players = $this->entityManager->getRepository(User::class)->findBy([
@@ -68,16 +124,38 @@ final class FrontOfficeController extends AbstractController
             'role' => 'player'
         ], ['position' => 'ASC']);    
         $teams = $this->entityManager->getRepository(Team::class)->findAll();
-        $season = 2024;
-        $topLeagues = $api_football->getTop5Leagues($season);
+        $sslCertPath = 'C:/xampp4/php/extras/ssl/cacert.pem';
+    if (!file_exists($sslCertPath)) {
+        $this->addFlash('error', 'SSL certificate file not found at: '.$sslCertPath);
+        // You could either:
+        // 1. Continue without API calls
+        // 2. Redirect to an error page
+        // 3. Throw an exception
         
-        // Add manager status to each team
-        $teamsWithManagerStatus = array_map(function($team) use ($teamManagerChecker) {
+        // For this example, we'll continue but without API data
+        $topLeagues = [];
+    } else {
+        // Only make API calls if certificate exists
+        $season = 2024;
+        try {
+            $topLeagues = $api_football->getTop5Leagues($season);
+        } catch (\Exception $e) {
+            $this->addFlash('warning', 'Could not fetch league data: '.$e->getMessage());
+            $topLeagues = [];
+        }
+    }
+
+                
+                // Filter to only include teams with managers
+        $teamsWithManagers = array_filter($teams, function($team) use ($teamManagerChecker) {
+            return $teamManagerChecker->hasTeamManager($team);
+        });
+        $teamsWithStatus = array_map(function($team) use ($teamManagerChecker) {
             return [
                 'team' => $team,
-                'hasManager' => $teamManagerChecker->isTeamManager($team)
+                'hasManager' => $teamManagerChecker->hasTeamManager($team)
             ];
-        }, $teams);
+        }, $teamsWithManagers);
         }
         if ($request->isMethod('POST')) {
             try {
@@ -160,10 +238,12 @@ final class FrontOfficeController extends AbstractController
         }
 
         return $this->render('front_office_dashboard/team.html.twig', [
-            'teamsWithStatus' => $teamsWithManagerStatus,
+            'teamsWithStatus' => $teamsWithStatus,
             'topLeagues' => $topLeagues,
             'players' => $players,
-            'currentTeam' => $team
+            'currentTeam' => $team,
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
         ]);
     }
 
@@ -271,7 +351,9 @@ final class FrontOfficeController extends AbstractController
         $team = null;
         $leagueId = null;
         $rankings = [];
-    
+
+        $data = $this->getTeamRequestsData($user, $entityManager);
+
         if ($user instanceof User) {
             $team = $user->getTeam();
             
@@ -297,16 +379,25 @@ final class FrontOfficeController extends AbstractController
         return $this->render('front_office_dashboard/score.html.twig', [
             'rankings' => $rankings,
             'userTeam' => $team,
-            'currentLeagueId' => $leagueId
+            'currentLeagueId' => $leagueId,
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
         ]);
     }
 
     #[Route('/front/dashboard/player/{id}', name: 'app_player_details')]
-    public function playerDetails(int $id): Response
+    public function playerDetails(int $id,Security $security,EntityManager $em): Response
     {
+        /** @var User|null $user */
+        $user = $security->getUser();
+
+        $data = $this->getTeamRequestsData($user, $em);
+
         $player = $this->entityManager->getRepository(User::class)->find($id);
         return $this->render('front_office_dashboard/player-details.html.twig', [
-            'player' => $player // TODO: Fetch player data from database
+            'player' => $player, // TODO: Fetch player data from database
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
         ]);
     }
 

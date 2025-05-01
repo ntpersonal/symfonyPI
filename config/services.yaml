@@ -17,6 +17,13 @@ services:
               # Let the system handle certificates automatically
               # No need for cafile parameter
               timeout: 30
+    
+    Symfony\Component\Mercure\HubInterface:
+        alias: 'mercure.hub.default'
+
+    Symfony\Component\Mercure\Publisher:
+        alias: 'mercure.hub.default.publisher'
+    
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.

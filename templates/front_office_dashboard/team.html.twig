@@ -117,7 +117,9 @@
         }
     </style>
 {% endblock %}
-
+{% block navbar %}
+{{ parent() }}
+{% endblock %}
 {% block banner %}
     <!--================= Banner Section Start Here =================-->
      <div class="banner banner1">
@@ -179,72 +181,47 @@
                 <div class="tab-content" id="teamTypeTabContent">
                     {# Local Teams Tab #}
                     <div class="tab-pane fade show active" id="local-teams" role="tabpanel">
-                        <div class="row">
-                            {% for teamData in teamsWithStatus %}
-                                {% set team = teamData.team %}
-                                {% set hasManager = teamData.hasManager %}
-                                
-                                <div class="col-md-4 mb-4">
-                                    <div class="card team-card">
-                                        {% if team.logoPath %}
-                                        <img src="{{ path('app_image', {'subdirectory': 'teams', 'filename':team.logoPath|split('/')|last}) }}" 
-                                        alt="{{ team.nom }} logo">
-                                        {% else %}
-                                        <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
-                                        {% endif %}
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">{{ team.nom }}</h5>
-                                            <div class="team-meta mb-2">
-                                                {% if hasManager %}
-                                                    <span class="badge bg-warning">Has Manager</span>
-                                                {% else %}
-                                                    <span class="badge bg-success">Available</span>
-                                                {% endif %}
-                                            </div>
-                                            <button class="btn btn-primary btn-sm select-team" 
-                                                    data-team-id="{{ team.id }}"
-                                                    data-team-type="local">
-                                                Select Team
-                                            </button>
+                    <div class="row">
+                        {% for team in teamsWithStatus %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card team-card-Player">
+                                    {% if team.team.logoPath %}
+                                    <img src="{{ path('app_image', {'subdirectory': 'teams', 'filename': team.team.logoPath|split('/')|last}) }}" 
+                                    alt="{{ team.team.nom }} logo">
+                                    {% else %}
+                                    <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+                                    {% endif %}
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">{{ team.team.nom }}</h5>
+                                        <div class="team-meta mb-2">
+                                            {% if team.hasManager %}
+                                                <span class="badge bg-warning">Has Manager</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Available</span>
+                                            {% endif %}
                                         </div>
+                                        <button class="btn btn-primary btn-sm select-team-player" 
+                                            data-team-id="{{ team.team.id }}"
+                                            data-team-type="local">
+                                            Select Team
+                                        </button>
                                     </div>
                                 </div>
-                            {% else %}
-                                <div class="col-12">
-                                    <div class="alert alert-warning">
-                                        No local teams available at the moment.
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    {# Real Teams (API) Tab #}
-                    <div class="tab-pane fade" id="real-teams" role="tabpanel">
-                        <div class="mb-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="api-team-search" placeholder="Search real teams...">
-                                <button class="btn btn-outline-secondary" type="button" id="search-api-teams">
-                                    <i class="fas fa-search"></i>
-                                </button>
                             </div>
-                        </div>
-                        <div class="row" id="api-teams-container">
-                            {# API teams will be loaded here via JavaScript #}
-                            <div class="col-12 text-center py-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                        {% else %}
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    No local teams available at the moment.
                                 </div>
-                                <p>Search for real teams to display results</p>
                             </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="confirm-selection" disabled>Confirm Selection</button>
+                <button type="button" class="btn btn-primary" id="confirm-selection-Player" disabled>Confirm Selection</button>
             </div>
         </div>
     </div>
@@ -418,6 +395,46 @@
         </div>
     </div>
 </div>
+{% elseif app.user and app.user.team is not null and app.user.role == 'player' %}
+<!--================= Team Section Start Here =================-->
+<div class="rts-team-section section-gap">
+    <div class="container">
+        <div class="row">
+       <div class="col-12 d-flex align-items-center justify-content-between">
+        <h1 class="m-0">Your Team</h1>
+    </div>
+
+            {% for player in players %}
+                <div class="col-xl-3 col-md-4 col-sm-6">
+                    <div class="player-single">
+                        <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-picture">
+                            {% if player.profilepicture %}
+                               <img src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" 
+     alt="{{ player.firstname }} {{ player.lastname }} photo">
+                            {% else %}
+                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+                            {% endif %}
+                        </a>
+                        <div class="content">
+                            <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-name">
+                                {{ player.firstname }} {{ player.lastname }}
+                            </a>
+                            <span class="player-role">
+                                {{ player.position|default('PLAYER')|upper }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No players found in your team
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 <!--================= Team Section End Here =================-->
  {% endif %}
 {% endblock %}
@@ -461,20 +478,22 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-       document.addEventListener('DOMContentLoaded', function() {
-    // Elements
+  document.addEventListener('DOMContentLoaded', function() {
+    // ================= Global Variables =================
+    let unreadCount = 0;
+    const maxNotifications = 10;
+
+    // ================= Organizer Team Selection =================
     const leagueSelect = document.getElementById('league-select');
     const teamSearch = document.getElementById('api-team-search');
     const searchButton = document.getElementById('search-api-teams');
     const teamsContainer = document.getElementById('api-teams-container');
     const confirmSelection = document.getElementById('confirm-selection');
-    
-    // State
     let selectedTeam = null;
     let currentTeams = [];
 
     // League selection handler
-    if (leagueSelect) {
+    if (leagueSelect && teamsContainer) {
         leagueSelect.addEventListener('change', function() {
             const leagueId = this.value;
             if (leagueId) {
@@ -489,389 +508,241 @@
     if (searchButton && teamSearch) {
         searchButton.addEventListener('click', function() {
             const searchTerm = teamSearch.value.trim().toLowerCase();
-            if (searchTerm) {
-                filterTeams(searchTerm);
-            }
+            if (searchTerm) filterTeams(searchTerm);
         });
-        
-        // Optional: Add search on Enter key
+
         teamSearch.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const searchTerm = teamSearch.value.trim().toLowerCase();
-                if (searchTerm) {
-                    filterTeams(searchTerm);
-                }
+                if (searchTerm) filterTeams(searchTerm);
             }
         });
     }
 
     // Confirm selection handler
     if (confirmSelection) {
-        confirmSelection.addEventListener('click', function() {
-                if (selectedTeam) {
-            // Get the currently selected league ID
+        confirmSelection.addEventListener('click', async function() {
+            if (!selectedTeam) return;
+            
             const leagueId = leagueSelect.value;
             const leagueName = leagueSelect.options[leagueSelect.selectedIndex].text;
             const teamCount = document.querySelectorAll('.team-card').length;
-            assignTeamToUser(
-                leagueId,
-                selectedTeam.id,
-                selectedTeam.name,
-                leagueName,
-                teamCount  // Pass the count of teams in this league
-            );
-        }
+
+            try {
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
+                const response = await fetch('/front/dashboard/assign-team', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        leagueId: Number(leagueId),
+                        teamId: parseInt(selectedTeam.id),
+                        teamName: selectedTeam.name,
+                        leagueName: leagueName.trim(),
+                        teamCount: Number(teamCount)
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to assign team');
+                
+                showToast('Team assigned successfully!');
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+                showToast(error.message, 'danger');
+                this.disabled = false;
+                this.innerHTML = 'Confirm Selection';
+            }
         });
     }
 
-    // Function to load teams for a league
-    function loadTeamsForLeague(leagueId) {
-        // Show loading state
-        teamsContainer.innerHTML = `
-            <div class="col-12 text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p>Loading teams...</p>
-            </div>
-        `;
-        
-        // Fetch teams from API
-        fetch(`/api/teams/league/${leagueId}`)
-            .then(response => {
+    // ================= Player Team Selection =================
+    const confirmSelectionPlayer = document.getElementById('confirm-selection-Player');
+    let selectedPlayerTeam = null;
+
+    // Player team selection handler
+    document.addEventListener('click', function(e) {
+        const playerTeamBtn = e.target.closest('.select-team-player');
+        if (playerTeamBtn) {
+            const card = playerTeamBtn.closest('.team-card-Player');
+            selectedPlayerTeam = {
+                id: playerTeamBtn.dataset.teamId,
+                name: card.querySelector('.card-title').textContent.trim()
+            };
+            
+            // Update UI
+            document.querySelectorAll('.team-card-Player').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            if (confirmSelectionPlayer) confirmSelectionPlayer.disabled = false;
+        }
+    });
+
+    // ================= Player Team Selection with Mercure =================
+    if (confirmSelectionPlayer) {
+        confirmSelectionPlayer.addEventListener('click', async function() {
+            const button = this;
+            let eventSource;
+
+            try {
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
+                // Get current user ID
+                const userId = {{ app.user ? app.user.id : 'null' }};
+                if (!userId) throw new Error('User not authenticated');
+
+                // Mercure configuration
+                eventSource = new EventSource(`http://127.0.0.1:3000/.well-known/mercure?topic=/user/${userId}/notifications`);
+
+                eventSource.onmessage = e => {
+                    const notification = JSON.parse(e.data);
+                    switch(notification.type) {
+                        case 'team_join_accepted':
+                            showToast(notification.message, 'success');
+                            eventSource.close();
+                            window.location.reload();
+                            break;
+                        case 'team_join_rejected':
+                            showToast(notification.message, 'danger');
+                            eventSource.close();
+                            button.disabled = false;
+                            button.innerHTML = 'Confirm Selection';
+                            break;
+                    }
+                };
+
+                // Send join request
+                const response = await fetch(`/team/${selectedPlayerTeam.id}/request-join`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    body: JSON.stringify(selectedPlayerTeam)
+                });
+
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to send request');
                 }
-                return response.json();
-            })
+
+                showToast('Join request sent! Waiting for approval...', 'info');
+
+            } catch (error) {
+                showToast(error.message, 'danger');
+                button.disabled = false;
+                button.innerHTML = 'Confirm Selection';
+                if (eventSource) eventSource.close();
+            }
+        });
+    }
+
+    // ================= Create Team Form =================
+    const createTeamSubmit = document.getElementById('create-team-submit');
+    if (createTeamSubmit) {
+        createTeamSubmit.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const form = document.getElementById('create-team-form');
+            
+            try {
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
+                const formData = new FormData(form);
+                const response = await fetch('/front/dashboard/create-team', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to create team');
+                
+                showToast('Team created successfully!');
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+                showToast(error.message, 'danger');
+                this.disabled = false;
+                this.innerHTML = 'Create Team';
+            }
+        });
+    }
+
+    // ================= Helper Functions =================
+    function loadTeamsForLeague(leagueId) {
+        teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        
+        fetch(`/api/teams/league/${leagueId}`)
+            .then(response => response.json())
             .then(data => {
-                if (data.teams && data.teams.length > 0) {
-                    currentTeams = data.teams;
-                    displayTeams(currentTeams);
-                } else {
-                    showNoTeamsMessage();
-                }
+                currentTeams = data.teams || [];
+                displayTeams(currentTeams);
             })
-            .catch(error => {
-                console.error('Error loading teams:', error);
-                showErrorMessage('Failed to load teams. Please try again.');
-            });
+            .catch(() => showErrorMessage('Failed to load teams'));
     }
 
-    // Function to display teams
-    function displayTeams(teams) {
-        teamsContainer.innerHTML = '';
-        
-        if (teams.length === 0) {
-            showNoTeamsMessage();
-            return;
-        }
-        
-        teams.forEach(team => {
-            const teamCol = document.createElement('div');
-            teamCol.className = 'col-md-4 mb-4';
+   function displayTeams(teams) {
+    teamsContainer.innerHTML = teams.length ? 
+        teams.map(team => {
+            // Get base URL from meta tag or current location
+            const baseUrl = document.querySelector('meta[name="base-url"]')?.content || window.location.origin;
             
-            teamCol.innerHTML = `
-                <div class="card team-card ${selectedTeam?.id === team.id ? 'border-primary' : ''}">
-                    <div class="card-body text-center">
-                        ${team.logo ? `<img src="${team.logo}" alt="${team.name}" class="img-fluid mb-2" style="max-height: 80px;">` : ''}
-                        <h5 class="card-title">${team.name}</h5>
-                        ${team.country ? `<p class="text-muted small">${team.country}</p>` : ''}
-                        <button class="btn btn-sm ${selectedTeam?.id === team.id ? 'btn-primary' : 'btn-outline-primary'} select-team" 
-                                data-team-id="${team.id}"
-                                data-team-name="${team.name}">
-                            Select Team
-                        </button>
+            // Construct proper image path
+            const logoPath = team.logo 
+                ? `${baseUrl}/image/teams/${encodeURIComponent(team.logo.split('/').pop())}`
+                : `${baseUrl}/assets/images/default-team-logo.jpg`;
+
+            return `
+                <div class="col-md-4 mb-4">
+                    <div class="card team-card ${selectedTeam?.id === team.id ? 'border-primary' : ''}">
+                        <div class="card-body text-center">
+                            <img src="${logoPath}" 
+                                 alt="${team.name} logo" 
+                                 class="img-fluid mb-2" 
+                                 style="max-height: 80px;">
+                            <h5 class="card-title">${team.name}</h5>
+                            <button class="btn btn-sm ${selectedTeam?.id === team.id ? 'btn-primary' : 'btn-outline-primary'} select-team" 
+                                    data-team-id="${team.id}"
+                                    data-team-name="${team.name}">
+                                Select Team
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
-            
-            teamsContainer.appendChild(teamCol);
-        });
-        
-        // Add event listeners to all select buttons
-        document.querySelectorAll('.select-team').forEach(button => {
-            button.addEventListener('click', function() {
-                const teamId = this.dataset.teamId;
-                const teamName = this.dataset.teamName;
-                selectTeam({id: teamId, name: teamName});
-            });
-        });
-    }
-
-    // Function to handle team selection
-    function selectTeam(team) {
-        selectedTeam = team;
-        
-        // Update UI
-        document.querySelectorAll('.team-card').forEach(card => {
-            card.classList.remove('border-primary');
-        });
-        
-        document.querySelectorAll('.select-team').forEach(button => {
-            button.classList.remove('btn-primary');
-            button.classList.add('btn-outline-primary');
-        });
-        
-        const selectedCard = document.querySelector(`.select-team[data-team-id="${team.id}"]`).closest('.team-card');
-        const selectedButton = selectedCard.querySelector('.select-team');
-        
-        selectedCard.classList.add('border-primary');
-        selectedButton.classList.remove('btn-outline-primary');
-        selectedButton.classList.add('btn-primary');
-        
-        // Enable confirm button
-        if (confirmSelection) {
-            confirmSelection.disabled = false;
-        }
-    }
-
-    // Function to filter teams based on search term
-    function filterTeams(searchTerm) {
-        if (!currentTeams || currentTeams.length === 0) {
-            showNoTeamsMessage();
-            return;
-        }
-        
-        const filteredTeams = currentTeams.filter(team => 
-            team.name.toLowerCase().includes(searchTerm) ||
-            (team.country && team.country.toLowerCase().includes(searchTerm))
-        );
-        
-        if (filteredTeams.length > 0) {
-            displayTeams(filteredTeams);
-        } else {
-            teamsContainer.innerHTML = `
-                <div class="col-12">
-                    <div class="alert alert-warning">
-                        No teams match your search
-                    </div>
-                </div>
-            `;
-        }
-    }
-async function assignTeamToUser(leagueId, teamId, teamName, leagueName, teamCount) {
-    const confirmSelection = document.getElementById('confirm-selection');
-    const teamSelectionModal = bootstrap.Modal.getInstance(
-        document.getElementById('teamSelectionModal')
-    );
-    
-    try {
-        // Show loading state
-        confirmSelection.disabled = true;
-        confirmSelection.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
-
-        const response = await fetch('/front/dashboard/assign-team', {
-            method: 'POST',
-            headers: {
-               'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                leagueId: Number(leagueId),
-                teamId: parseInt(teamId), 
-                teamName: String(teamName).trim(),
-                leagueName: String(leagueName).trim(),
-                teamCount: Number(teamCount)
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Backend error details:", errorData);
-            
-            // Handle specific error cases
-            if (errorData.error === 'This team already has a manager') {
-                throw new Error('This team is already managed by another user');
-            } else if (response.status === 400) {
-                throw new Error('Invalid team data. Please try again.');
-            } else {
-                throw new Error(errorData.message || `Server error (${response.status})`);
-            }
-        }
-
-        const data = await response.json();
-        
-        // Success handling
-        showSuccessMessage('Team assigned successfully!');
-        
-        // Close modal after delay
-        setTimeout(() => {
-            if (teamSelectionModal) {
-                teamSelectionModal.hide();
-            }
-            
-            // Refresh page or update UI
-            window.location.reload();
-        }, 1500);
-
-    } catch (error) {
-        console.error("Full error details:", {
-            error: error,
-            message: error.message,
-            stack: error.stack
-        });
-        
-        // User-friendly error messages
-        const errorMessage = error.message.includes('Failed to fetch') 
-            ? 'Network error - please check your connection'
-            : error.message;
-            
-        showErrorMessage(errorMessage);
-        
-        // Re-enable button on error
-        confirmSelection.disabled = false;
-        confirmSelection.innerHTML = 'Confirm Selection';
-        
-        // For debugging - remove in production
-        if (console && console.error) {
-            console.error('Assignment error:', {
-                leagueId,
-                teamId, 
-                teamName,
-                leagueName,
-                teamCount,
-                error: error.toString()
-            });
-        }
-    }
+        }).join('') : showNoTeamsMessage();
 }
 
-// Helper functions (make sure these exist in your code)
-function showSuccessMessage(message) {
-    // Example using Bootstrap toast
-    const toast = new bootstrap.Toast(document.getElementById('successToast'));
-    document.getElementById('toastSuccessMessage').textContent = message;
-    toast.show();
-}
-
-function showErrorMessage(message) {
-    // Example using Bootstrap toast
-    const toast = new bootstrap.Toast(document.getElementById('errorToast'));
-    document.getElementById('toastErrorMessage').textContent = message;
-    toast.show();
-}
-    
-
-    // Helper functions for UI states
-    function showInitialState() {
-        teamsContainer.innerHTML = `
-            <div class="col-12 text-center py-4">
-                <p>Please select a league first</p>
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast show align-items-center text-white bg-${type}`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"></button>
             </div>
         `;
+        
+        const container = document.getElementById('toast-container') || document.body;
+        container.appendChild(toast);
+        
+        toast.querySelector('.btn-close')?.addEventListener('click', () => toast.remove());
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    function showInitialState() {
+        if (teamsContainer) teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>Please select a league first</p></div>';
     }
 
     function showNoTeamsMessage() {
-        teamsContainer.innerHTML = `
-            <div class="col-12 text-center py-4">
-                <p>No teams found for this league</p>
-            </div>
-        `;
+        if (teamsContainer) teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>No teams found</p></div>';
     }
 
     function showErrorMessage(message) {
-        // Create or update error message display
-        let errorAlert = document.getElementById('team-assignment-error');
-        if (!errorAlert) {
-            errorAlert = document.createElement('div');
-            errorAlert.id = 'team-assignment-error';
-            errorAlert.className = 'alert alert-danger alert-dismissible fade show';
-            errorAlert.role = 'alert';
-            errorAlert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-            
-            // Insert before the teams container
-            teamsContainer.parentNode.insertBefore(errorAlert, teamsContainer);
-        } else {
-            errorAlert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-            errorAlert.classList.remove('d-none');
-        }
-    }
-
-    function showSuccessMessage(message) {
-        // Create or update success message display
-        let successAlert = document.getElementById('team-assignment-success');
-        if (!successAlert) {
-            successAlert = document.createElement('div');
-            successAlert.id = 'team-assignment-success';
-            successAlert.className = 'alert alert-success alert-dismissible fade show';
-            successAlert.role = 'alert';
-            successAlert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-            
-            // Insert at the top of the container
-            const container = teamsContainer.closest('.container, .tab-content') || document.body;
-            container.prepend(successAlert);
-        } else {
-            successAlert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-            successAlert.classList.remove('d-none');
-        }
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            if (successAlert) {
-                const bsAlert = new bootstrap.Alert(successAlert);
-                bsAlert.close();
-            }
-        }, 5000);
-    }
-
-    // Initialize
-    showInitialState();
-});
-
-   // Add Team Form Submission
-submitTeamForm.addEventListener('click', async function(e) {
-    e.preventDefault();
-    clearFormErrors();
-
-    submitTeamForm.disabled = true;
-    submitTeamForm.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
-
-    try {
-        const formData = new FormData(form);
-        const response = await fetch("/front/dashboard/team", {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        });
-
-        const result = await response.json();
-        
-        if (!result.success) {
-            throw new Error(result.error || 'Server error occurred');
-        }
-
-        // Success handling
-        const modal = bootstrap.Modal.getInstance(addTeamModal);
-        modal.hide();
-        
-        // Immediate redirect instead of reload
-        window.location.href = result.redirectUrl;
-
-    } catch (error) {
-        console.error('Error:', error.message);
-        // Show error to user (example using alert)
-        alert(error.message);
-    } finally {
-        submitTeamForm.disabled = false;
-        submitTeamForm.innerHTML = 'Create Team';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mt-3';
+        errorDiv.textContent = message;
+        teamsContainer.parentNode.insertBefore(errorDiv, teamsContainer.nextSibling);
+        setTimeout(() => errorDiv.remove(), 5000);
     }
 });
-
     </script>
 {% endblock %} 

@@ -193,109 +193,11 @@
 {% endblock %}
 
 {% block header %}
-    <header class="header-area">
-        <div class="container">
-            <div class="header-inner">
-                <div class="logo-area">
-                    <a href="{{ path('app_front_office_dashboard') }}">
-                        <img src="{{ asset('assets/images/logo.png') }}" alt="logo">
-                    </a>
-                </div>
-                <div class="header-right">
-                    <div class="user-profile-dropdown">
-                        <div class="profile-trigger" id="profileDropdown">
-                            <div class="profile-picture">
-                                {% if app.user.profilepicture %}
-                                    <img src="{{ asset('uploads/profile_pictures/' ~ app.user.profilepicture) }}" 
-                                         alt="Profile Picture" 
-                                         class="rounded-circle">
-                                {% else %}
-                                    <img src="{{ asset('assets/img/default-avatar.png') }}" 
-                                         alt="Default Profile Picture" 
-                                         class="rounded-circle">
-                                {% endif %}
-                            </div>
-                            <span class="user-name">{{ app.user.firstname }} {{ app.user.lastname }}</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="dropdown-menu" id="profileMenu">
-                            <a href="{{ path('app_player_profile') }}" class="dropdown-item">
-                                <i class="fas fa-user"></i> My Profile
-                            </a>
-                            <a href="{{ path('app_player_profile_edit') }}" class="dropdown-item">
-                                <i class="fas fa-cog"></i> Profile Settings
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="{{ path('app_log_out') }}" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt"></i> Logout
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-   
+    {{ parent() }}
    
 {% endblock %}
 {% block navbar %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="{{ path('app_front_office_dashboard') }}">
-                <img src="{{ asset('assets/images/logo.png') }}" alt="logo" height="40">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_front_office_dashboard') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_team') }}">Team</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_match_schedule') }}">Matches</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_shop') }}">Shop</a>
-                    </li>
-                </ul>
-                <div class="user-profile-dropdown">
-                    <div class="profile-trigger" id="profileDropdown">
-                        <div class="profile-picture">
-                            {% if app.user.profilepicture %}
-                                <img src="{{ asset('uploads/profile_pictures/' ~ app.user.profilepicture) }}" 
-                                     alt="Profile Picture" 
-                                     class="rounded-circle">
-                            {% else %}
-                                <img src="{{ asset('assets/img/default-avatar.png') }}" 
-                                     alt="Default Profile Picture" 
-                                     class="rounded-circle">
-                            {% endif %}
-                        </div>
-                        <span class="user-name">{{ app.user.firstname }} {{ app.user.lastname }}</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="dropdown-menu" id="profileMenu">
-                        <a href="{{ path('app_player_profile') }}" class="dropdown-item">
-                            <i class="fas fa-user"></i> My Profile
-                        </a>
-                        <a href="{{ path('app_player_profile_edit') }}" class="dropdown-item">
-                            <i class="fas fa-cog"></i> Profile Settings
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ path('app_log_out') }}" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
+    {{ parent() }}
     
     
 {% endblock %}
