@@ -199,7 +199,6 @@ final class FrontOfficeController extends AbstractController
     }
  // src/Controller/FrontOfficeController.php
 
- 
  #[Route('/front/dashboard/matches', name: 'app_front_matches', methods: ['GET'])]
  public function matches(
      Request $request,
@@ -305,6 +304,7 @@ final class FrontOfficeController extends AbstractController
      ]);
  }
  
+ 
 
     // #[Route('/front/dashboard/matches', name: 'app_front_matches')]
     // public function matches(
@@ -375,11 +375,23 @@ final class FrontOfficeController extends AbstractController
         // 2) fetch each team’s full info
         $homeTeam = $api->getTeamById((int)$match['match_hometeam_id']);
         $awayTeam = $api->getTeamById((int)$match['match_awayteam_id']);
+
+        $contextData = [
+            'teamA'  => $match['match_hometeam_name'],
+            'teamB'  => $match['match_awayteam_name'],
+            'date'   => "{$match['match_date']} {$match['match_time']}",
+            'status' => $match['match_status'],
+            'league' => $match['league_name']
+        ];
+        
     
         return $this->render('front_office_dashboard/api-match-details.html.twig', [
             'match'    => $match,
             'homeTeam' => $homeTeam,
             'awayTeam' => $awayTeam,
+            'contextType' => 'api_match',
+            'contextId'   => $match['match_id'],
+            'contextData' => $contextData
         ]);
     }
 
@@ -514,11 +526,24 @@ public function tournois(
             ];
         }
 
+
+
+        $contextData = [
+            'teamA'      => $match->getTeamA()->getNom(),
+            'teamB'      => $match->getTeamB()->getNom(),
+            'date'       => $match->getMatchTime()->format('Y-m-d H:i'),
+            'status'     => $match->getStatus(),
+            'tournament' => $match->getTournoi()?->getNom()
+        ];
+        
         // 6) render with 4 new Twig vars
         return $this->render('front_office_dashboard/match-details.html.twig', [
             'match'       => $match,
             'playersHome' => $playersHome,
             'playersAway' => $playersAway,
+            'contextType' => 'local_match',
+            'contextId'   => $match->getId(),
+            'contextData' => $contextData
         ]);
     }
 

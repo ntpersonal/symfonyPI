@@ -1,0 +1,126 @@
+{# templates/chat/_widget.html.twig #}
+<div class="position-fixed bottom-0 end-0 mb-4 me-4" style="z-index:1050;">
+  <button id="toggle-chatbot"
+          class="btn btn-primary rounded-circle shadow p-3">
+    <i class="fas fa-comments fa-lg"></i>
+  </button>
+
+  <div id="chatbot-container"
+       class="card shadow"
+       style="width:350px; display:none; max-height:500px;">
+    <div class="card-header bg-primary text-white d-flex justify-content-between">
+      <span> Assistant</span>
+      <div>
+        <button id="clear-chat"
+                class="btn btn-sm btn-outline-light me-2"
+                title="Effacer la conversation">
+          <i class="fas fa-trash"></i>
+        </button>
+        <button id="close-chatbot"
+                class="btn-close btn-close-white"></button>
+      </div>
+    </div>
+    <div class="card-body p-0 d-flex flex-column">
+      <div id="chat-messages"
+           class="flex-grow-1 p-3 overflow-auto"
+           style="height:300px;">
+        <div class="d-flex mb-3">
+          <div class="bg-light p-2 rounded-3 shadow-sm">
+            <p class="mb-0">Bonjour ! Je suis votre assistant </p>
+          </div>
+        </div>
+      </div>
+      <div class="p-3 border-top bg-light">
+        <form id="chat-form" class="d-flex">
+          <input type="text" id="chat-input" name="message"
+                 class="form-control me-2"
+                 placeholder="Posez votre question…"
+                 required>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+        <div id="chat-typing"
+             class="text-muted small mt-1"
+             style="display:none;">
+          <i class="fas fa-circle-notch fa-spin me-1"></i>
+          En train d’écrire…
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn    = document.getElementById('toggle-chatbot');
+  const container    = document.getElementById('chatbot-container');
+  const closeBtn     = document.getElementById('close-chatbot');
+  const clearBtn     = document.getElementById('clear-chat');
+  const form         = document.getElementById('chat-form');
+  const input        = document.getElementById('chat-input');
+  const messagesDiv  = document.getElementById('chat-messages');
+  const typing       = document.getElementById('chat-typing');
+  const endpoint     = "{{ path('api_chat') }}";
+
+  // Open / close
+  toggleBtn.addEventListener('click', () => {
+    container.style.display = 'block';
+  });
+  closeBtn.addEventListener('click', () => {
+    container.style.display = 'none';
+  });
+
+  // Clear conversation
+  clearBtn.addEventListener('click', () => {
+    if (!confirm('Effacer la conversation ?')) return;
+    messagesDiv.innerHTML = `
+      <div class="d-flex mb-3">
+        <div class="bg-light p-2 rounded-3 shadow-sm">
+          <p class="mb-0">Bonjour ! Je suis votre assistant Padel.…</p>
+        </div>
+      </div>`;
+  });
+
+  // Send message
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendMessage(text, 'Vous', 'user');
+    input.value = '';
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    typing.style.display = 'block';
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ message: text })
+      });
+      const { reply } = await res.json();
+      typing.style.display = 'none';
+      appendMessage(reply, 'Padel Assistant', 'bot');
+    } catch (err) {
+      typing.style.display = 'none';
+      appendMessage("Erreur de connexion au serveur.", 'bot');
+      console.error(err);
+    }
+  });
+
+  function appendMessage(content, author, sender) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'd-flex mb-3 ' +
+      (sender === 'user' ? 'justify-content-end' : 'justify-content-start');
+    const bubble = document.createElement('div');
+    bubble.className = 
+      'p-2 rounded-3 shadow-sm ' +
+      (sender === 'user' ? 'bg-primary text-white' : 'bg-light text-dark');
+    bubble.innerHTML = `<strong>${author} :</strong> ${content}`;
+    wrapper.appendChild(bubble);
+    messagesDiv.appendChild(wrapper);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+});
+</script>

@@ -23,116 +23,49 @@
 {% block content %}
   <div class="rts-matches-section section-gap py-5">
     <div class="container">
+      <!-- Filter Form -->
+      <form id="match-filter-form" class="row g-3 mb-4">
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-primary text-white"><i class="fas fa-search"></i></span>
+            <input type="text" name="team" id="team-filter" placeholder="Search by team name..." 
+                   class="form-control" value="{{ app.request.query.get('team') }}"/>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-primary text-white"><i class="fas fa-filter"></i></span>
+            <select name="status" id="status-filter" class="form-select">
+              <option value="">All status</option>
+              <option value="UPCOMING" {% if app.request.query.get('status') == 'UPCOMING' %}selected{% endif %}>Upcoming</option>
+              <option value="LIVE" {% if app.request.query.get('status') == 'LIVE' %}selected{% endif %}>Live</option>
+              <option value="FINISHED" {% if app.request.query.get('status') == 'FINISHED' %}selected{% endif %}>Finished</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-filter me-2"></i>Apply Filters
+          </button>
+        </div>
+        <div id="filter-status" class="col-12 d-none">
+          <div class="alert alert-info d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm text-primary me-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Filtering matches...</span>
+          </div>
+        </div>
+      </form>
 
-{# ----------------------------------------------------------------- #}
-{#                            LOCAL MATCHES                         #}
-{# ----------------------------------------------------------------- #}
-<div class="section-title text-center mb-5">
-  <h2 class="fw-bold pb-3 border-bottom border-3 border-primary">Local Matches</h2>
-</div>
-<div class="row g-4">
-  {% for match in matches %}
-    {% set home = match.teamA %}
-    {% set away = match.teamB %}
-    <div class="col-xl-3 col-md-6">
-      <div class="match-card bg-white shadow-sm rounded-3 overflow-hidden h-100">
-        <div class="match-teams text-center pt-4 px-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="team text-center" style="width:40%">
-              <img src="{{ asset('assets/images/sportify.png') }}"
-                   class="img-fluid rounded-circle mb-2" width="70"
-                   alt="{{ home.nom }}">
-              <h6 class="fw-bold text-truncate">{{ home.nom }}</h6>
-            </div>
-            <div class="vs-badge fw-bold fs-5">VS</div>
-            <div class="team text-center" style="width:40%">
-              <img src="{{ asset('assets/images/sportify.png') }}"
-                   class="img-fluid rounded-circle mb-2" width="70"
-                   alt="{{ away.nom }}">
-              <h6 class="fw-bold text-truncate">{{ away.nom }}</h6>
-            </div>
-          </div>
-        </div>
-        <div class="match-details text-center p-3">
-          <div class="match-date mb-2">
-            <i class="far fa-calendar-alt me-2"></i>{{ match.matchTime|date('D, M d, Y') }}
-          </div>
-          <div class="match-time mb-3">
-            <i class="far fa-clock me-2"></i>{{ match.matchTime|date('h:i A') }}
-          </div>
-          <div class="match-status mb-3">
-            <span class="badge rounded-pill px-4 py-2
-              bg-{{ match.status == 'FINISHED' ? 'success'
-                     : match.status == 'UPCOMING' ? 'warning'
-                     : match.status == 'LIVE'     ? 'danger'
-                                                  : 'secondary' }}">
-              {{ match.status|capitalize }}
-            </span>
-          </div>
-          <a href="{{ path('app_front_match_show', { id: match.id }) }}"
-             class="btn btn-outline-primary rounded-pill w-100">
-            Details
-          </a>
-        </div>
+      <!-- Matches Container -->
+      <div id="matches-container">
+        {% include 'front_office_dashboard/_matches_container.html.twig' with { 
+          matches: matches, 
+          apiMatches: apiMatches,
+          season: season 
+        } %}
       </div>
-    </div>
-  {% else %}
-    <div class="col-12">
-      <div class="alert alert-info text-center">
-        No local matches found.
-      </div>
-    </div>
-  {% endfor %}
-</div>
-
-      {# ----------------- API MATCHES ----------------- #}
-<div class="section-title text-center mt-5 mb-4">
-  <h2 class="fw-bold pb-3 border-bottom border-primary">Upcoming International Matches {{ season }}</h2>
-</div>
-<div class="row g-4">
-  {% for m in apiMatches %}
-    <div class="col-xl-3 col-md-6">
-      <div class="match-card bg-white shadow-sm rounded-3 h-100">
-        <div class="match-teams text-center pt-4 px-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="team text-center" style="width:40%">
-              <img src="{{ m.team_home_badge ?: asset('assets/images/sportify.png') }}"
-                   class="img-fluid rounded-circle mb-2" width="70"
-                   alt="{{ m.match_hometeam_name }}">
-              <h6 class="fw-bold text-truncate">{{ m.match_hometeam_name }}</h6>
-            </div>
-            <div class="vs-badge fw-bold fs-5">VS</div>
-            <div class="team text-center" style="width:40%">
-              <img src="{{ m.team_away_badge ?: asset('assets/images/sportify.png') }}"
-                   class="img-fluid rounded-circle mb-2" width="70"
-                   alt="{{ m.match_awayteam_name }}">
-              <h6 class="fw-bold text-truncate">{{ m.match_awayteam_name }}</h6>
-            </div>
-          </div>
-        </div>
-        <div class="match-details text-center p-3">
-          <div class="match-date mb-2">
-            <i class="far fa-calendar-alt me-2"></i>{{ m.match_date }}
-          </div>
-          <div class="match-time mb-3">
-            <i class="far fa-clock me-2"></i>{{ m.match_time }}
-          </div>
-          <a href="{{ path('app_front_api_match_show', { matchId: m.match_id }) }}"
-             class="btn btn-outline-primary rounded-pill w-100">
-            Details
-          </a>
-        </div>
-      </div>
-    </div>
-  {% else %}
-    <div class="col-12">
-      <div class="alert alert-info text-center">
-        <i class="fas fa-info-circle fa-3x mb-3"></i>
-        <h4>No API matches found.</h4>
-      </div>
-    </div>
-  {% endfor %}
-</div>
         
     </div>
   </div>
@@ -140,6 +73,66 @@
 
 {% block footer %}
   {{ parent() }}
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('match-filter-form');
+      const teamInput = form.querySelector('input[name="team"]');
+      const statusSel = form.querySelector('select[name="status"]');
+      const container = document.getElementById('matches-container');
+      const filterStatus = document.getElementById('filter-status');
+      const url = "{{ path('app_front_matches') }}";
+
+      // Form submission handler
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        sendRequest();
+      });
+      
+      // Optional: Debounced input handler for immediate filtering while typing
+      let timeout = null;
+      teamInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(sendRequest, 500);
+      });
+      
+      // Immediate filter on status change
+      statusSel.addEventListener('change', sendRequest);
+
+      function sendRequest() {
+        // Show loading indicator
+        filterStatus.classList.remove('d-none');
+        
+        const params = new URLSearchParams(new FormData(form)).toString();
+        fetch(`${url}?${params}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.text())
+        .then(html => {
+          container.innerHTML = html;
+          // Update URL to reflect filters (for bookmarking/sharing)
+          history.pushState(null, '', `${url}?${params}`);
+          // Hide loading indicator
+          filterStatus.classList.add('d-none');
+        })
+        .catch(err => {
+          console.error('Filter error:', err);
+          filterStatus.classList.add('d-none');
+          // Show error message
+          alert('Error filtering matches. Please try again.');
+        });
+      }
+      
+      // Initialize filter values from URL params if present
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('team')) {
+        teamInput.value = urlParams.get('team');
+      }
+      if (urlParams.has('status')) {
+        statusSel.value = urlParams.get('status');
+      }
+    });
+  </script>
   
   <style>
     .hover-scale {
@@ -151,8 +144,13 @@
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
     }
     
-    .transition-all {
+    .match-card {
       transition: all 0.3s ease;
+    }
+    
+    .match-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
     }
     
     .overlay-dark {
@@ -193,6 +191,20 @@
     
     .vs-badge {
       color: #333;
+    }
+    
+    /* Button hover effect */
+    .btn-primary {
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    #filter-status {
+      transition: opacity 0.3s ease;
     }
   </style>
 {% endblock %}

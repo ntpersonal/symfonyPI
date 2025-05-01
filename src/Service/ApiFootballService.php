@@ -116,4 +116,40 @@ public function getTeamById(int $teamId): array
     return $resp[0] ?? [];
 }
 
+// 1. Count how many times two teams have played in a season (all matches)
+public function countHeadToHeadMatches(string $teamA, string $teamB, int $seasonStart): int
+{
+    $matches = $this->getEventsMatches($seasonStart);
+    return $this->countMatchesBetweenTeams($matches, $teamA, $teamB);
+}
+
+// 2. Count how many times two teams have played in a specific league/tournament
+public function countHeadToHeadMatchesInLeague(string $teamA, string $teamB, int $leagueId, int $seasonStart): int
+{
+    $matches = $this->getFixturesByLeagueAndSeason($leagueId, $seasonStart);
+    return $this->countMatchesBetweenTeams($matches, $teamA, $teamB);
+}
+
+// PRIVATE helper to avoid repeating
+private function countMatchesBetweenTeams(array $matches, string $teamA, string $teamB): int
+{
+    $count = 0;
+    $teamA = strtolower($teamA);
+    $teamB = strtolower($teamB);
+
+    foreach ($matches as $match) {
+        $home = strtolower($match['match_hometeam_name']);
+        $away = strtolower($match['match_awayteam_name']);
+
+        if (
+            ($home === $teamA && $away === $teamB) ||
+            ($home === $teamB && $away === $teamA)
+        ) {
+            $count++;
+        }
+    }
+
+    return $count;
+}
+
 }
