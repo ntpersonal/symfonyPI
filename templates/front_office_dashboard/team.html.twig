@@ -117,7 +117,9 @@
         }
     </style>
 {% endblock %}
-
+{% block navbar %}
+{{ parent() }}
+{% endblock %}
 {% block banner %}
     <!--================= Banner Section Start Here =================-->
      <div class="banner banner1">
@@ -139,135 +141,302 @@
 {% endblock %}
 
 {% block content %}
-<!--================= Team Section Start Here =================-->
+{% if (app.user.team is null or app.user.team.id == 0) and app.user.role == 'player' %}
+{#================= Team Selection Start Here =================#}
     <div class="rts-team-section section-gap">
         <div class="container">
             <div class="row">
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player1.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JAHID EMILY</a>
-                            <span class="player-role">GOALKEEPER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player2.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JOHN DOE</a>
-                            <span class="player-role">GOALKEEPER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player3.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">LAKATTURA</a>
-                            <span class="player-role">DEFENDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player4.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">NICHOLAS</a>
-                            <span class="player-role">DEFENDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player5.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">M. ROJO</a>
-                            <span class="player-role">DEFENDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player6.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">A. HAKIM</a>
-                            <span class="player-role">MID-FIELDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player7.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">A. DRAGO</a>
-                            <span class="player-role">MID-FIELDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player8.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">ANDREW GOMEZ</a>
-                            <span class="player-role">MID-FIELDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player9.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">M. ROLIN</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player10.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JIKU</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player11.jpg') }}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">DOMINGO</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player12.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JOHN SNOW</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
+                <div class="col-12 text-center">
+                    <div class="alert alert-info">
+                        <h4>You don't have a team yet</h4>
+                        <p>Please select a team to join from the available options below</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#teamSelectionModal">
+                            Select Team
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!--================= Team Section End Here =================-->
 
+    {# Team Selection Modal #}
+<div class="modal fade" id="teamSelectionModal" tabindex="-1" aria-labelledby="teamSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="teamSelectionModalLabel">Join a Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# Team Type Selection Tab #}
+                <ul class="nav nav-tabs mb-4" id="teamTypeTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="local-tab" data-bs-toggle="tab" data-bs-target="#local-teams" type="button" role="tab">
+                            Local Teams
+                        </button>
+                    </li>
+                    
+                </ul>
+
+                <div class="tab-content" id="teamTypeTabContent">
+                    {# Local Teams Tab #}
+                    <div class="tab-pane fade show active" id="local-teams" role="tabpanel">
+                    <div class="row">
+                        {% for team in teamsWithStatus %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card team-card-Player">
+                                    {% if team.team.logoPath %}
+                                    <img src="{{ path('app_image', {'subdirectory': 'teams', 'filename': team.team.logoPath|split('/')|last}) }}" 
+                                    alt="{{ team.team.nom }} logo">
+                                    {% else %}
+                                    <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+                                    {% endif %}
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">{{ team.team.nom }}</h5>
+                                        <div class="team-meta mb-2">
+                                            {% if team.hasManager %}
+                                                <span class="badge bg-warning">Has Manager</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Available</span>
+                                            {% endif %}
+                                        </div>
+                                        <button class="btn btn-primary btn-sm select-team-player" 
+                                            data-team-id="{{ team.team.id }}"
+                                            data-team-type="local">
+                                            Select Team
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    No local teams available at the moment.
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirm-selection-Player" disabled>Confirm Selection</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    {#================= Team Player Selection End Here =================#}
+
+
+{% elseif (app.user.team is null or app.user.team.id == 0) and app.user.role == 'organizer' %}
+<div class="rts-team-section section-gap">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="alert alert-info">
+                    <h4>You don't have a team yet</h4>
+                    <p>Please select a team to join from the available options below</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#teamSelectionModal">
+                            Select Existing Team
+                        </button>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createTeamModal">
+                            Create New Team
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Team Selection Modal #}
+<div class="modal fade" id="teamSelectionModal" tabindex="-1" aria-labelledby="teamSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="teamSelectionModalLabel">Select Your Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs mb-4" id="teamTypeTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="real-tab" data-bs-toggle="tab" data-bs-target="#real-teams" type="button" role="tab">
+                            Real Teams (API)
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="real-teams" role="tabpanel">
+                        <div class="mb-3">
+                            <label for="league-select" class="form-label">Select League:</label>
+                            <select class="form-select" id="league-select">
+                                <option value="">-- Select a league --</option>
+                                {% for league in topLeagues %}
+                                    <option value="{{ league.id }}">{{ league.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="api-team-search" placeholder="Search teams...">
+                                <button class="btn btn-outline-secondary" type="button" id="search-api-teams">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row" id="api-teams-container">
+                            <div class="col-12 text-center py-4">
+                                <p>Please select a league first</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirm-selection" disabled>Confirm Selection</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Create Team Modal #}
+<div class="modal fade" id="createTeamModal" tabindex="-1" aria-labelledby="createTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createTeamModalLabel">Create New Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="create-team-form">
+                    <div class="mb-3">
+                        <label for="team-name" class="form-label">Team Name</label>
+                        <input type="text" class="form-control" id="team-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="team-category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="team-category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="team-players" class="form-label">Number of Players</label>
+                        <input type="number" class="form-control" id="team-players" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="team-mode" class="form-label">Game Mode</label>
+                        <select class="form-select" id="team-mode" required>
+                            <option value="EN_GROUPE">Group</option>
+                            <option value="ELIMINATION">Elimination</option>
+                            <option value="COMBINE">Combined</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="team-logo" class="form-label">Team Logo</label>
+                        <input type="file" class="form-control" id="team-logo">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="create-team-submit">Create Team</button>
+            </div>
+        </div>
+    </div>
+</div>
+    {#================= Team Orginizer Selection End Here =================#}
+
+{% elseif app.user and app.user.team is not null and app.user.role == 'organizer' %}
+<!--================= Team Section Start Here =================-->
+<div class="rts-team-section section-gap">
+    <div class="container">
+        <div class="row">
+       <div class="col-12 d-flex align-items-center justify-content-between">
+        <h1 class="m-0">Your Team</h1>
+        <div class="d-flex gap-3">
+            <a href="#" class="btn btn-success">ADD Players</a>
+            {% if app.user.team.tournoi is null %}
+                <a href="{{ path('app_front_tournois')}}" class="btn btn-primary">Join Tournament</a>
+            {% endif %}
+        </div>
+    </div>
+
+            {% for player in players %}
+                <div class="col-xl-3 col-md-4 col-sm-6">
+                    <div class="player-single">
+                        <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-picture">
+                            {% if player.profilepicture %}
+                               <img src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" 
+     alt="{{ player.firstname }} {{ player.lastname }} photo">
+                            {% else %}
+                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+                            {% endif %}
+                        </a>
+                        <div class="content">
+                            <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-name">
+                                {{ player.firstname }} {{ player.lastname }}
+                            </a>
+                            <span class="player-role">
+                                {{ player.position|default('PLAYER')|upper }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No players found in your team
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% elseif app.user and app.user.team is not null and app.user.role == 'player' %}
+<!--================= Team Section Start Here =================-->
+<div class="rts-team-section section-gap">
+    <div class="container">
+        <div class="row">
+       <div class="col-12 d-flex align-items-center justify-content-between">
+        <h1 class="m-0">Your Team</h1>
+    </div>
+
+            {% for player in players %}
+                <div class="col-xl-3 col-md-4 col-sm-6">
+                    <div class="player-single">
+                        <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-picture">
+                            {% if player.profilepicture %}
+                               <img src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" 
+     alt="{{ player.firstname }} {{ player.lastname }} photo">
+                            {% else %}
+                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+                            {% endif %}
+                        </a>
+                        <div class="content">
+                            <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-name">
+                                {{ player.firstname }} {{ player.lastname }}
+                            </a>
+                            <span class="player-role">
+                                {{ player.position|default('PLAYER')|upper }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No players found in your team
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!--================= Team Section End Here =================-->
+ {% endif %}
 {% endblock %}
 {% block footer %}
  <!--================= Footer Start Here =================-->
@@ -309,21 +478,271 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        $(document).ready(function() {
-            // Team filter functionality
-            $('.team-filter button').click(function() {
-                $('.team-filter button').removeClass('active');
-                $(this).addClass('active');
-                
-                var filterValue = $(this).attr('data-filter');
-                
-                if(filterValue == 'all') {
-                    $('.col-xl-3').show();
-                } else {
-                    $('.col-xl-3').hide();
-                    $('.col-xl-3[data-category="' + filterValue + '"]').show();
-                }
-            });
+  document.addEventListener('DOMContentLoaded', function() {
+    // ================= Global Variables =================
+    let unreadCount = 0;
+    const maxNotifications = 10;
+
+    // ================= Organizer Team Selection =================
+    const leagueSelect = document.getElementById('league-select');
+    const teamSearch = document.getElementById('api-team-search');
+    const searchButton = document.getElementById('search-api-teams');
+    const teamsContainer = document.getElementById('api-teams-container');
+    const confirmSelection = document.getElementById('confirm-selection');
+    let selectedTeam = null;
+    let currentTeams = [];
+
+    // League selection handler
+    if (leagueSelect && teamsContainer) {
+        leagueSelect.addEventListener('change', function() {
+            const leagueId = this.value;
+            if (leagueId) {
+                loadTeamsForLeague(leagueId);
+            } else {
+                showInitialState();
+            }
         });
+    }
+
+    // Team search handler
+    if (searchButton && teamSearch) {
+        searchButton.addEventListener('click', function() {
+            const searchTerm = teamSearch.value.trim().toLowerCase();
+            if (searchTerm) filterTeams(searchTerm);
+        });
+
+        teamSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = teamSearch.value.trim().toLowerCase();
+                if (searchTerm) filterTeams(searchTerm);
+            }
+        });
+    }
+
+    // Confirm selection handler
+    if (confirmSelection) {
+        confirmSelection.addEventListener('click', async function() {
+            if (!selectedTeam) return;
+            
+            const leagueId = leagueSelect.value;
+            const leagueName = leagueSelect.options[leagueSelect.selectedIndex].text;
+            const teamCount = document.querySelectorAll('.team-card').length;
+
+            try {
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
+                const response = await fetch('/front/dashboard/assign-team', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        leagueId: Number(leagueId),
+                        teamId: parseInt(selectedTeam.id),
+                        teamName: selectedTeam.name,
+                        leagueName: leagueName.trim(),
+                        teamCount: Number(teamCount)
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to assign team');
+                
+                showToast('Team assigned successfully!');
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+                showToast(error.message, 'danger');
+                this.disabled = false;
+                this.innerHTML = 'Confirm Selection';
+            }
+        });
+    }
+
+    // ================= Player Team Selection =================
+    const confirmSelectionPlayer = document.getElementById('confirm-selection-Player');
+    let selectedPlayerTeam = null;
+
+    // Player team selection handler
+    document.addEventListener('click', function(e) {
+        const playerTeamBtn = e.target.closest('.select-team-player');
+        if (playerTeamBtn) {
+            const card = playerTeamBtn.closest('.team-card-Player');
+            selectedPlayerTeam = {
+                id: playerTeamBtn.dataset.teamId,
+                name: card.querySelector('.card-title').textContent.trim()
+            };
+            
+            // Update UI
+            document.querySelectorAll('.team-card-Player').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            if (confirmSelectionPlayer) confirmSelectionPlayer.disabled = false;
+        }
+    });
+
+    // ================= Player Team Selection with Mercure =================
+    if (confirmSelectionPlayer) {
+        confirmSelectionPlayer.addEventListener('click', async function() {
+            const button = this;
+            let eventSource;
+
+            try {
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
+                // Get current user ID
+                const userId = {{ app.user ? app.user.id : 'null' }};
+                if (!userId) throw new Error('User not authenticated');
+
+                // Mercure configuration
+                eventSource = new EventSource(`http://127.0.0.1:3000/.well-known/mercure?topic=/user/${userId}/notifications`);
+
+                eventSource.onmessage = e => {
+                    const notification = JSON.parse(e.data);
+                    switch(notification.type) {
+                        case 'team_join_accepted':
+                            showToast(notification.message, 'success');
+                            eventSource.close();
+                            window.location.reload();
+                            break;
+                        case 'team_join_rejected':
+                            showToast(notification.message, 'danger');
+                            eventSource.close();
+                            button.disabled = false;
+                            button.innerHTML = 'Confirm Selection';
+                            break;
+                    }
+                };
+
+                // Send join request
+                const response = await fetch(`/team/${selectedPlayerTeam.id}/request-join`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    body: JSON.stringify(selectedPlayerTeam)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to send request');
+                }
+
+                showToast('Join request sent! Waiting for approval...', 'info');
+
+            } catch (error) {
+                showToast(error.message, 'danger');
+                button.disabled = false;
+                button.innerHTML = 'Confirm Selection';
+                if (eventSource) eventSource.close();
+            }
+        });
+    }
+
+    // ================= Create Team Form =================
+    const createTeamSubmit = document.getElementById('create-team-submit');
+    if (createTeamSubmit) {
+        createTeamSubmit.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const form = document.getElementById('create-team-form');
+            
+            try {
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
+                const formData = new FormData(form);
+                const response = await fetch('/front/dashboard/create-team', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to create team');
+                
+                showToast('Team created successfully!');
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+                showToast(error.message, 'danger');
+                this.disabled = false;
+                this.innerHTML = 'Create Team';
+            }
+        });
+    }
+
+    // ================= Helper Functions =================
+    function loadTeamsForLeague(leagueId) {
+        teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        
+        fetch(`/api/teams/league/${leagueId}`)
+            .then(response => response.json())
+            .then(data => {
+                currentTeams = data.teams || [];
+                displayTeams(currentTeams);
+            })
+            .catch(() => showErrorMessage('Failed to load teams'));
+    }
+
+   function displayTeams(teams) {
+    teamsContainer.innerHTML = teams.length ? 
+        teams.map(team => {
+            // Get base URL from meta tag or current location
+            const baseUrl = document.querySelector('meta[name="base-url"]')?.content || window.location.origin;
+            
+            // Construct proper image path
+            const logoPath = team.logo 
+                ? `${baseUrl}/image/teams/${encodeURIComponent(team.logo.split('/').pop())}`
+                : `${baseUrl}/assets/images/default-team-logo.jpg`;
+
+            return `
+                <div class="col-md-4 mb-4">
+                    <div class="card team-card ${selectedTeam?.id === team.id ? 'border-primary' : ''}">
+                        <div class="card-body text-center">
+                            <img src="${logoPath}" 
+                                 alt="${team.name} logo" 
+                                 class="img-fluid mb-2" 
+                                 style="max-height: 80px;">
+                            <h5 class="card-title">${team.name}</h5>
+                            <button class="btn btn-sm ${selectedTeam?.id === team.id ? 'btn-primary' : 'btn-outline-primary'} select-team" 
+                                    data-team-id="${team.id}"
+                                    data-team-name="${team.name}">
+                                Select Team
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('') : showNoTeamsMessage();
+}
+
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast show align-items-center text-white bg-${type}`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"></button>
+            </div>
+        `;
+        
+        const container = document.getElementById('toast-container') || document.body;
+        container.appendChild(toast);
+        
+        toast.querySelector('.btn-close')?.addEventListener('click', () => toast.remove());
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    function showInitialState() {
+        if (teamsContainer) teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>Please select a league first</p></div>';
+    }
+
+    function showNoTeamsMessage() {
+        if (teamsContainer) teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>No teams found</p></div>';
+    }
+
+    function showErrorMessage(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mt-3';
+        errorDiv.textContent = message;
+        teamsContainer.parentNode.insertBefore(errorDiv, teamsContainer.nextSibling);
+        setTimeout(() => errorDiv.remove(), 5000);
+    }
+});
     </script>
 {% endblock %} 

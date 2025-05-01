@@ -7,39 +7,265 @@ use App\Repository\TournoiRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Service\ApiFootballService;
-use Symfony\Component\HttpFoundation\Request;
 use App\Repository\UserRepository;
 
 
+use App\Entity\Team;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Controller\TeamManagerCheckerController;
+use App\Service\ApiFootballService;
+use SebastianBergmann\Environment\Console;
+use Symfony\Component\Security\Core\Security;
+use App\Entity\Ranking;
+use App\Entity\TeamRequest;
+use App\Entity\User;
+use Doctrine\ORM\EntityManager;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 final class FrontOfficeController extends AbstractController
 {
-    #[Route('/front/dashboard', name: 'app_front_office')]
-    public function index(): Response
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        // TODO: Replace this with actual player data from your database
+        $this->entityManager = $entityManager;
+    }
+
+    #[Route('/front/dashboard', name: 'app_front_office')]
+    public function index(Security $security, EntityManagerInterface $em): Response
+    {
+        /** @var User|null $user */
+        $user = $security->getUser();
+
+        $data = $this->getTeamRequestsData($user, $em);
+
+        // your sample player payload
         $player = [
-            'id' => 1,
-            'name' => 'John Doe',
-            'role' => 'FORWARD',
-            'description' => 'There are so many sports available in the world nowadays, but we can categorize them by the numbers of players, the three main categories are individual sport, dual sport.'
+            'id'          => 1,
+            'name'        => 'John Doe',
+            'role'        => 'FORWARD',
+            'description' => 'There are so many sports available in the world nowadays…'
         ];
 
         return $this->render('front_office_dashboard/index.html.twig', [
             'controller_name' => 'FrontOfficeController',
-            'player' => $player
+            'player'          => $player,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
     #[Route('/front/dashboard/home1', name: 'app_home1')]
-    public function home1(): Response
+    public function home1(Security $security, EntityManagerInterface $em): Response
     {
-        return $this->render('front_office_dashboard/index.html.twig');
+        /** @var User|null $user */
+        $user = $security->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $data = $this->getTeamRequestsData($user, $em);
+
+        // note: same variable names as in index()
+        return $this->render('front_office_dashboard/index.html.twig', [
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
+        ]);
     }
-    #[Route('/front/dashboard/team', name: 'app_team')]
-    public function team(): Response
+    
+    private function getTeamRequestsData(?User $user, EntityManagerInterface $em): array
     {
-        return $this->render('front_office_dashboard/team.html.twig');
+        if (!$user) {
+            return ['teamRequests' => [], 'playerRequests' => []];
+        }
+
+        $team = $user->getTeam();
+
+        // only users with ROLE_ORGANIZER see team requests
+        $teamRequests = [];
+        if ($this->isGranted('ROLE_ORGANIZER') && $team) {
+            $teamRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'team'   => $team,
+                'status' => 'pending',
+            ]);
+        }
+
+        // only users with ROLE_PLAYER see their own requests
+        $playerRequests = [];
+        if ($this->isGranted('ROLE_PLAYER')) {
+            $playerRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'player' => $user,
+                'status' => 'pending',
+            ]);
+        }
+
+        return [
+            'teamRequests'   => $teamRequests,
+            'playerRequests' => $playerRequests,
+        ];
+    }
+        #[Route('/front/dashboard/team', name: 'app_team', methods: ['GET','POST'])]
+    public function team(
+        Request $request,
+        Security $security,
+        TeamManagerCheckerController $teamManagerChecker,
+        ApiFootballService $api_football,
+        EntityManagerInterface $entityManager
+    ): Response {
+        /** @var User $user */
+        $user = $security->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'User not authenticated'], 401);
+        }
+
+        $data = $this->getTeamRequestsData($user, $entityManager);
+
+        $team = $user->getTeam();
+        if ($request->isMethod('GET')) {
+        $players = $this->entityManager->getRepository(User::class)->findBy([
+            'team' => $team,
+            'role' => 'player'
+        ], ['position' => 'ASC']);    
+        $teams = $this->entityManager->getRepository(Team::class)->findAll();
+        $sslCertPath = 'C:/xampp4/php/extras/ssl/cacert.pem';
+    if (!file_exists($sslCertPath)) {
+        $this->addFlash('error', 'SSL certificate file not found at: '.$sslCertPath);
+        // You could either:
+        // 1. Continue without API calls
+        // 2. Redirect to an error page
+        // 3. Throw an exception
+        
+        // For this example, we'll continue but without API data
+        $topLeagues = [];
+    } else {
+        // Only make API calls if certificate exists
+        $season = 2024;
+        try {
+            $topLeagues = $api_football->getTop5Leagues($season);
+        } catch (\Exception $e) {
+            $this->addFlash('warning', 'Could not fetch league data: '.$e->getMessage());
+            $topLeagues = [];
+        }
+    }
+
+                
+                // Filter to only include teams with managers
+        $teamsWithManagers = array_filter($teams, function($team) use ($teamManagerChecker) {
+            return $teamManagerChecker->hasTeamManager($team);
+        });
+        $teamsWithStatus = array_map(function($team) use ($teamManagerChecker) {
+            return [
+                'team' => $team,
+                'hasManager' => $teamManagerChecker->hasTeamManager($team)
+            ];
+        }, $teamsWithManagers);
+        }
+        if ($request->isMethod('POST')) {
+            try {
+                // Get all data including files
+                dump("Request data:", $request->request->all());
+                dump("Files data:", $request->files->all());
+                
+                // Get regular form fields - use the exact names from your form
+                $data = [
+                    'name' => $request->request->get('team-name'), // match form field name
+                    'category' => $request->request->get('team-category'),
+                    'players' => $request->request->get('team-players'),
+                    'mode' => $request->request->get('team-mode'),
+                    'logo' => $request->request->get('team-logo')
+                ];
+                
+                // Get uploaded file - use exact form field name
+                $logoFile = $request->files->get('team-logo'); // match file input name
+                
+                // Debug the received data
+                dump("Processed data:", $data);
+                dump("Logo file:", $logoFile);
+                
+                // Validate required fields
+                if (empty($data['name']) || empty($data['category']) || 
+                    empty($data['players']) || empty($data['mode'])) {
+                    throw new \Exception('All fields are required');
+                }
+        
+                // Validate number of players
+                if (!is_numeric($data['players']) || $data['players'] < 1 || $data['players'] > 30) {
+                    throw new \Exception('Number of players must be between 1 and 30');
+                }
+        
+                // Create and persist team
+                $team = new Team();
+                $team->setNom($data['name']);
+                $team->setCategorie($data['category']);
+                if($data['mode'] == 'Group'){
+                    $team->setModeJeu('EN_GROUPE');
+                }else{
+                    $team->setModeJeu('PAR_2');
+                }
+                $team->setNombreJoueurs((int)$data['players']);
+        
+                // Handle file upload
+                if ($logoFile) {
+                    $newFilename = $this->handleFileUpload($logoFile);
+                    $team->setLogoPath($newFilename);
+                }
+        
+                $entityManager->persist($team);
+                $user->setTeam($team);
+                $entityManager->persist($user);
+                $entityManager->flush();
+        
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => true,
+                        'redirectUrl' => $this->generateUrl('app_team')
+                    ]);
+                }
+        
+                // For regular form submissions
+                return $this->redirectToRoute('app_team');
+        
+            } catch (\Exception $e) {
+                // Handle AJAX errors
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'error' => 'Error: ' . $e->getMessage()
+                    ], 400);
+                }
+        
+                // For regular form submissions
+                $this->addFlash('error', 'Error: ' . $e->getMessage());
+                return $this->redirectToRoute('app_team');
+            }
+        }
+
+        return $this->render('front_office_dashboard/team.html.twig', [
+            'teamsWithStatus' => $teamsWithStatus,
+            'topLeagues' => $topLeagues,
+            'players' => $players,
+            'currentTeam' => $team,
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
+        ]);
+    }
+
+    private function handleFileUpload($file)
+    {
+        // Generate a unique filename
+        $newFilename = md5(uniqid()).'.'.$file->guessExtension();
+        $uploadDir = 'C:/xampp4/htdocs/img/teams/';
+        
+        // Ensure the upload directory exists
+        if (!file_exists($uploadDir)) {
+            if (!mkdir($uploadDir, 0777, true)) {
+                throw new \RuntimeException('Failed to create upload directory: ' . $uploadDir);
+            }
+        }
+
+        // Move the file to the upload directory
+        $file->move($uploadDir, $newFilename);
+        return $newFilename;
     }
     #[Route('/front/dashboard/team/{id}', name: 'app_team_details')]
     public function team_details(int $id): Response
@@ -123,16 +349,60 @@ final class FrontOfficeController extends AbstractController
 
 
     #[Route('/front/dashboard/score', name: 'app_score')]
-    public function score(): Response
+    public function score(EntityManagerInterface $entityManager, Security $security): Response
     {
-        return $this->render('front_office_dashboard/score.html.twig');
+        /** @var User $user */
+        $user = $security->getUser();
+        $team = null;
+        $leagueId = null;
+        $rankings = [];
+
+        $data = $this->getTeamRequestsData($user, $entityManager);
+
+        if ($user instanceof User) {
+            $team = $user->getTeam();
+            
+            // If user has a team, get the tournament/league ID
+            if ($team && $team->getTournoi()) {
+                $leagueId = $team->getTournoi()->getId();
+                
+                // Get rankings only for this specific league/tournament
+                $rankings = $entityManager->getRepository(Ranking::class)
+                    ->createQueryBuilder('r')
+                    ->join('r.team', 't')
+                    ->join('r.tournoi', 'tournament')
+                    ->where('tournament.id = :leagueId')
+                    ->setParameter('leagueId', $leagueId)
+                    ->orderBy('r.position', 'ASC')
+                    ->getQuery()
+                    ->getResult();
+            }
+        }
+    
+        
+    
+        return $this->render('front_office_dashboard/score.html.twig', [
+            'rankings' => $rankings,
+            'userTeam' => $team,
+            'currentLeagueId' => $leagueId,
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
+        ]);
     }
 
     #[Route('/front/dashboard/player/{id}', name: 'app_player_details')]
-    public function playerDetails(int $id): Response
+    public function playerDetails(int $id,Security $security,EntityManager $em): Response
     {
+        /** @var User|null $user */
+        $user = $security->getUser();
+
+        $data = $this->getTeamRequestsData($user, $em);
+
+        $player = $this->entityManager->getRepository(User::class)->find($id);
         return $this->render('front_office_dashboard/player-details.html.twig', [
-            'player' => null // TODO: Fetch player data from database
+            'player' => $player, // TODO: Fetch player data from database
+            'teamRequests'   => $data['teamRequests'],
+            'playerRequests' => $data['playerRequests'],
         ]);
     }
 

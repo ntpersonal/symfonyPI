@@ -62,5 +62,5 @@ security:
     - { path: ^/product, roles: PUBLIC_ACCESS }
 
     
-    
 
+    - { path: ^/\.well-known/mercure, roles: PUBLIC_ACCESS }

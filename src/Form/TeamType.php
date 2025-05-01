@@ -12,7 +12,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 class TeamType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -73,6 +74,21 @@ class TeamType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Enter number of players'
+                ]
+            ])
+            ->add('logoPath', FileType::class, [
+                'label' => 'Logo',
+                'required' => false, // Since the field is nullable
+                'mapped' => false, // This means the form won't try to directly update the entity property
+                'constraints' => [
+                    new File([
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/gif',
+                        ],
+                        'mimeTypesMessage' => 'Please upload a valid image file (JPEG, PNG or GIF)',
+                    ])
                 ]
             ])
             ->add('submit', SubmitType::class, [

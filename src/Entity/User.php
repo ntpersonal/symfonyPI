@@ -482,6 +482,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private Collection $events;
 
+    /**
+     * @var Collection<int, TeamRequest>
+     */
+    #[ORM\OneToMany(targetEntity: TeamRequest::class, mappedBy: 'player')]
+    private Collection $teamRequests;
+     /**
+     * @var Collection<int, TeamRequest>
+     */
+    #[ORM\OneToMany(targetEntity: TeamRequest::class, mappedBy: 'player')]
+    private Collection $sentTeamRequests;
+    /**
+     * @var Collection<int, TeamRequest>
+     */
+    #[ORM\OneToMany(targetEntity: TeamRequest::class, mappedBy: 'manager')]
+    private Collection $receivedTeamRequests;
+    
     public function __construct()
     {
         $this->orders = new ArrayCollection();
@@ -489,6 +505,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->tournois = new ArrayCollection();
         $this->reclamations = new ArrayCollection();
         $this->events = new ArrayCollection();
+        $this->sentTeamRequests = new ArrayCollection();
+        $this->receivedTeamRequests=new ArrayCollection();
     }
 
     /**
@@ -630,6 +648,65 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setGoogleId(?string $googleId): self
     {
         $this->googleId = $googleId;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TeamRequest>
+     */
+    public function getsentTeamRequests(): Collection
+    {
+        return $this->sentTeamRequests;
+    }
+
+    public function addsentTeamRequest(TeamRequest $teamRequest): static
+    {
+        if (!$this->sentTeamRequests->contains($teamRequest)) {
+            $this->sentTeamRequests->add($teamRequest);
+            $teamRequest->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removesentTeamRequest(TeamRequest $teamRequest): static
+    {
+        if ($this->sentTeamRequests->removeElement($teamRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($teamRequest->getPlayer() === $this) {
+                $teamRequest->setPlayer(null);
+            }
+        }
+
+        return $this;
+    }
+    /**
+     * @return Collection<int, TeamRequest>
+     */
+    public function getreceivedTeamRequests(): Collection
+    {
+        return $this->receivedTeamRequests;
+    }
+
+    public function addreceivedTeamRequest(TeamRequest $teamRequest): static
+    {
+        if (!$this->receivedTeamRequests->contains($teamRequest)) {
+            $this->receivedTeamRequests->add($teamRequest);
+            $teamRequest->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTeamRequest(TeamRequest $teamRequest): static
+    {
+        if ($this->receivedTeamRequests->removeElement($teamRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($teamRequest->getPlayer() === $this) {
+                $teamRequest->setPlayer(null);
+            }
+        }
+
         return $this;
     }
 }

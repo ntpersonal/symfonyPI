@@ -174,11 +174,17 @@ class Team
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'team')]
     private Collection $users;
 
+    /**
+     * @var Collection<int, TeamRequest>
+     */
+    #[ORM\OneToMany(targetEntity: TeamRequest::class, mappedBy: 'team')]
+    private Collection $joinRequests;
     public function __construct()
     {
         $this->matches = new ArrayCollection();
         $this->rankings = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->joinRequests = new ArrayCollection();
     }
 
     /**
@@ -231,6 +237,36 @@ class Team
             }
             if ($match->getTeamB() === $this) {
                // $match->setTeamB(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TeamRequest>
+     */
+    public function getTeamRequests(): Collection
+    {
+        return $this->joinRequests;
+    }
+
+    public function addTeamRequest(TeamRequest $teamRequest): static
+    {
+        if (!$this->joinRequests->contains($teamRequest)) {
+            $this->joinRequests->add($teamRequest);
+            $teamRequest->setTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTeamRequest(TeamRequest $teamRequest): static
+    {
+        if ($this->joinRequests->removeElement($teamRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($teamRequest->getTeam() === $this) {
+                $teamRequest->setTeam(null);
             }
         }
 
