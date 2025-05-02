@@ -12,21 +12,33 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\TeamRequest;
 
 class PlayerProfileController extends AbstractController
 {
     private $logger;
 
-    public function __construct(LoggerInterface $logger)
+
+    public function __construct(LoggerInterface $logger,)
     {
         $this->logger = $logger;
+      
     }
 
     #[Route('/player/profile', name: 'app_player_profile')]
-    public function profile(Security $security, ManagerRegistry $doctrine): Response
+    public function profile(Security $security, ManagerRegistry $doctrine, 
+    EntityManagerInterface $em): Response
     {
         // Get the current user
+         /** @var User|null $user */
         $user = $security->getUser();
+
+
+       $data = $this->getTeamRequestsData($user, $em);
+          
+       
+
 
         if (!$user) {
             return $this->redirectToRoute('app_log_in');
@@ -34,6 +46,8 @@ class PlayerProfileController extends AbstractController
 
         return $this->render('front_office/player_profile.html.twig', [
             'user' => $user,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
@@ -48,10 +62,13 @@ class PlayerProfileController extends AbstractController
     }
 
     #[Route('/player/profile/edit', name: 'app_player_profile_edit', methods: ['GET', 'POST'])]
-    public function editProfile(Request $request, Security $security, ManagerRegistry $doctrine, UserPasswordHasherInterface $passwordHasher): Response
+    public function editProfile(Request $request, Security $security, ManagerRegistry $doctrine, UserPasswordHasherInterface $passwordHasher,
+    EntityManagerInterface $em): Response
     {
-        $user = $security->getUser();
+    /** @var User|null $user */
+    $user = $security->getUser();
 
+    $data = $this->getTeamRequestsData($user, $em);
         if (!$user) {
             return $this->redirectToRoute('app_log_in');
         }
@@ -175,6 +192,8 @@ class PlayerProfileController extends AbstractController
         return $this->render('front_office/player_profile_edit.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
@@ -241,5 +260,36 @@ class PlayerProfileController extends AbstractController
             $this->logger->error('Error in handleFileUpload: ' . $e->getMessage());
             throw $e;
         }
+    }
+    private function getTeamRequestsData(?User $user, EntityManagerInterface $em): array
+    {
+        if (!$user) {
+            return ['teamRequests' => [], 'playerRequests' => []];
+        }
+
+        $team = $user->getTeam();
+
+        // only users with ROLE_ORGANIZER see team requests
+        $teamRequests = [];
+        if ($this->isGranted('ROLE_ORGANIZER') && $team) {
+            $teamRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'team'   => $team,
+                'status' => 'pending',
+            ]);
+        }
+
+        // only users with ROLE_PLAYER see their own requests
+        $playerRequests = [];
+        if ($this->isGranted('ROLE_PLAYER')) {
+            $playerRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'player' => $user,
+                'status' => 'pending',
+            ]);
+        }
+
+        return [
+            'teamRequests'   => $teamRequests,
+            'playerRequests' => $playerRequests,
+        ];
     }
 }

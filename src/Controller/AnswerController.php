@@ -95,6 +95,7 @@ class AnswerController extends AbstractController
         return $this->render('answer/list.html.twig', [
             'reclamation' => $reclamation,
             'answers' => $answers,
+            
         ]);
     }
 }

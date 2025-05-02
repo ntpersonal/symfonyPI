@@ -14,12 +14,15 @@ use App\Entity\Team;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Controller\TeamManagerCheckerController;
 use App\Service\ApiFootballService;
+use App\Service\ApiFootballService2;
+
 use SebastianBergmann\Environment\Console;
 use Symfony\Component\Security\Core\Security;
 use App\Entity\Ranking;
 use App\Entity\TeamRequest;
 use App\Entity\User;
 use Doctrine\ORM\EntityManager;
+
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 final class FrontOfficeController extends AbstractController
@@ -109,7 +112,7 @@ final class FrontOfficeController extends AbstractController
         Request $request,
         Security $security,
         TeamManagerCheckerController $teamManagerChecker,
-        ApiFootballService $api_football,
+        ApiFootballService2 $api_football,
         EntityManagerInterface $entityManager
     ): Response {
         /** @var User $user */
@@ -127,7 +130,7 @@ final class FrontOfficeController extends AbstractController
             'role' => 'player'
         ], ['position' => 'ASC']);    
         $teams = $this->entityManager->getRepository(Team::class)->findAll();
-        $sslCertPath = 'C:/xampp4/php/extras/ssl/cacert.pem';
+        $sslCertPath = 'C:/xampp/php/extras/ssl/cacert.pem';
     if (!file_exists($sslCertPath)) {
         $this->addFlash('error', 'SSL certificate file not found at: '.$sslCertPath);
         // You could either:
@@ -254,7 +257,7 @@ final class FrontOfficeController extends AbstractController
     {
         // Generate a unique filename
         $newFilename = md5(uniqid()).'.'.$file->guessExtension();
-        $uploadDir = 'C:/xampp4/htdocs/img/teams/';
+        $uploadDir = 'C:/xampp/htdocs/img/teams/';
         
         // Ensure the upload directory exists
         if (!file_exists($uploadDir)) {
@@ -268,10 +271,17 @@ final class FrontOfficeController extends AbstractController
         return $newFilename;
     }
     #[Route('/front/dashboard/team/{id}', name: 'app_team_details')]
-    public function team_details(int $id): Response
+    public function team_details(int $id,Security $security, EntityManagerInterface $em): Response
     {
+           /** @var User|null $user */
+           $user = $security->getUser();
+
+           $data = $this->getTeamRequestsData($user, $em);
+
         return $this->render('front_office_dashboard/team-details.html.twig', [
-            'team' => null // TODO: Fetch team data from database
+            'team' => null, // TODO: Fetch team data from database
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
     #[Route('/front/dashboard/history', name: 'app_history')]
@@ -391,7 +401,7 @@ final class FrontOfficeController extends AbstractController
     }
 
     #[Route('/front/dashboard/player/{id}', name: 'app_player_details')]
-    public function playerDetails(int $id,Security $security,EntityManager $em): Response
+    public function playerDetails(int $id,Security $security,EntityManagerInterface $em): Response
     {
         /** @var User|null $user */
         $user = $security->getUser();
@@ -473,8 +483,14 @@ final class FrontOfficeController extends AbstractController
  public function matches(
      Request $request,
      MatchesRepository $matchesRepository,
-     ApiFootballService $apiFootballService
+     ApiFootballService $apiFootballService,
+     Security $security, 
+     EntityManagerInterface $em
  ): Response {
+       /** @var User|null $user */
+       $user = $security->getUser();
+
+       $data = $this->getTeamRequestsData($user, $em);
      // 1) Get filters
      $teamFilter   = $request->query->get('team', '');
      $statusFilter = $request->query->get('status', '');
@@ -553,6 +569,7 @@ final class FrontOfficeController extends AbstractController
              }
  
              return $teamMatch && $statusMatch;
+
          });
          // Re-index to avoid gaps
          $apiMatches = array_values($apiMatches);
@@ -571,6 +588,8 @@ final class FrontOfficeController extends AbstractController
          'matches'    => $localMatches,
          'apiMatches' => $apiMatches,
          'season'     => $season,
+         'teamRequests'    => $data['teamRequests'],
+         'playerRequests'  => $data['playerRequests'],
      ]);
  }
  
@@ -634,8 +653,13 @@ final class FrontOfficeController extends AbstractController
     #[Route('/front/dashboard/api-match/{matchId}', name: 'app_front_api_match_show', methods: ['GET'])]
     public function showApiMatch(
         int                $matchId,
-        ApiFootballService $api
+        ApiFootballService $api,
+        Security $security, 
+        EntityManagerInterface $em
     ): Response {
+           /** @var User|null $user */
+       $user = $security->getUser();
+         $data = $this->getTeamRequestsData($user, $em);                
         // 1) fetch the single match
         $match = $api->getEventById($matchId);
         if (!$match) {
@@ -661,7 +685,9 @@ final class FrontOfficeController extends AbstractController
             'awayTeam' => $awayTeam,
             'contextType' => 'api_match',
             'contextId'   => $match['match_id'],
-            'contextData' => $contextData
+            'contextData' => $contextData,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
@@ -670,8 +696,14 @@ final class FrontOfficeController extends AbstractController
 #[Route('/front/dashboard/tournois', name: 'app_front_tournois')]
 public function tournois(
     TournoiRepository  $tournoiRepo,
-    ApiFootballService $api
+    ApiFootballService $api,
+    Security $security, 
+    EntityManagerInterface $em
 ): Response {
+       /** @var User|null $user */
+       $user = $security->getUser();
+
+       $data = $this->getTeamRequestsData($user, $em);
     // 1) your local tournaments
     $tournois = $tournoiRepo->findBy([], ['start_date' => 'DESC']);
 
@@ -709,13 +741,20 @@ public function tournois(
     return $this->render('front_office_dashboard/tournois.html.twig', [
       'tournois'        => $tournois,
       'externalLeagues' => $externalLeagues,
+      'teamRequests'    => $data['teamRequests'],
+      'playerRequests'  => $data['playerRequests'],
     ]);
 }
 
 
     #[Route('/front/dashboard/tournois/{id}', name: 'app_front_tournoi_show', methods: ['GET'])]
-    public function showTournoi(int $id, TournoiRepository $tournoiRepo): Response
+    public function showTournoi(int $id, TournoiRepository $tournoiRepo,  Security $security, 
+    EntityManagerInterface $em): Response
     {
+            /** @var User|null $user */
+       $user = $security->getUser();
+
+       $data = $this->getTeamRequestsData($user, $em);
         $tournoi = $tournoiRepo->find($id);
         if (!$tournoi) {
             throw $this->createNotFoundException("Tournament #{$id} not found.");
@@ -723,6 +762,8 @@ public function tournois(
 
         return $this->render('front_office_dashboard/tournoi-matches.html.twig', [
             'tournoi' => $tournoi,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
     // #[Route('/front/dashboard/matches/{id}', name: 'app_front_match_show', methods: ['GET'])]
@@ -741,8 +782,15 @@ public function tournois(
     public function showFrontMatch(
         int               $id,
         MatchesRepository $matchesRepo,
-        UserRepository    $userRepo           
+        UserRepository    $userRepo ,
+        Security $security, 
+        EntityManagerInterface $em,
+                  
     ): Response {
+            /** @var User|null $user */
+       $user = $security->getUser();
+
+       $data = $this->getTeamRequestsData($user, $em);
         // 1) load match
         $match = $matchesRepo->find($id);
         if (!$match) {
@@ -813,7 +861,9 @@ public function tournois(
             'playersAway' => $playersAway,
             'contextType' => 'local_match',
             'contextId'   => $match->getId(),
-            'contextData' => $contextData
+            'contextData' => $contextData,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
@@ -822,8 +872,14 @@ public function tournois(
  public function leagueFixtures(
      int                $leagueId,
      int                $season,
-     ApiFootballService $api
+     ApiFootballService $api,
+     Security $security, 
+     EntityManagerInterface $em
  ): Response {
+         /** @var User|null $user */
+         $user = $security->getUser();
+    
+         $data = $this->getTeamRequestsData($user, $em);
      // Fetch raw fixtures keyed by “event_id” etc.
      $raw       = $api->getEvents($leagueId, $season);
      // Discard numeric keys so Twig sees each element as an array
@@ -833,6 +889,8 @@ public function tournois(
          'fixtures' => $fixtures,
          'leagueId' => $leagueId,
          'season'   => $season,
+         'teamRequests'    => $data['teamRequests'],
+         'playerRequests'  => $data['playerRequests'],
      ]);
  }
 }

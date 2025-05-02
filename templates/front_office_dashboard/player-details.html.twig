@@ -123,7 +123,7 @@
 {% endblock %}
 
 {% block content %}
-{% if app.user and app.user.team is not null and app.user.role == 'organizer' %}
+{% if app.user and app.user.team is not null and app.user.role == 'organizer' or app.user.role =='player' %}
 
     <div class="container py-5">
     <div class="row">

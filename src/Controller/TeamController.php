@@ -17,7 +17,7 @@ use App\Entity\Ranking;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Tournoi;
 use App\Entity\User;
-use App\Service\ApiFootballService;
+use App\Service\ApiFootballService2;
 use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -29,7 +29,7 @@ final class TeamController extends AbstractController
     private $apiFootballService;
     private $slugger;
     private $logger;
-    public function __construct(LoggerInterface $logger,EntityManagerInterface $entityManager,ApiFootballService $apiFootballService,SluggerInterface $slugger)
+    public function __construct(LoggerInterface $logger,EntityManagerInterface $entityManager,ApiFootballService2 $apiFootballService,SluggerInterface $slugger)
     {
         $this->entityManager = $entityManager;
         $this->apiFootballService = $apiFootballService;
@@ -248,7 +248,7 @@ final class TeamController extends AbstractController
         }
     }
     #[Route('/api/teams/league/{leagueId}', name: 'api_teams_by_league', methods: ['GET'])]
-    public function getTeamsByLeague(int $leagueId, ApiFootballService $api_football): JsonResponse
+    public function getTeamsByLeague(int $leagueId, ApiFootballService2 $api_football): JsonResponse
     {
         try {
             $teams = $api_football->getTeamsByLeague($leagueId);
@@ -261,7 +261,7 @@ final class TeamController extends AbstractController
     public function assignTeam(
         Security $security,
         Request $request,
-        ApiFootballService $apiFootball,
+        ApiFootballService2 $apiFootball,
         EntityManagerInterface $entityManager,
         LoggerInterface $logger
     ): JsonResponse {
@@ -373,7 +373,7 @@ final class TeamController extends AbstractController
     }
     private function findOrCreateTeam(
         EntityManagerInterface $entityManager,
-        ApiFootballService $apiFootball,
+        ApiFootballService2 $apiFootball,
         string $teamName,
         Tournoi $tournament,
         LoggerInterface $logger,
@@ -461,7 +461,7 @@ final class TeamController extends AbstractController
     }*/
     
     private function processFixtures(
-        ApiFootballService $apiFootball,
+        ApiFootballService2 $apiFootball,
         EntityManagerInterface $entityManager,
         Tournoi $tournament,
         int $mainTeamId,
@@ -508,7 +508,7 @@ final class TeamController extends AbstractController
     
     private function getOrCreateTeam(
         EntityManagerInterface $entityManager,
-        ApiFootballService $apiFootball,
+        ApiFootballService2 $apiFootball,
         int $teamId,
         string $teamName,
         Tournoi $tournament
@@ -548,7 +548,7 @@ final class TeamController extends AbstractController
     
     
     private function processPlayers(
-        ApiFootballService $apiFootball,
+        ApiFootballService2 $apiFootball,
         EntityManagerInterface $entityManager,
         int $teamId,
         Team $team
@@ -601,7 +601,7 @@ final class TeamController extends AbstractController
     }
     
     private function processStandings(
-        ApiFootballService $apiFootball,
+        ApiFootballService2 $apiFootball,
         EntityManagerInterface $entityManager,
         Tournoi $tournament,
         int $leagueId,
@@ -665,7 +665,7 @@ final class TeamController extends AbstractController
         }
 
         // Base directory (matches your ImageController)
-        $baseDirectory = 'C:/xampp4/htdocs/img/';
+        $baseDirectory = 'C:/xampp/htdocs/img/';
         $targetDirectory = $baseDirectory . $subdirectory . '/';
 
         // Create directory if needed
@@ -721,7 +721,7 @@ final class TeamController extends AbstractController
     }
 
             // Create a helper method to get player count for a team
-        private function getTeamPlayerCount(ApiFootballService $apiFootball, int $teamId): int
+        private function getTeamPlayerCount(ApiFootballService2 $apiFootball, int $teamId): int
         {
             try {
                 $teamData = $apiFootball->getTeamData($teamId);
@@ -771,5 +771,6 @@ final class TeamController extends AbstractController
         }
     }
     
+
 
 }

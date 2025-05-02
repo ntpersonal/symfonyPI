@@ -17,7 +17,7 @@ class ImageController extends AbstractController
     public function serveImage(string $subdirectory, string $filename): Response
     {
         $validSubdirectories = ['teams', 'players']; // Add others as needed
-        $basePath = 'C:/xampp4/htdocs/img/';
+        $basePath = 'C:/xampp/htdocs/img/';
         
         // Security check
         if (!in_array($subdirectory, $validSubdirectories, true)) {

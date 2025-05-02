@@ -1,0 +1,149 @@
+{# templates/_notifications_panel.html.twig #}
+
+{# compute total unread notifications #}
+{% set notifCount = is_granted('ROLE_ORGANIZER')
+     ? teamRequests|length
+     : is_granted('ROLE_PLAYER')
+       ? playerRequests|length
+       : 0
+%}
+
+<div class="notification-bell-container position-relative d-inline-block">
+  <div id="notification-bell" style="cursor:pointer">
+    <i class="fas fa-bell" style="font-size:1.5rem;color:#fff;"></i>
+    {% if notifCount > 0 %}
+      <span id="notification-count"
+            class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+        {{ notifCount }}
+      </span>
+    {% endif %}
+  </div>
+
+  <div id="notifications-panel" class="card d-none notifications-panel" style="z-index:1000; width:350px;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Notifications</span>
+      <button id="clear-notifications" class="btn btn-sm btn-link">Clear All</button>
+    </div>
+    <div id="notifications-list" class="list-group list-group-flush">
+
+      {# ORGANIZER view #}
+      {% if is_granted('ROLE_ORGANIZER') %}
+        {% if teamRequests is empty %}
+          <div class="list-group-item text-muted">No pending join requests</div>
+        {% else %}
+          {% for req in teamRequests %}
+            {% set logoFilename = req.team.logoPath|default('') 
+                 ? (req.team.logoPath|split('/')|last) 
+                 : null %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center gap-3">
+                {% if logoFilename %}
+                  <img src="{{ path('app_image',{subdirectory:'teams',filename:logoFilename}) }}"
+                       class="rounded-circle" style="width:40px;height:40px;object-fit:cover;"
+                       alt="Team logo">
+                {% else %}
+                  <img src="{{ asset('images/default-team.png') }}"
+                       class="rounded-circle" style="width:40px;height:40px;object-fit:cover;"
+                       alt="No team logo">
+                {% endif %}
+                <div>
+                  <strong>{{ req.player.firstname }} {{ req.player.lastname }}</strong><br>
+                  <small>Wants to join your team</small>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <small class="badge bg-secondary">{{ req.createdAt|date('H:i') }}</small>
+                <div class="btn-group">
+                  <button class="btn btn-sm reject-request"
+                          data-url="{{ path('team_request_reject',{id:req.id}) }}">
+                    <i class="fas fa-times"></i>
+                  </button>
+                  <button class="btn btn-sm accept-request"
+                          data-url="{{ path('team_request_accept',{id:req.id}) }}">
+                    <i class="fas fa-check"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+      {# PLAYER view #}
+      {% elseif is_granted('ROLE_PLAYER') %}
+        {% if playerRequests is empty %}
+          <div class="list-group-item text-muted">You have no notifications</div>
+        {% else %}
+          {% for req in playerRequests %}
+            {% set logoFilename = req.team.logoPath|default('') 
+                 ? (req.team.logoPath|split('/')|last) 
+                 : null %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center gap-3">
+                {% if logoFilename %}
+                  <img src="{{ path('app_image',{subdirectory:'teams',filename:logoFilename}) }}"
+                       class="rounded-circle" style="width:40px;height:40px;object-fit:cover;"
+                       alt="Team logo">
+                {% else %}
+                  <img src="{{ asset('assets/images/sportify.png') }}"
+                       class="rounded-circle" style="width:40px;height:40px;object-fit:cover;"
+                       alt="No team logo">
+                {% endif %}
+                <div>
+                  <strong>{{ req.team.nom }}</strong><br>
+                  <small>Request status: {{ req.status|capitalize }}</small>
+                </div>
+              </div>
+              <small class="badge bg-secondary">{{ req.createdAt|date('H:i') }}</small>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+      {# Everyone else #}
+      {% else %}
+        <div class="list-group-item text-muted">No notifications available</div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{# JS to toggle panel and wire buttons #}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const bell  = document.getElementById('notification-bell');
+    const panel = document.getElementById('notifications-panel');
+
+    // Toggle on bell click
+    bell.addEventListener('click', e => {
+      e.stopPropagation();
+      panel.classList.toggle('d-none');
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#notifications-panel') &&
+          !e.target.closest('#notification-bell')) {
+        panel.classList.add('d-none');
+      }
+    });
+
+    // Wire up accept / reject buttons
+    ['.accept-request', '.reject-request'].forEach(selector => {
+      document.querySelectorAll(selector).forEach(btn => {
+        btn.addEventListener('click', async e => {
+          e.preventDefault();
+          const res = await fetch(btn.dataset.url, {
+            method: 'POST',
+            headers: {'X-Requested-With':'XMLHttpRequest'}
+          });
+          if (res.ok) {
+            // on success, reload or remove that notification
+            return window.location.reload();
+          }
+          alert('Something went wrong.');
+        });
+      });
+    });
+
+  });
+</script>
