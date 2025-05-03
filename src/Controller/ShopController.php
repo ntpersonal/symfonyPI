@@ -228,6 +228,17 @@ class ShopController extends AbstractController
         
         return $this->redirectToRoute('app_shop_cart');
     }
+    
+    #[Route('/clear', name: 'cart_clear')]
+    public function clear(SessionInterface $session): Response
+    {
+        // Remove the cart from the session
+        $session->remove('cart');
+        
+        $this->addFlash('success', 'Cart has been cleared successfully!');
+        
+        return $this->redirectToRoute('app_shop_cart');
+    }
 
     #[Route('/checkout', name: 'app_shop_checkout')]
     public function checkout(Request $request, SessionInterface $session, ManagerRegistry $doctrine): Response
@@ -274,8 +285,25 @@ class ShopController extends AbstractController
             return $this->redirectToRoute('app_shop');
         }
         
+        // Get cart items for the order summary
+        $cartItems = [];
+        $cartTotal = 0;
+        
+        foreach ($cart as $productId => $quantity) {
+            $product = $doctrine->getRepository(Product::class)->find($productId);
+            if ($product) {
+                $cartItems[] = [
+                    'product' => $product,
+                    'quantity' => $quantity
+                ];
+                $cartTotal += $product->getPriceproduct() * $quantity;
+            }
+        }
+        
         return $this->render('shop/checkout.html.twig', [
             'form' => $form->createView(),
+            'cart_items' => $cartItems,
+            'cart_total' => $cartTotal,
         ]);
     }
     
@@ -321,9 +349,53 @@ class ShopController extends AbstractController
             return $this->redirectToRoute('app_product_details', ['id' => $id]);
         }
         
+        // Get all products except the current one
+        $allProducts = $doctrine->getRepository(Product::class)->findBy(
+            ['deleted' => false],
+            ['id' => 'DESC']
+        );
+        
+        // Initialize arrays for category matches and other products
+        $categoryMatches = [];
+        $otherProducts = [];
+        
+        // Sort products into category matches and others
+        foreach ($allProducts as $otherProduct) {
+            // Skip the current product
+            if ($otherProduct->getId() === $product->getId()) {
+                continue;
+            }
+            
+            // Check if it's in the same category
+            if ($otherProduct->getCategory() === $product->getCategory()) {
+                $categoryMatches[] = $otherProduct;
+            } else {
+                $otherProducts[] = $otherProduct;
+            }
+            
+            // Limit the number of products in each category to prevent too much processing
+            if (count($categoryMatches) >= 5 && count($otherProducts) >= 5) {
+                break;
+            }
+        }
+        
+        // Shuffle both arrays to add randomness
+        shuffle($categoryMatches);
+        shuffle($otherProducts);
+        
+        // Take up to 3 products from the same category
+        $relatedProducts = array_slice($categoryMatches, 0, 3);
+        
+        // If we don't have enough from the same category, add some from other categories
+        if (count($relatedProducts) < 3) {
+            $neededFromOthers = 3 - count($relatedProducts);
+            $relatedProducts = array_merge($relatedProducts, array_slice($otherProducts, 0, $neededFromOthers));
+        }
+        
         return $this->render('shop/product_details.html.twig', [
             'product' => $product,
-            'cartCount' => $cartCount
+            'cartCount' => $cartCount,
+            'related_products' => $relatedProducts
         ]);
     }
 }

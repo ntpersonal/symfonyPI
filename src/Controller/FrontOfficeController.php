@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Repository\MatchesRepository;
 use App\Repository\TournoiRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -104,9 +106,31 @@ final class FrontOfficeController extends AbstractController
     }
 
     #[Route('/front/dashboard/checkout', name: 'app_checkout')]
-    public function checkout(): Response
+    public function checkout(Request $request, ManagerRegistry $doctrine): Response
     {
-        return $this->render('front_office_dashboard/checkout.html.twig');
+        $session = $request->getSession();
+        $cart = $session->get('cart', []);
+        
+        // Get cart items for the order summary
+        $cartItems = [];
+        $cartTotal = 0;
+        
+        $productRepo = $doctrine->getRepository(\App\Entity\Product::class);
+        foreach ($cart as $productId => $quantity) {
+            $product = $productRepo->find($productId);
+            if ($product) {
+                $cartItems[] = [
+                    'product' => $product,
+                    'quantity' => $quantity
+                ];
+                $cartTotal += $product->getPriceproduct() * $quantity;
+            }
+        }
+        
+        return $this->render('front_office_dashboard/checkout.html.twig', [
+            'cart_items' => $cartItems,
+            'cart_total' => $cartTotal,
+        ]);
     }
 
     #[Route('/front/dashboard/cart', name: 'app_cart')]
@@ -182,6 +206,118 @@ final class FrontOfficeController extends AbstractController
     public function account(): Response
     {
         return $this->render('front_office_dashboard/account.html.twig');
+    }
+    
+    #[Route('/front/dashboard/checkout/process', name: 'app_shop_checkout_process', methods: ['POST'])]
+    public function checkoutProcess(Request $request, ManagerRegistry $doctrine, \App\Service\EmailService $emailService = null): Response
+    {
+        $session = $request->getSession();
+        $cart = $session->get('cart', []);
+        
+        if (empty($cart)) {
+            $this->addFlash('error', 'Your cart is empty');
+            return $this->redirectToRoute('app_shop');
+        }
+        
+        // Get form data
+        $homeAddress = $request->request->get('homeaddress');
+        $phoneNum = $request->request->get('phonenum');
+        $email = $request->request->get('email');
+        $stripeToken = $request->request->get('stripeToken');
+        
+        // Validate form data
+        if (empty($homeAddress) || empty($phoneNum) || empty($email)) {
+            $this->addFlash('error', 'Please fill in all required fields');
+            return $this->redirectToRoute('app_checkout');
+        }
+        
+        // Process the order
+        $entityManager = $doctrine->getManager();
+        $productRepo = $doctrine->getRepository(\App\Entity\Product::class);
+        $user = $this->getUser();
+        $userId = $user ? $user->getId() : 0;
+        
+        // Calculate total amount
+        $totalAmount = 0;
+        foreach ($cart as $productId => $quantity) {
+            $product = $productRepo->find($productId);
+            if ($product) {
+                $totalAmount += $product->getPriceproduct() * $quantity;
+                
+                // Create order record for each product
+                $order = new \App\Entity\Order();
+                
+                // Set user if available
+                if ($user) {
+                    $order->setUser($user);
+                }
+                
+                $order->setDate(new \DateTime());
+                $order->setQuantityOrder($quantity);
+                $order->setProduct($product);
+                $order->setStatus('paid'); // Assuming payment is successful
+                $order->setTotalAmount($product->getPriceproduct() * $quantity);
+                $order->setPhone((int)$phoneNum);
+                $order->setAddress($homeAddress);
+                
+                $entityManager->persist($order);
+            }
+        }
+        
+        $entityManager->flush();
+        
+        // Clear the cart after successful order
+        $session->remove('cart');
+        
+        // Send confirmation email
+        try {
+            // Get the last created order to send the email
+            $lastOrder = null;
+            foreach ($entityManager->getRepository(\App\Entity\Order::class)->findBy(
+                ['date' => new \DateTime()],
+                ['id' => 'DESC'],
+                1
+            ) as $o) {
+                $lastOrder = $o;
+                break;
+            }
+            
+            if ($lastOrder && $emailService) {
+                // Send the order confirmation email using the injected service
+                $emailService->sendOrderConfirmation($lastOrder, $email);
+            } else {
+                // Fallback to file-based email if no order is found or no email service
+                $emailContent = "Thank you for your order!\n\n";
+                $emailContent .= "Order Details:\n";
+                $emailContent .= "Total Amount: $" . number_format($totalAmount, 2) . "\n";
+                $emailContent .= "Delivery Address: $homeAddress\n";
+                $emailContent .= "Phone Number: $phoneNum\n";
+                
+                // Save email to file instead of sending via SMTP
+                $emailFilePath = $this->getParameter('kernel.project_dir') . '/var/emails/';
+                if (!is_dir($emailFilePath)) {
+                    mkdir($emailFilePath, 0777, true);
+                }
+                
+                $filename = 'order_confirmation_' . time() . '_' . uniqid() . '.txt';
+                file_put_contents($emailFilePath . $filename, $emailContent);
+            }
+        } catch (\Exception $e) {
+            // Log email error but don't stop the order process
+            $logDir = $this->getParameter('kernel.project_dir') . '/var/log';
+            if (!is_dir($logDir)) {
+                mkdir($logDir, 0777, true);
+            }
+            
+            file_put_contents(
+                $logDir . '/email_errors.log',
+                date('Y-m-d H:i:s') . ' - Error sending email: ' . $e->getMessage() . "\n",
+                FILE_APPEND
+            );
+        }
+        
+        $this->addFlash('success', 'Your order has been placed successfully!');
+        return $this->redirectToRoute('app_thank_you');
     }
     
 
