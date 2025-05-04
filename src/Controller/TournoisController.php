@@ -8,14 +8,37 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request; // Added missing import
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\Tournoi;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+use Knp\Component\Pager\PaginatorInterface;
 final class TournoisController extends AbstractController
 {
-    #[Route('/admin/dashboard/Tournoi', name: 'app_admin_dashborad_Tournoi')]
-    public function tournoi(Request $request, ManagerRegistry $doctrine): Response
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+    #[Route('/admin/dashboard/Tournoi', name: 'app_admin_dashboard_Tournoi')]
+    public function tournoi(Request $request, ManagerRegistry $doctrine, PaginatorInterface $paginator): Response
     {
         $tournois = $doctrine->getRepository(Tournoi::class)->findAll();
+        $pagination = $paginator->paginate(
+            $tournois,
+            $request->query->getInt('page', 1),
+            5 // Number of items per page
+        );
         return $this->render('admin_dashboard/tournoi.html.twig',[
-            'tournois' => $tournois,
+            'tournois' => $pagination,
+        ]);
+    }
+    #[Route('/admin/dashboard/tournois/{id}', name: 'app_tournoi_show', methods: ['GET'])]
+    public function show(Tournoi $tournoi): Response
+    {
+        return $this->render('admin_dashboard/tournoi_show.html.twig', [
+            'tournoi' => $tournoi,
+            'matches' => $tournoi->getMatches(),
         ]);
     }
     #[Route('/admin/tournoi/add', name: 'app_admin_tournoi_add', methods: ['POST'])]
@@ -126,5 +149,28 @@ final class TournoisController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Error updating tournament'], 500);
         }
     }
+    #[Route('/admin/tournaments/available', name: 'app_tournaments_available', methods: ['GET'])]
+    public function getAvailableTournaments(ManagerRegistry $doctrine): JsonResponse
+    {
+        try {
+            $tournaments = $doctrine->getRepository(Tournoi::class)
+                ->findBy(['status' => 'Pending'], ['start_date' => 'ASC']);
 
+            $tournamentsData = array_map(function($tournament) {
+                return [
+                    'id' => $tournament->getId(),
+                    'nom' => $tournament->getNom(),
+                    'start_date' => $tournament->getStart_date()->format('Y-m-d'),
+                    'end_date' => $tournament->getEnd_date()->format('Y-m-d'),
+                    'format' => $tournament->getFormat(),
+                    'sportType' => $tournament->getSportType(),
+                    'nbEquipe' => $tournament->getNbEquipe()
+                ];
+            }, $tournaments);
+
+            return new JsonResponse(['tournaments' => $tournamentsData]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Failed to fetch tournaments'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

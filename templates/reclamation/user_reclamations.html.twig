@@ -1,0 +1,321 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}My Reclamations{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Modern styling for reclamations page */
+        .reclamations-section {
+            padding: 60px 0;
+            background-color: #f8f9fa;
+        }
+        
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #222;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .page-title:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 50px;
+            height: 3px;
+            background-color: #e91e63;
+        }
+        
+        .filter-section {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .filter-section h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .filter-btn {
+            border-radius: 30px;
+            padding: 8px 20px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background-color: #e91e63;
+            border-color: #e91e63;
+            color: #fff;
+            box-shadow: 0 4px 8px rgba(233, 30, 99, 0.2);
+        }
+        
+        .filter-btn:not(.active) {
+            background-color: #fff;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        
+        .filter-btn:not(.active):hover {
+            background-color: #f5f5f5;
+            color: #e91e63;
+            border-color: #e91e63;
+        }
+        
+        .reclamation-card {
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .reclamation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            padding: 18px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-id {
+            font-weight: 700;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .card-date {
+            font-size: 0.85rem;
+            color: #888;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .message-content {
+            margin-bottom: 20px;
+            color: #444;
+            line-height: 1.6;
+        }
+        
+        .card-footer {
+            padding: 15px 20px;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-badge.pending {
+            background-color: #ffecb3;
+            color: #ff9800;
+        }
+        
+        .status-badge.resolved {
+            background-color: #dff7e8;
+            color: #28a745;
+        }
+        
+        .status-badge.nouveau {
+            background-color: #e3f2fd;
+            color: #2196f3;
+        }
+        
+        .action-btn {
+            border-radius: 30px;
+            padding: 8px 20px;
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            background-color: transparent;
+            color: #e91e63;
+            border: 2px solid #e91e63;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: #e91e63;
+            color: #fff;
+            box-shadow: 0 4px 8px rgba(233, 30, 99, 0.3);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h4 {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            color: #888;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .filter-btn {
+                padding: 6px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .reclamation-card {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block banner %}
+<!--================= Banner Section Start Here =================-->
+<div class="banner banner1">
+    <div class="inner-page-banner banner-bg">
+        <div class="container">
+            <div class="banner-content">
+                <div class="page-path">
+                    <ul>
+                        <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                        <li><a class="current-page" href="#">My Reclamations</a></li>
+                    </ul>
+                </div>
+                <h1 class="banner-heading">My Reclamations</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<!--================= Banner Section End Here =================-->
+{% endblock %}
+
+{% block content %}
+<!--reclamations-section start-->
+<div class="reclamations-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-title">Your Submitted Reclamations</h2>
+                
+                <!-- Filter section -->
+                <div class="filter-section">
+                    <h5>Filter by Status</h5>
+                    <div class="d-flex flex-wrap">
+                        <a href="{{ path('app_reclamation_my') }}" class="filter-btn {{ currentStatus is null ? 'active' : '' }}">
+                            All Reclamations
+                        </a>
+                        {% for status, label in statusChoices %}
+                            <a href="{{ path('app_reclamation_my', {'status': status}) }}" 
+                                class="filter-btn {{ currentStatus == status ? 'active' : '' }}">
+                                {{ label }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                {% if reclamations is empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h4>No reclamations found</h4>
+                        <p>
+                            {% if currentStatus %}
+                                You have no reclamations with status "{{ currentStatus }}".
+                            {% else %}
+                                You haven't submitted any reclamations yet.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="row">
+                        {% for reclamation in reclamations %}
+                            <div class="col-lg-6">
+                                <div class="reclamation-card">
+                                    <div class="card-header">
+                                        <span class="card-id">#{{ loop.index }}</span>
+                                        <span class="card-date">{{ reclamation.createdAt|date('d M Y, H:i') }}</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="message-content">
+                                            {{ reclamation.message|u.truncate(150, '...') }}
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        {% set statusClass = reclamation.status == 'Résolu' ? 'resolved' : (reclamation.status == 'Nouveau' ? 'nouveau' : 'pending') %}
+                                        <span class="status-badge {{ statusClass }}">{{ reclamation.status }}</span>
+                                        <a href="{{ path('reclamation_show2', {id: reclamation.id}) }}" class="action-btn">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<!--reclamations-section end-->
+{% endblock %}
+
+{% block footer %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Animation for cards on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.reclamation-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+{% endblock %}

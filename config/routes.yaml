@@ -136,3 +136,21 @@ app_tournois_delete:
     path: /tournois/delete/{id}
     controller: App\Controller\TournoisController::delete
     methods: [POST]
+
+# Shop routes
+shop:
+    path: /shop
+    controller: App\Controller\ShopController::index
+
+shop_cart:
+    path: /shop/cart
+    controller: App\Controller\ShopController::cart
+
+shop_checkout:
+    path: /shop/checkout
+    controller: App\Controller\ShopController::checkout
+
+# Product admin routes
+product_admin:
+    path: /admin/product
+    controller: App\Controller\ProductController::index

@@ -1,0 +1,375 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h4 class="mb-0">Nouvelle réclamation</h4>
+                    <p class="text-sm text-muted">Veuillez fournir les détails de votre réclamation ci-dessous</p>
+                </div>
+                <div class="card-body">
+                    {% if bad_words is defined and bad_words|length > 0 %}
+                        <div class="alert alert-danger">
+                            <h5>Mots inappropriés détectés:</h5>
+                            <p>Votre message contient les termes suivants qui ne sont pas autorisés:</p>
+                            <ul>
+                                {% for word in bad_words %}
+                                    <li>{{ word }}</li>
+                                {% endfor %}
+                            </ul>
+                            <p>Veuillez reformuler votre message sans utiliser ces termes.</p>
+                        </div>
+                    {% endif %}
+                    
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation', 'id': 'reclamation-form-admin'}}) }}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-4">
+                                    <label for="{{ form.message.vars.id }}" class="form-control-label mb-2">Votre message</label>
+                                    {{ form_widget(form.message, {
+                                        'attr': {
+                                            'class': 'form-control form-control-lg',
+                                            'rows': 8,
+                                            'placeholder': 'Décrivez en détail votre réclamation ici...',
+                                            'id': 'reclamation-message-admin'
+                                        }
+                                    }) }}
+                                    <div id="realtime-alert-admin" class="alert alert-danger mt-2" style="display:none;">
+                                        <i class="fas fa-exclamation-circle"></i> Un mot inapproprié a été détecté et supprimé automatiquement.
+                                    </div>
+                                    <div class="form-text text-muted">
+                                        Veuillez être aussi précis que possible pour nous permettre de mieux traiter votre réclamation.
+                                    </div>
+                                    <span id="word-counter">0 caractères</span>
+                                    {{ form_errors(form.message) }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('reclamation_index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .needs-validation .form-control.is-invalid,
+    .was-validated .form-control:invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    @keyframes shakeAlert {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .shake-alert {
+        animation: shakeAlert 0.6s;
+    }
+    
+    .highlight-error {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+        animation: pulse-error 1s ease;
+    }
+    
+    @keyframes pulse-error {
+        0% { border-color: #dc3545; }
+        50% { border-color: #ff8c8c; }
+        100% { border-color: #dc3545; }
+    }
+    
+    .alert-container {
+        margin-bottom: 1rem;
+    }
+    
+    #realtime-alert {
+        display: none;
+        position: relative;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        background-color: #f8d7da;
+        color: #842029;
+        border-color: #f5c2c7;
+    }
+    
+    #word-counter {
+        display: block;
+        text-align: right;
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .shake {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        transform: translate3d(0, 0, 0);
+    }
+    
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+        40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('reclamation_form') || document.querySelector('form');
+        const messageInput = document.getElementById('reclamation_message');
+        const realtimeAlert = document.getElementById('realtime-alert');
+        const alertMessage = document.getElementById('alert-message');
+        const wordCounter = document.getElementById('word-counter');
+        
+        // Liste étendue de mots inappropriés
+        const badWords = [
+            'putain', 'pute', 'connard', 'con', 'encule', 'enculé', 'salope', 'bite', 
+            'couille', 'merde', 'connerie', 'foutre', 'pd', 'salaud', 'chier', 'cul',
+            'batard', 'bâtard', 'bordel', 'crétin', 'débile', 'nique', 'ta mère', 'ta mere',
+            'tg', 'ftg', 'ntm', 'ptn', 'fdp', 'va te faire', 'vtf', 'suce', 'fils de'
+        ];
+        
+        // Fonction pour normaliser le texte (enlever les accents, caractères spéciaux, etc.)
+        function normalizeText(text) {
+            // Remplacer les caractères spéciaux et accents
+            let normalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            // Remplacer les chiffres et caractères qui ressemblent à des lettres
+            normalized = normalized.replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a')
+                         .replace(/5/g, 's').replace(/0/g, 'o').replace(/8/g, 'b')
+                         .replace(/\$/g, 's').replace(/@/g, 'a');
+            // Supprimer les répétitions de caractères (ex: "puuutain" -> "putain")
+            normalized = normalized.replace(/(.)\1+/g, '$1');
+            // Supprimer les caractères qui ne sont pas des lettres
+            normalized = normalized.replace(/[^a-z]/gi, '');
+            
+            return normalized.toLowerCase();
+        }
+        
+        // Fonction pour détecter les mots inappropriés avec plusieurs stratégies
+        function findBadWords(text) {
+            if (!text) return { found: false };
+            
+            const textLower = text.toLowerCase();
+            const textNormalized = normalizeText(text);
+            
+            for (const badWord of badWords) {
+                const badWordNormalized = normalizeText(badWord);
+                
+                // Méthode 1: Vérification simple d'inclusion
+                if (textLower.includes(badWord)) {
+                    return { found: true, word: badWord, method: 'exact' };
+                }
+                
+                // Méthode 2: Vérification avec limites de mots
+                const regex = new RegExp(`\\b${badWord}\\b`, 'i');
+                if (regex.test(textLower)) {
+                    return { found: true, word: badWord, method: 'word_boundary' };
+                }
+                
+                // Méthode 3: Vérification sur le texte normalisé
+                if (textNormalized.includes(badWordNormalized)) {
+                    return { found: true, word: badWord, method: 'normalized' };
+                }
+                
+                // Méthode 4: Vérification avec séparation de caractères
+                // Par exemple, "p.u.t.a.i.n" ou "p u t a i n"
+                const separatedRegex = new RegExp(badWord.split('').join('[^a-zA-Z0-9]*'), 'i');
+                if (separatedRegex.test(textLower)) {
+                    return { found: true, word: badWord, method: 'separated' };
+                }
+                
+                // Méthode 5: Vérification des variations intentionnelles
+                // Par exemple, "put@in", "put41n", etc.
+                const specialCharsRegex = badWord.replace(/a/g, '[a@4]')
+                                          .replace(/e/g, '[e3]')
+                                          .replace(/i/g, '[i1!]')
+                                          .replace(/o/g, '[o0]')
+                                          .replace(/s/g, '[s$5]');
+                const variantRegex = new RegExp(specialCharsRegex, 'i');
+                if (variantRegex.test(textLower)) {
+                    return { found: true, word: badWord, method: 'variant' };
+                }
+            }
+            
+            return { found: false };
+        }
+        
+        // Fonction pour filtrer un texte
+        function filterText(text) {
+            if (!text) return text;
+            
+            let filteredText = text;
+            let detected = false;
+            let detectedWord = '';
+            
+            for (const badWord of badWords) {
+                const badWordPattern = new RegExp(badWord, 'gi');
+                if (badWordPattern.test(filteredText)) {
+                    filteredText = filteredText.replace(badWordPattern, '*'.repeat(badWord.length));
+                    detected = true;
+                    detectedWord = badWord;
+                }
+                
+                // Vérifier également les variations avec des caractères spéciaux
+                const textNormalized = normalizeText(text);
+                const badWordNormalized = normalizeText(badWord);
+                
+                if (textNormalized.includes(badWordNormalized)) {
+                    // Trouver l'occurrence originale et la remplacer
+                    const startPos = textNormalized.indexOf(badWordNormalized);
+                    if (startPos >= 0) {
+                        const endPos = startPos + badWordNormalized.length;
+                        const originalPortion = text.substring(startPos, endPos);
+                        filteredText = filteredText.replace(originalPortion, '*'.repeat(originalPortion.length));
+                        detected = true;
+                        detectedWord = badWord;
+                    }
+                }
+            }
+            
+            return { 
+                text: filteredText, 
+                detected: detected,
+                word: detectedWord
+            };
+        }
+        
+        // Met à jour le compteur de mots
+        function updateWordCounter() {
+            if (!messageInput || !wordCounter) return;
+            
+            const length = messageInput.value.length;
+            wordCounter.textContent = `${length} caractères`;
+            
+            // Change la couleur en fonction de la longueur
+            if (length > 200) {
+                wordCounter.style.color = '#28a745'; // vert
+            } else if (length > 100) {
+                wordCounter.style.color = '#6c757d'; // gris
+            } else if (length > 50) {
+                wordCounter.style.color = '#ffc107'; // jaune
+            } else if (length > 0) {
+                wordCounter.style.color = '#dc3545'; // rouge
+            }
+        }
+        
+        // Fonction pour afficher une alerte
+        function showAlert(message, type = 'danger') {
+            if (!realtimeAlert || !alertMessage) return;
+            
+            alertMessage.textContent = message;
+            realtimeAlert.style.display = 'block';
+            realtimeAlert.classList.add('shake');
+            
+            if (messageInput) {
+                messageInput.classList.add('highlight-error');
+            }
+            
+            setTimeout(() => {
+                realtimeAlert.classList.remove('shake');
+                if (messageInput) {
+                    messageInput.classList.remove('highlight-error');
+                }
+            }, 1000);
+            
+            setTimeout(() => {
+                realtimeAlert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Vérifie et filtre le contenu du champ message
+        function checkContent() {
+            if (!messageInput) return;
+            
+            const text = messageInput.value;
+            const badWordResult = findBadWords(text);
+            
+            if (badWordResult.found) {
+                const filtered = filterText(text);
+                messageInput.value = filtered.text;
+                
+                showAlert(`Le mot inapproprié "${badWordResult.word}" a été détecté et remplacé.`);
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Événement d'écoute pour le champ message (en temps réel)
+        if (messageInput) {
+            messageInput.addEventListener('input', function() {
+                checkContent();
+                updateWordCounter();
+            });
+            
+            // Initialiser le compteur de mots
+            updateWordCounter();
+        }
+        
+        // Événement à la soumission du formulaire
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // Vérifier une dernière fois à la soumission
+                if (checkContent()) {
+                    event.preventDefault();
+                    showAlert('Veuillez corriger votre message avant de soumettre le formulaire.');
+                }
+                
+                // Vérifier si le champ message est vide
+                if (messageInput && !messageInput.value.trim()) {
+                    event.preventDefault();
+                    showAlert('Le message ne peut pas être vide.');
+                    return;
+                }
+                
+                // Vérifier la longueur minimale
+                if (messageInput && messageInput.value.trim().length < 10) {
+                    event.preventDefault();
+                    showAlert('Votre message est trop court. Veuillez fournir plus de détails.');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

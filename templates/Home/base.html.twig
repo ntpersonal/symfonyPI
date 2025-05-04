@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/aos.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 
+
     {% block stylesheets %}{% endblock %}
 </head>
 
@@ -48,7 +49,7 @@
                                 <li><a href="{{ path('app_matches') }}" class="nav-link">Matches</a></li>
                                 <li><a href="{{ path('app_players') }}" class="nav-link">Players</a></li>
                                 <li><a href="{{ path('app_blog') }}" class="nav-link">Blog</a></li>
-                                <li><a href="{{ path('app_contact') }}" class="nav-link">Contact</a></li>
+                                <li><a href="{{ path('app_front_office_contact') }}" class="nav-link">Contact</a></li>
                             </ul>
                         </nav>
                         <a href="#" class="d-inline-block d-lg-none site-menu-toggle js-menu-toggle text-black float-right text-white">
@@ -63,70 +64,113 @@
         {% block body %}{% endblock %}
 
         {% block footer %}
-        <footer class="footer-section">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-3">
-                        <div class="widget mb-3">
-                            <h3>News</h3>
-                            <ul class="list-unstyled links">
-                                <li><a href="#">All</a></li>
-                                <li><a href="#">Club News</a></li>
-                                <li><a href="#">Media Center</a></li>
-                                <li><a href="#">Video</a></li>
-                                <li><a href="#">RSS</a></li>
-                            </ul>
+                <footer class="footer-section footer-compact">
+                    <div class="container">
+                        <div class="row gx-4">
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="widget widget-compact">
+                                    <h5 class="widget-title">News</h5>
+                                    <ul class="list-unstyled links-compact">
+                                        <li><a href="#">All</a></li>
+                                        <li><a href="#">Club News</a></li>
+                                        <li><a href="#">Media Center</a></li>
+                                        <li><a href="#">Video</a></li>
+                                        <li><a href="#">RSS</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="widget widget-compact">
+                                    <h5 class="widget-title">Tickets</h5>
+                                    <ul class="list-unstyled links-compact">
+                                        <li><a href="#">Online Ticket</a></li>
+                                        <li><a href="#">Payment and Prices</a></li>
+                                        <li><a href="#">Contact &amp; Booking</a></li>
+                                        <li><a href="#">Tickets</a></li>
+                                        <li><a href="#">Coupon</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="widget widget-compact">
+                                    <h5 class="widget-title">Matches</h5>
+                                    <ul class="list-unstyled links-compact">
+                                        <li><a href="#">Standings</a></li>
+                                        <li><a href="#">World Cup</a></li>
+                                        <li><a href="#">La Lega</a></li>
+                                        <li><a href="#">Hyper Cup</a></li>
+                                        <li><a href="#">World League</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="widget widget-compact">
+                                    <h5 class="widget-title">Social</h5>
+                                    <ul class="list-unstyled links-compact">
+                                        <li><a href="#">Twitter</a></li>
+                                        <li><a href="#">Facebook</a></li>
+                                        <li><a href="#">Instagram</a></li>
+                                        <li><a href="#">Youtube</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="copyright-text">
+                                    <p>
+                                        Copyright &copy; <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-lg-3">
-                        <div class="widget mb-3">
-                            <h3>Tickets</h3>
-                            <ul class="list-unstyled links">
-                                <li><a href="#">Online Ticket</a></li>
-                                <li><a href="#">Payment and Prices</a></li>
-                                <li><a href="#">Contact &amp; Booking</a></li>
-                                <li><a href="#">Tickets</a></li>
-                                <li><a href="#">Coupon</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="widget mb-3">
-                            <h3>Matches</h3>
-                            <ul class="list-unstyled links">
-                                <li><a href="#">Standings</a></li>
-                                <li><a href="#">World Cup</a></li>
-                                <li><a href="#">La Lega</a></li>
-                                <li><a href="#">Hyper Cup</a></li>
-                                <li><a href="#">World League</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="widget mb-3">
-                            <h3>Social</h3>
-                            <ul class="list-unstyled links">
-                                <li><a href="#">Twitter</a></li>
-                                <li><a href="#">Facebook</a></li>
-                                <li><a href="#">Instagram</a></li>
-                                <li><a href="#">Youtube</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="row text-center">
-                    <div class="col-md-12">
-                        <div class=" pt-5">
-                            <p>
-                                Copyright &copy;
-                                <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </footer>
-        {% endblock %}
+                    <style>
+                        .footer-compact {
+                            padding: 2rem 0 1rem;
+                            font-size: 0.9rem;
+                        }
+
+                        .widget-compact {
+                            margin-bottom: 1.5rem;
+                        }
+
+                        .widget-title {
+                            font-size: 1rem;
+                            margin-bottom: 0.75rem;
+                            font-weight: 600;
+                        }
+
+                        .links-compact li {
+                            margin-bottom: 0.35rem;
+                        }
+
+                        .links-compact a {
+                            color: rgba(255, 255, 255, 0.7);
+                            transition: color 0.2s;
+                            font-size: 0.85rem;
+                        }
+
+                        .links-compact a:hover {
+                            color: #fff;
+                            text-decoration: none;
+                        }
+
+                        .copyright-text {
+                            font-size: 0.8rem;
+                            text-align: center;
+                            padding-top: 1rem;
+                            margin-top: 1rem;
+                            border-top: 1px solid rgba(255, 255, 255, 0.1);
+                        }
+                        #togglePasswordIcon {
+                            color: #999;
+                            font-size: 1rem;
+                        }
+                    </style>
+                </footer>
+            {% endblock %}
+
     </div>
 
     <!-- JavaScript -->
@@ -144,6 +188,18 @@
     <script src="{{ asset('assets/js/jquery.fancybox.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.sticky.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('inputPassword');
+            const icon = document.getElementById('togglePasswordIcon');
+
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+    </script>
 
     {% block javascripts %}{% endblock %}
 </body>

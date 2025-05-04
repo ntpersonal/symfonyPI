@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.id ? 'Edit Product' : 'New Product' }}{% endblock %}
+
+{% block body %}
+<div class="hero overlay" style="background-image: url('{{ asset('assets/images/bg_3.jpg') }}');">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mx-auto text-center">
+                <h1 class="text-white">{{ product.id ? 'Edit Product' : 'New Product' }}</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="widget-next-match">
+                    <div class="widget-body mb-3">
+                        <div class="widget-vs">
+                            <h3>Product Details</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form_label(form.nameproduct) }}
+                    {{ form_widget(form.nameproduct) }}
+                    {{ form_errors(form.nameproduct) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.priceproduct) }}
+                    {{ form_widget(form.priceproduct) }}
+                    {{ form_errors(form.priceproduct) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.category) }}
+                    {{ form_widget(form.category) }}
+                    {{ form_errors(form.category) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.stock) }}
+                    {{ form_widget(form.stock) }}
+                    {{ form_errors(form.stock) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">{{ product.id ? 'Update' : 'Create' }}</button>
+            <a href="{{ path('product_index') }}" class="btn btn-secondary">Back to list</a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

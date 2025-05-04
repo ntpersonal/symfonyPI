@@ -16,6 +16,39 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
+    /**
+     * Search for products based on criteria
+     *
+     * @param string|null $searchTerm Search term for product name
+     * @param string|null $category Category filter
+     * @param string|null $stock Stock status filter
+     * @return array
+     */
+    public function search(?string $searchTerm = null, ?string $category = null, ?string $stock = null): array
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        // Search by name if search term is provided
+        if ($searchTerm) {
+            $qb->andWhere('p.nameproduct LIKE :searchTerm')
+               ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+        
+        // Filter by category if provided
+        if ($category) {
+            $qb->andWhere('p.category = :category')
+               ->setParameter('category', $category);
+        }
+        
+        // Filter by stock status if provided
+        if ($stock) {
+            $qb->andWhere('p.stock = :stock')
+               ->setParameter('stock', $stock);
+        }
+        
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return Product[] Returns an array of Product objects
     //     */

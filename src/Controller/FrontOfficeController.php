@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Repository\MatchesRepository;
+use App\Repository\TournoiRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -113,11 +115,6 @@ final class FrontOfficeController extends AbstractController
         return $this->render('front_office_dashboard/cart.html.twig');
     }
 
-    #[Route('/front/dashboard/contact', name: 'app_front_office_contact')]
-    public function contact(): Response
-    {
-        return $this->render('front_office_dashboard/contact.html.twig');
-    }
 
     #[Route('/front/dashboard/score', name: 'app_score')]
     public function score(): Response
@@ -187,12 +184,55 @@ final class FrontOfficeController extends AbstractController
         return $this->render('front_office_dashboard/account.html.twig');
     }
     
-    
-    
+
 
     #[Route('/front/dashboard/faq', name: 'app_faq')]
     public function faq(): Response
     {
         return $this->render('front_office_dashboard/faq.html.twig');
+    }
+    #[Route('/front/dashboard/matches', name: 'app_front_matches')]
+public function matches(MatchesRepository $matchesRepo): Response
+{
+    $matches = $matchesRepo->findBy([], ['matchTime' => 'DESC']);
+
+    return $this->render('front_office_dashboard/matches.html.twig', [
+        'matches' => $matches,
+    ]);
+}
+
+    #[Route('/front/dashboard/tournois', name: 'app_front_tournois')]
+    public function tournois(TournoiRepository $tournoiRepo): Response
+    {
+        // sort by the actual field name "start_date"
+        $tournois = $tournoiRepo->findBy([], ['start_date' => 'DESC']);
+
+        return $this->render('front_office_dashboard/tournois.html.twig', [
+            'tournois' => $tournois,
+        ]);
+    }
+    #[Route('/front/dashboard/tournois/{id}', name: 'app_front_tournoi_show', methods: ['GET'])]
+    public function showTournoi(int $id, TournoiRepository $tournoiRepo): Response
+    {
+        $tournoi = $tournoiRepo->find($id);
+        if (!$tournoi) {
+            throw $this->createNotFoundException("Tournament #{$id} not found.");
+        }
+
+        return $this->render('front_office_dashboard/tournoi-matches.html.twig', [
+            'tournoi' => $tournoi,
+        ]);
+    }
+    #[Route('/front/dashboard/matches/{id}', name: 'app_front_match_show', methods: ['GET'])]
+    public function showFrontMatch(int $id, MatchesRepository $matchesRepo): Response
+    {
+        $match = $matchesRepo->find($id);
+        if (!$match) {
+            throw $this->createNotFoundException("Match #{$id} not found.");
+        }
+
+        return $this->render('front_office_dashboard/match-details.html.twig', [
+            'match' => $match,
+        ]);
     }
 }

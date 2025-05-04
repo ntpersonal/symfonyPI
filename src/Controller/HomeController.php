@@ -15,13 +15,7 @@ class HomeController extends AbstractController
             'controller_name' => 'HomeController',
         ]);
     }
-    #[Route('/', name: 'app_home')]
-    public function index1(): Response
-    {
-        return $this->render('Home/index.html.twig', [
-            'controller_name' => 'HomeController',
-        ]);
-    }
+    
 
     #[Route('/matches', name: 'app_matches')]
     public function matches(): Response
@@ -47,13 +41,7 @@ class HomeController extends AbstractController
         ]);
     }
 
-    #[Route('/contact', name: 'app_contact')]
-    public function contact(): Response
-    {
-        return $this->render('Home/contact.html.twig', [
-            'controller_name' => 'HomeController',
-        ]);
-    }
+
 
     #[Route('/single', name: 'app_single')]
     public function single(): Response

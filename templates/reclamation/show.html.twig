@@ -1,0 +1,263 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}Reclamation - Administration{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Styles personnalisés non-standard pour éviter les suppressions */
+    .custom-container {
+        font-family: inherit;
+        line-height: 1.5;
+    }
+    
+    .custom-section {
+        background: #f9f9f9;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .custom-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .custom-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .custom-status {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .status-resolved {
+        background-color: #198754;
+        color: white;
+    }
+    
+    .custom-message-box {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+        background: white;
+    }
+    
+    .custom-info-message {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+        border-radius: 4px;
+        padding: 12px;
+    }
+    
+    .custom-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+    
+    .btn-primary-custom {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .btn-success-custom {
+        background-color: #198754;
+        color: white;
+    }
+    
+    .btn-secondary-custom {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .custom-form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .custom-textarea {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        min-height: 120px;
+    }
+    
+    .action-row {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .custom-mb {
+        margin-bottom: 1rem;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 12px;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #495057;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid custom-container" id="main-content-area">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Informations sur l'utilisateur -->
+            <div class="custom-section">
+                <div class="custom-header">
+                    <h3 class="custom-title">Utilisateur</h3>
+                </div>
+                
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ reclamation.user.firstname|first|upper }}{{ reclamation.user.lastname|first|upper }}
+                    </div>
+                    <div>
+                        <h5>{{ reclamation.user.firstname }} {{ reclamation.user.lastname }}</h5>
+                        <p>{{ reclamation.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Détails de la réclamation -->
+            <div class="custom-section">
+                <div class="custom-header">
+                    <h3 class="custom-title">Détails de la réclamation</h3>
+                    {% set statusVariant = reclamation.status == 'Résolu' ? 'resolved' : 'pending' %}
+                    <span class="custom-status status-{{ statusVariant }}">{{ reclamation.status }}</span>
+                </div>
+
+                <div class="custom-message-box">
+                    <h4><strong>Message:</strong> {{ reclamation.message }}</h4>
+                    <p><strong>Date:</strong> {{ reclamation.createdAt|date('Y-m-d H:i') }}</p>
+                </div>
+            </div>
+            
+            <!-- Réponses -->
+            <div class="custom-section">
+                <h5 class="custom-title">Réponses</h5>
+                
+                {% if reclamation.answers is empty %}
+                    <div class="custom-info-message">Aucune réponse n'a encore été ajoutée.</div>
+                {% else %}
+                    {% for answer in reclamation.answers %}
+                        <div class="custom-message-box">
+                            <p><strong>From:</strong> {{ answer.admin.lastname }}</p>
+                            <p>{{ answer.message }}</p>
+
+                            {% if app.user and app.user.id == answer.admin.id %}
+                                <div class="action-row">
+                                    <a href="{{ path('answer_edit', { id: answer.id }) }}" class="custom-btn btn-primary-custom" style="margin-right: 10px;">Modifier</a>
+                                    <form action="{{ path('answer_delete', { id: answer.id }) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this answer?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ answer.id) }}">
+                                        <button class="custom-btn btn-danger-outline-custom">Delete</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Formulaire d'ajout de réponse -->
+            <div class="custom-section">
+                <h5 class="custom-title">Ajouter une réponse</h5>
+                {{ form_start(form, {'attr': {'class': 'custom-form'}}) }}
+                    <div class="custom-form-group">
+                        {{ form_widget(form.message, {
+                            'attr': {
+                                'class': 'custom-textarea',
+                                'rows': 6,
+                                'placeholder': 'Écrivez votre réponse ici...'
+                            }
+                        }) }}
+                    </div>
+                    <button type="submit" class="custom-btn btn-primary-custom">Envoyer</button>
+                {{ form_end(form) }}
+            </div>
+            
+            <!-- Liens de navigation -->
+            <div class="custom-mb">
+                <a href="{{ path('reclamation_index') }}" class="custom-btn btn-secondary-custom">Retour à la liste</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded with new approach for show template');
+    
+    // Fonction pour recréer dynamiquement le contenu si nécessaire
+    const reconstructContent = function() {
+        const mainContentArea = document.getElementById('main-content-area');
+        if (!mainContentArea || !mainContentArea.innerHTML || mainContentArea.innerHTML.trim() === '') {
+            // Si le contenu a été supprimé ou vidé, nous rechargerons la page
+            window.location.reload();
+            return;
+        }
+        
+        // Assurer que tous les éléments de formulaire ont des événements
+        document.querySelectorAll('form').forEach(form => {
+            // S'assurer que les formulaires ont les gestionnaires d'événements corrects
+            form.addEventListener('submit', function(e) {
+                const actionPath = form.getAttribute('action');
+                const isDeleteForm = actionPath && actionPath.includes('delete');
+                
+                if (isDeleteForm) {
+                    if (!confirm('Are you sure you want to delete this?')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    };
+    
+    // Appliquer après un court délai pour s'assurer que tout est chargé
+    setTimeout(reconstructContent, 200);
+    
+    // Et continuer à vérifier périodiquement
+    setInterval(reconstructContent, 1000);
+});
+</script>
+{% endblock %}
