@@ -9,132 +9,51 @@
                 <div class="card mb-4">
                     <div class="card-header pb-0">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6>Edit User</h6>
-                                <p class="text-sm mb-0">
-                                    <i class="fas fa-user-edit text-info"></i>
-                                    <span class="font-weight-bold ms-1">Edit information for {{ user.firstname }} {{ user.lastname }}</span>
-                                </p>
-                            </div>
-                            <a href="{{ path('app_admin_dashboard_users') }}" class="btn bg-gradient-secondary">
-                                <i class="fas fa-arrow-left me-2"></i> Back to List
+                            <h6>Edit User</h6>
+                            <a href="{{ path('app_admin_dashboard_users') }}" class="btn bg-gradient-secondary mb-0">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Users
                             </a>
                         </div>
                     </div>
-                    <div class="card-body">
-
-
-                        {{ form_errors(form) }}
-                        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.firstname, 'First Name', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.firstname) }}
+                    <div class="card-body px-0 pt-0 pb-2">
+                        {{ form_start(form, {'attr': {'class': 'p-3'}}) }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form_row(form.firstname) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.lastname) }}
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.lastname, 'Last Name', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.lastname, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.lastname) }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form_row(form.email) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.role) }}
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.email) }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form_row(form.password) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.profilepicture) }}
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.password, 'Password', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
-                                    <small class="form-text text-muted">Leave blank to keep the current password</small>
-                                    {{ form_errors(form.password) }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form_row(form.team) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.is_active) }}
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.role, 'Role', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.role, {'attr': {'class': 'form-control', 'id': 'user_role'}}) }}
-                                    {{ form_errors(form.role) }}
-                                </div>
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn bg-gradient-primary mb-0">
+                                    <i class="fas fa-save me-2"></i> Update User
+                                </button>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.team, 'Team', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.team, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.team) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.phonenumber, 'Phone Number', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.phonenumber, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.phonenumber) }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.dateofbirth, 'Date of Birth', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.dateofbirth, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.dateofbirth) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6" id="coaching-license-container"
-                                 style="{{ user.role == 'ROLE_COACH' ? '' : 'display: none;' }}">
-                                <div class="form-group">
-                                    {{ form_label(form.coachinglicense, 'Coaching License', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.coachinglicense, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.coachinglicense) }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.is_active, 'Status', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    <div class="d-flex align-items-center gap-3">
-                                        {{ form_widget(form.is_active) }}
-                                    </div>
-                                    {{ form_errors(form.is_active) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{ form_label(form.profilepicture, 'Profile Picture', {'label_attr': {'class': 'form-control-label'}}) }}
-                                    {{ form_widget(form.profilepicture, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
-                                    {% if user.profilepicture %}
-                                        <div class="mt-2">
-                                            <img src="{{ asset('uploads/profile/' ~ user.profilepicture) }}"
-                                                 class="avatar avatar-sm"
-                                                 alt="{{ user.firstname }} {{ user.lastname }}"
-                                                 onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
-                                            <small class="ms-2">Current profile picture</small>
-                                        </div>
-                                    {% endif %}
-                                    {{ form_errors(form.profilepicture) }}
-                                    <small class="form-text text-muted">Leave blank to keep the current picture</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end mt-4">
-                            <a href="{{ path('app_admin_dashboard_users') }}" class="btn btn-light m-0 me-2">Cancel</a>
-                            <button type="submit" class="btn bg-gradient-primary m-0">
-                                <i class="fas fa-save me-2"></i> Save Changes
-                            </button>
-                        </div>
                         {{ form_end(form) }}
                     </div>
                 </div>

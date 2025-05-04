@@ -4,9 +4,6 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
 use App\Repository\OrderRepository;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -29,16 +26,16 @@ class Order
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id')]
-    private ?User $user = null;
+    #[ORM\ManyToOne(targetEntity: \App\Entity\User::class, inversedBy: 'orders')]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false)]
+    private ?\App\Entity\User $user = null;
 
-    public function getUser(): ?User
+    public function getUser(): ?\App\Entity\User
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?\App\Entity\User $user): self
     {
         $this->user = $user;
         return $this;
@@ -60,6 +57,18 @@ class Order
 
     #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $quantity_order = null;
+    
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    private ?string $status = 'pending';    
+    
+    #[ORM\Column(type: 'float', nullable: false)]
+    private ?float $total_amount = 0;
+    
+    #[ORM\Column(name: 'homeaddress', type: 'string', length: 255, nullable: false)]
+    private ?string $address = null;
+    
+    #[ORM\Column(name: 'phonenum', type: 'integer', nullable: false)]
+    private ?int $phone = null;
 
     public function getQuantity_order(): ?int
     {
@@ -73,7 +82,7 @@ class Order
     }
 
     #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'orders')]
-    #[ORM\JoinColumn(name: 'id_product', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'id_product', referencedColumnName: 'id', nullable: false)]
     private ?Product $product = null;
 
     public function getProduct(): ?Product
@@ -113,5 +122,52 @@ class Order
 
         return $this;
     }
+    
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
 
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+    
+    public function getTotalAmount(): ?float
+    {
+        return $this->total_amount;
+    }
+
+    public function setTotalAmount(float $total_amount): static
+    {
+        $this->total_amount = $total_amount;
+
+        return $this;
+    }
+    
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): static
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+    
+    public function getPhone(): ?int
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?int $phone): static
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
 }

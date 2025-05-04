@@ -1,4 +1,5 @@
-
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}Player Details{% endblock %}
 {% block stylesheets %}
     {{ parent() }}
     <style>
@@ -101,57 +102,86 @@
         }
     </style>
 {% endblock %}
-
-{% block body %}
-    <div class="player-details-container">
-        <div class="player-header">
-            <img src="{{ asset(player.image) }}" alt="{{ player.name }}" class="player-image">
-            <div class="player-info">
-                <h1 class="player-name">{{ player.name }}</h1>
-                <div class="player-meta">
-                    <p>Position: {{ player.position }}</p>
-                    <p>Team: {{ player.team }}</p>
-                    <p>Jersey Number: {{ player.jerseyNumber }}</p>
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+     <div class="banner banner1">
+        <div class="inner-page-banner banner-bg">
+            <div class="container">
+                <div class="banner-content">
+                    <div class="page-path">
+                        <ul>
+                            <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                            <li><a class="current-page" href="#">Team</a></li>
+                        </ul>
+                    </div>
+                    <h1 class="banner-heading">OUR AVENGERS</h1>
                 </div>
             </div>
         </div>
+    </div>
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
 
-        <div class="player-stats">
-            <div class="stat-card">
-                <div class="stat-value">{{ player.stats.matches }}</div>
-                <div class="stat-label">Matches Played</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ player.stats.goals }}</div>
-                <div class="stat-label">Goals</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ player.stats.assists }}</div>
-                <div class="stat-label">Assists</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ player.stats.yellowCards }}</div>
-                <div class="stat-label">Yellow Cards</div>
+{% block content %}
+{% if app.user and app.user.team is not null and app.user.role == 'organizer' or app.user.role =='player' %}
+
+    <div class="container py-5">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <div class="card mb-4">
+                <div class="card-body">
+                    
+                     {% if player.profilepicture %}
+                               <img  class="img-fluid rounded-circle mb-3"
+                             style="width: 200px; height: 200px; object-fit: cover;"
+                             src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" alt="{{ player.firstname }} {{ player.lastname }} photo">
+                            {% else %}
+                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image"  class="img-fluid rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+                            {% endif %}
+                    <h2>{{ player.firstname }} {{ player.lastname }}</h2>
+                    <span class="badge bg-primary">{{ player.position|default('PLAYER')|upper }}</span>
+                </div>
             </div>
         </div>
-
-        <div class="player-bio">
-            <h2>Biography</h2>
-            <p>{{ player.biography }}</p>
-        </div>
-
-        <div class="achievements">
-            <h2>Achievements</h2>
-            <ul class="achievement-list">
-                {% for achievement in player.achievements %}
-                    <li class="achievement-item">
-                        <span class="achievement-icon">🏆</span>
-                        <span>{{ achievement }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Player Details</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Team</dt>
+                        <dd class="col-sm-9">
+                            {% if player.team %}
+                                {{ player.team.nom }} {# Access the team name property #}
+                            {% else %}
+                                No team assigned
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-3">Birth Date</dt>
+                        <dd class="col-sm-9">{{ player.dateofbirth ? player.dateofbirth|date('Y-m-d') : 'Unknown' }}</dd>
+                        
+                        <dt class="col-sm-3">Nationality</dt>
+                        <dd class="col-sm-9">{{ player.nationality|default('Unknown') }}</dd>
+                        
+                        <dt class="col-sm-3">Rating</dt>
+                        <dd class="col-sm-9">
+                            {% if player.rating %}
+                                <div class="star-rating" data-rating="{{ player.rating / 20 }}"></div>
+                                ({{ player.rating }}/100)
+                            {% else %}
+                                Not rated yet
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block javascripts %}

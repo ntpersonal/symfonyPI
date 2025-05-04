@@ -21,94 +21,118 @@
     <!--================= Banner Section End Here =================-->
 {% endblock %}
 {% block content %}
-  <!--================= Matches Grid Start Here =================-->
   <div class="rts-matches-section section-gap py-5">
     <div class="container">
-      <div class="section-title text-center mb-5">
-        <h2 class="fw-bold position-relative d-inline-block pb-3 border-bottom border-3 border-primary">Upcoming Matches</h2>
-        <p class="text-muted mt-3">Don't miss any of these exciting events!</p>
-      </div>
-      <div class="row g-4">
-        {% for match in matches %}
-          <div class="col-xl-3 col-md-6">
-            <div class="match-card bg-white shadow-sm rounded-3 overflow-hidden hover-scale transition-all border-0 h-100">
-              <!-- Teams and VS section -->
-              <div class="match-teams text-center pt-4 px-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <!-- Team A -->
-                  <div class="team text-center" style="width: 40%;">
-                    <div class="team-logo bg-light rounded-circle p-2 shadow-sm mx-auto" style="width: 70px; height: 70px;">
-                      <img class="img-fluid" src="{{ asset('assets/images/sportify.png') }}" alt="{{ match.teamA.nom }}">
-                    </div>
-                    <h6 class="team-name mt-2 mb-0 text-truncate fw-bold">{{ match.teamA.nom }}</h6>
-                  </div>
-                  
-                  <!-- VS Badge -->
-                  <div class="vs-badge fw-bold fs-5">VS</div>
-                  
-                  <!-- Team B -->
-                  <div class="team text-center" style="width: 40%;">
-                    <div class="team-logo bg-light rounded-circle p-2 shadow-sm mx-auto" style="width: 70px; height: 70px;">
-                      <img class="img-fluid" src="{{ asset('assets/images/sportify.png') }}" alt="{{ match.teamB.nom }}">
-                    </div>
-                    <h6 class="team-name mt-2 mb-0 text-truncate fw-bold">{{ match.teamB.nom }}</h6>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Match details -->
-              <div class="match-details text-center p-3">
-                <div class="match-date d-flex justify-content-center align-items-center mb-2">
-                  <i class="far fa-calendar-alt text-primary me-2"></i>
-                  <span class="fw-medium">{{ match.matchTime|date('D, M d, Y') }}</span>
-                </div>
-                <div class="match-time d-flex justify-content-center align-items-center mb-3">
-                  <i class="far fa-clock text-primary me-2"></i>
-                  <span>{{ match.matchTime|date('h:i A') }}</span>
-                </div>
-                <div class="match-status mb-4">
-                  <span class="badge rounded-pill px-4 py-2 bg-{{ 
-                    match.status == 'FINISHED' ? 'success' : 
-                    match.status == 'UPCOMING' ? 'warning text-dark' : 
-                    match.status == 'LIVE' ? 'danger' : 'warning text-dark' 
-                  }}">
-                    {{ match.status|capitalize }}
-                  </span>
-                </div>
-{% if match.tournoi %}
-  <p class="text-secondary mb-3">
-    <strong>Tournament:</strong> {{ match.tournoi.nom }}
-  </p>
-{% else %}
-  <p class="text-secondary mb-3">
-    <strong>Tournament:</strong> N/A
-  </p>
-{% endif %}
-              <div class="match-action">
-                  <a href="{{ path('app_front_match_show', { id: match.id }) }}"
-                    class="btn btn-outline-primary rounded-pill w-100">
-                    Match Details
-                  </a>            
-                </div>
-              </div>
-            </div>
+      <!-- Filter Form -->
+      <form id="match-filter-form" class="row g-3 mb-4">
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-primary text-white"><i class="fas fa-search"></i></span>
+            <input type="text" name="team" id="team-filter" placeholder="Search by team name..." 
+                   class="form-control" value="{{ app.request.query.get('team') }}"/>
           </div>
-        {% else %}
-          <div class="col-12">
-            <div class="alert alert-info text-center p-5">
-              <i class="fas fa-info-circle fa-3x mb-3"></i>
-              <h4 class="alert-heading">No Matches Found</h4>
-              <p class="mb-0">There are currently no matches available in the database.</p>
-            </div>
+        </div>
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-primary text-white"><i class="fas fa-filter"></i></span>
+            <select name="status" id="status-filter" class="form-select">
+              <option value="">All status</option>
+              <option value="UPCOMING" {% if app.request.query.get('status') == 'UPCOMING' %}selected{% endif %}>Upcoming</option>
+              <option value="LIVE" {% if app.request.query.get('status') == 'LIVE' %}selected{% endif %}>Live</option>
+              <option value="FINISHED" {% if app.request.query.get('status') == 'FINISHED' %}selected{% endif %}>Finished</option>
+            </select>
           </div>
-        {% endfor %}
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-filter me-2"></i>Apply Filters
+          </button>
+        </div>
+        <div id="filter-status" class="col-12 d-none">
+          <div class="alert alert-info d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm text-primary me-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Filtering matches...</span>
+          </div>
+        </div>
+      </form>
+
+      <!-- Matches Container -->
+      <div id="matches-container">
+        {% include 'front_office_dashboard/_matches_container.html.twig' with { 
+          matches: matches, 
+          apiMatches: apiMatches,
+          season: season 
+        } %}
       </div>
+        
     </div>
   </div>
-  <!--================= Matches Grid End Here =================-->
 {% endblock %}
+
 {% block footer %}
   {{ parent() }}
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('match-filter-form');
+      const teamInput = form.querySelector('input[name="team"]');
+      const statusSel = form.querySelector('select[name="status"]');
+      const container = document.getElementById('matches-container');
+      const filterStatus = document.getElementById('filter-status');
+      const url = "{{ path('app_front_matches') }}";
+
+      // Form submission handler
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        sendRequest();
+      });
+      
+      // Optional: Debounced input handler for immediate filtering while typing
+      let timeout = null;
+      teamInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(sendRequest, 500);
+      });
+      
+      // Immediate filter on status change
+      statusSel.addEventListener('change', sendRequest);
+
+      function sendRequest() {
+        // Show loading indicator
+        filterStatus.classList.remove('d-none');
+        
+        const params = new URLSearchParams(new FormData(form)).toString();
+        fetch(`${url}?${params}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.text())
+        .then(html => {
+          container.innerHTML = html;
+          // Update URL to reflect filters (for bookmarking/sharing)
+          history.pushState(null, '', `${url}?${params}`);
+          // Hide loading indicator
+          filterStatus.classList.add('d-none');
+        })
+        .catch(err => {
+          console.error('Filter error:', err);
+          filterStatus.classList.add('d-none');
+          // Show error message
+          alert('Error filtering matches. Please try again.');
+        });
+      }
+      
+      // Initialize filter values from URL params if present
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('team')) {
+        teamInput.value = urlParams.get('team');
+      }
+      if (urlParams.has('status')) {
+        statusSel.value = urlParams.get('status');
+      }
+    });
+  </script>
   
   <style>
     .hover-scale {
@@ -120,8 +144,13 @@
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
     }
     
-    .transition-all {
+    .match-card {
       transition: all 0.3s ease;
+    }
+    
+    .match-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
     }
     
     .overlay-dark {
@@ -162,6 +191,20 @@
     
     .vs-badge {
       color: #333;
+    }
+    
+    /* Button hover effect */
+    .btn-primary {
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    #filter-status {
+      transition: opacity 0.3s ease;
     }
   </style>
 {% endblock %}

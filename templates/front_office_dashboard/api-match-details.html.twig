@@ -1,0 +1,78 @@
+{# templates/front_office_dashboard/api-match-details.html.twig #}
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}
+	{{ match.match_hometeam_name }}
+	vs
+	{{ match.match_awayteam_name }}
+{% endblock %}
+
+{% block content %}
+	<div class="container py-5">
+		<h2 class="mb-3">
+			{{ match.match_hometeam_name }}
+			<span class="text-muted">vs</span>
+			{{ match.match_awayteam_name }}
+		</h2>
+		<p>
+			<i class="far fa-calendar-alt"></i>
+			{{ match.match_date }}</p>
+		<p>
+			<i class="far fa-clock"></i>
+			{{ match.match_time }}</p>
+		<p>
+			<strong>Status:</strong>
+			{{ match.match_status ?: 'Upcoming' }}</p>
+
+		<div class="row my-4">
+			<div class="col-md-6 text-center">
+				<img src="{{ homeTeam.team_badge ?: asset('assets/images/sportify.png') }}" class="img-fluid mb-2" width="100" alt="{{ homeTeam.team_name }}">
+				<h4>{{ homeTeam.team_name }}</h4>
+				<p>
+					<strong>Founded:</strong>
+					{{ homeTeam.team_founded }}</p>
+				<p>
+					<strong>Country:</strong>
+					{{ homeTeam.team_country }}</p>
+
+			</div>
+			<div class="col-md-6 text-center">
+				<img src="{{ awayTeam.team_badge ?: asset('assets/images/sportify.png') }}" class="img-fluid mb-2" width="100" alt="{{ awayTeam.team_name }}">
+				<h4>{{ awayTeam.team_name }}</h4>
+				<p>
+					<strong>Founded:</strong>
+					{{ homeTeam.team_founded }}</p>
+				<p>
+					<strong>Country:</strong>
+					{{ homeTeam.team_country }}</p>
+			</div>
+		</div>
+
+		{# Optional: show lineups if present #}
+		{% if match.lineup.home.starting_lineups is defined and match.lineup.home.starting_lineups %}
+			<h3>Starting XI</h3>
+			<div class="row">
+				<div class="col-md-6">
+					<h5>{{ match.match_hometeam_name }}</h5>
+					<ul class="list-unstyled">
+						{% for p in match.lineup.home.starting_lineups %}
+							<li>{{ p.lineup_number }}
+								–
+								{{ p.lineup_player }}</li>
+						{% endfor %}
+					</ul>
+				</div>
+				<div class="col-md-6">
+					<h5>{{ match.match_awayteam_name }}</h5>
+					<ul class="list-unstyled">
+						{% for p in match.lineup.away.starting_lineups %}
+							<li>{{ p.lineup_number }}
+								–
+								{{ p.lineup_player }}</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+		{% endif %}
+	</div>
+{% endblock %}

@@ -193,7 +193,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     #[ORM\Column(name: 'phonenumber', type: 'string', nullable: true)]
-    #[Assert\NotBlank(message: 'phone number is required')]
     #[Assert\Regex(
         pattern: '/^[0-9+\s()-]{8,20}$/',
         message: 'Please enter a valid phone number'
@@ -214,7 +213,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'dateofbirth', type: 'date', nullable: false)]
     #[Assert\NotBlank(message: 'Date of birth is required')]
     #[Assert\Type(type: \DateTimeInterface::class, message: 'Please enter a valid date in YYYY-MM-DD format')]
-    #[Assert\LessThanOrEqual(value: '-5 years', message: 'User must be at least 5 years old')]
+    #[Assert\LessThanOrEqual(value: '-16 years', message: 'User must be at least 16 years old')]
     private ?\DateTimeInterface $dateofbirth = null;
 
     public function getDateofbirth(): ?\DateTimeInterface
@@ -224,7 +223,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setDateofbirth(?\DateTimeInterface $dateofbirth): self
     {
-
         $this->dateofbirth = $dateofbirth;
         return $this;
     }
@@ -243,11 +241,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
+
+
+
+
+
     #[ORM\Column(name: 'coachinglicense', type: 'string', nullable: true)]
     #[Assert\When(
-        expression: "this.getRole() === 'ROLE_COACH'",
+        expression: "this.getRole() === 'organizer'",
         constraints: [
-            new Assert\NotBlank(message: 'Coaching license is required for coaches'),
+            new Assert\NotBlank(message: 'Coaching license is required for organizers'),
             new Assert\Length(
                 min: 5,
                 max: 20,
@@ -401,7 +405,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
     #[ORM\OneToMany(targetEntity: Tournoi::class, mappedBy: 'user')]
     private Collection $tournois;
 
@@ -479,6 +482,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private Collection $events;
 
+    /**
+     * @var Collection<int, TeamRequest>
+     */
+    #[ORM\OneToMany(targetEntity: TeamRequest::class, mappedBy: 'player')]
+    private Collection $teamRequests;
+     /**
+     * @var Collection<int, TeamRequest>
+     */
+    #[ORM\OneToMany(targetEntity: TeamRequest::class, mappedBy: 'player')]
+    private Collection $sentTeamRequests;
+    /**
+     * @var Collection<int, TeamRequest>
+     */
+    #[ORM\OneToMany(targetEntity: TeamRequest::class, mappedBy: 'manager')]
+    private Collection $receivedTeamRequests;
+    
     public function __construct()
     {
         $this->orders = new ArrayCollection();
@@ -486,6 +505,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->tournois = new ArrayCollection();
         $this->reclamations = new ArrayCollection();
         $this->events = new ArrayCollection();
+        $this->sentTeamRequests = new ArrayCollection();
+        $this->receivedTeamRequests=new ArrayCollection();
     }
 
     /**
@@ -544,7 +565,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
+        // $roles = ['ROLE_USER'];
+        // if ($this->role === 'player') {
+        //     $roles[] = 'ROLE_PLAYER';
+        // } elseif ($this->role === 'organizer') {
+        //     $roles[] = 'ROLE_ORGANIZER';
+        // } elseif ($this->role === 'Admin') {
+        //     $roles[] = 'ROLE_ADMIN';
+        // }
+        // return $roles;
         return ['ROLE_' . strtoupper($this->role)];
+
     }
 
     public function eraseCredentials(): void
@@ -603,6 +634,79 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFaceData(?string $faceData): self
     {
         $this->faceData = $faceData;
+        return $this;
+    }
+
+    #[ORM\Column(name: "googleId", type: "string", nullable: true)]
+    private ?string $googleId = null;
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TeamRequest>
+     */
+    public function getsentTeamRequests(): Collection
+    {
+        return $this->sentTeamRequests;
+    }
+
+    public function addsentTeamRequest(TeamRequest $teamRequest): static
+    {
+        if (!$this->sentTeamRequests->contains($teamRequest)) {
+            $this->sentTeamRequests->add($teamRequest);
+            $teamRequest->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removesentTeamRequest(TeamRequest $teamRequest): static
+    {
+        if ($this->sentTeamRequests->removeElement($teamRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($teamRequest->getPlayer() === $this) {
+                $teamRequest->setPlayer(null);
+            }
+        }
+
+        return $this;
+    }
+    /**
+     * @return Collection<int, TeamRequest>
+     */
+    public function getreceivedTeamRequests(): Collection
+    {
+        return $this->receivedTeamRequests;
+    }
+
+    public function addreceivedTeamRequest(TeamRequest $teamRequest): static
+    {
+        if (!$this->receivedTeamRequests->contains($teamRequest)) {
+            $this->receivedTeamRequests->add($teamRequest);
+            $teamRequest->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTeamRequest(TeamRequest $teamRequest): static
+    {
+        if ($this->receivedTeamRequests->removeElement($teamRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($teamRequest->getPlayer() === $this) {
+                $teamRequest->setPlayer(null);
+            }
+        }
+
         return $this;
     }
 }

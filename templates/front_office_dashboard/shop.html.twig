@@ -204,7 +204,16 @@
         </div>
         <!--================= Banner Section End Here =================-->
 {% endblock %}
-{% block content %}
+{% block body  %}
+{{ parent()  }}
+{%  endblock  %}
+
+{% block content  %}
+
+
+
+
+
 <!--================= Match Result Section Start Here =================-->
     <div class="rts-merch-section section-gap">
         <div class="container">
@@ -400,8 +409,12 @@
 
 {% endblock %}
 {% block footer %}
-{{ parent() }}
+    {{ parent() }}
 {% endblock %}
+
+
+
+
 
 {% block javascripts %}
     {{ parent() }}

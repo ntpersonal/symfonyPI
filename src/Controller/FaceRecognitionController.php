@@ -23,6 +23,81 @@ class FaceRecognitionController extends AbstractController
         private LoggerInterface $logger
     ) {}
 
+    #[Route('/api/verify-email-for-face-login', name: 'app_verify_email_for_face_login', methods: ['POST'])]
+    public function verifyEmailForFaceLogin(Request $request): JsonResponse
+    {
+        // Immediately set the response type
+        $response = new JsonResponse();
+        $response->headers->set('Content-Type', 'application/json');
+
+        try {
+            $this->logger->info('Email verification for face login started');
+
+            // Verify it's an AJAX request
+            if (!$request->isXmlHttpRequest()) {
+                throw new \RuntimeException('This route accepts only AJAX requests');
+            }
+
+            // Parse JSON content
+            $data = json_decode($request->getContent(), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \InvalidArgumentException('Invalid JSON payload');
+            }
+
+            $email = $data['email'] ?? null;
+
+            if (!$email) {
+                throw new \InvalidArgumentException('Email is required');
+            }
+
+            // Find user by email
+            $user = $this->userRepository->findOneBy(['email' => $email]);
+
+            if (!$user) {
+                $response->setData([
+                    'success' => false,
+                    'message' => 'Email not found in our records.'
+                ]);
+                $response->setStatusCode(Response::HTTP_NOT_FOUND);
+                return $response;
+            }
+
+            // Check if user has face data
+            if (!$user->getFaceData()) {
+                $response->setData([
+                    'success' => false,
+                    'message' => 'This email is not registered for face recognition. Please register your face first.'
+                ]);
+                $response->setStatusCode(Response::HTTP_FORBIDDEN);
+                return $response;
+            }
+
+            $response->setData([
+                'success' => true,
+                'message' => 'Email verified successfully.'
+            ]);
+
+            return $response;
+
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->error('Validation error: '.$e->getMessage());
+            $response->setData([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            $response->setStatusCode(Response::HTTP_BAD_REQUEST);
+            return $response;
+        } catch (\Exception $e) {
+            $this->logger->error('Email verification error: '.$e->getMessage());
+            $response->setData([
+                'success' => false,
+                'message' => 'An error occurred during email verification. Please try again.'
+            ]);
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $response;
+        }
+    }
+
     #[Route('/api/face-login', name: 'app_face_login', methods: ['POST'])]
     public function faceLogin(Request $request): JsonResponse
     {
@@ -46,58 +121,48 @@ class FaceRecognitionController extends AbstractController
 
             $imageData = $data['image'] ?? null;
             $liveDescriptor = $data['descriptor'] ?? null;
+            $email = $data['email'] ?? null;
 
-            if (!$imageData || !$liveDescriptor) {
-                throw new \InvalidArgumentException('Missing image or descriptor data');
+            if (!$imageData || !$liveDescriptor || !$email) {
+                throw new \InvalidArgumentException('Missing image, descriptor, or email data');
             }
 
-            // Find all users with face data
-            $users = $this->userRepository->createQueryBuilder('u')
-                ->where('u.faceData IS NOT NULL')
-                ->getQuery()
-                ->getResult();
+            // Find user by email
+            $user = $this->userRepository->findOneBy(['email' => $email]);
 
-            $this->logger->info(sprintf('Found %d users with face data', count($users)));
-            $matchedUser = null;
-            $highestSimilarity = 0;
+            if (!$user) {
+                throw new \InvalidArgumentException('User not found');
+            }
+
+            // Get stored face data
+            $storedData = json_decode($user->getFaceData(), true);
+            if (!$storedData || !isset($storedData['descriptor'])) {
+                throw new \InvalidArgumentException('Invalid face data format');
+            }
+
+            $storedDescriptor = $storedData['descriptor'];
+
+            // Compare face descriptors
+            $similarity = $this->compareFaceDescriptors($liveDescriptor, $storedDescriptor);
+
+            $this->logger->info(sprintf('Face comparison for user %d: similarity = %f', $user->getId(), $similarity));
+
+            // Check if similarity is above threshold
             $threshold = 0.4; // More lenient threshold
-
-            foreach ($users as $user) {
-                if (!$user->getFaceData()) continue;
-
-                $storedData = json_decode($user->getFaceData(), true);
-                if (!$storedData || !isset($storedData['descriptor'])) {
-                    $this->logger->warning(sprintf('Invalid face data format for user %d', $user->getId()));
-                    continue;
-                }
-                $storedDescriptor = $storedData['descriptor'];
-
-                try {
-                    $similarity = $this->compareFaceDescriptors($liveDescriptor, $storedDescriptor);
-                    $this->logger->info(sprintf('Face comparison for user %d: similarity = %f', $user->getId(), $similarity));
-
-                    if ($similarity > $highestSimilarity) {
-                        $highestSimilarity = $similarity;
-                        $matchedUser = $user;
-                    }
-                } catch (\Exception $e) {
-                    $this->logger->warning(sprintf('Face comparison failed for user %d: %s', $user->getId(), $e->getMessage()));
-                    continue;
-                }
-            }
-
-            if (!$matchedUser || $highestSimilarity < $threshold) {
+            if ($similarity < $threshold) {
                 $response->setData([
                     'success' => false,
-                    'message' => 'Face not recognized',
-                    'similarity' => $highestSimilarity
+                    'message' => 'We couldn\'t verify your identity. Please try again or use your password to sign in.',
+                    'debug' => [
+                        'similarity' => $similarity
+                    ]
                 ]);
                 $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 return $response;
             }
 
             // Authenticate user
-            $token = new UsernamePasswordToken($matchedUser, 'main', $matchedUser->getRoles());
+            $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
             $this->container->get('security.token_storage')->setToken($token);
 
             $event = new InteractiveLoginEvent($request, $token);
@@ -106,7 +171,10 @@ class FaceRecognitionController extends AbstractController
             $response->setData([
                 'success' => true,
                 'redirectUrl' => $this->generateUrl('app_front_office'),
-                'similarity' => $highestSimilarity
+                'debug' => [
+                    'similarity' => $similarity,
+                    'userId' => $user->getId()
+                ]
             ]);
 
             return $response;
@@ -123,8 +191,10 @@ class FaceRecognitionController extends AbstractController
             $this->logger->error('Face login error: '.$e->getMessage());
             $response->setData([
                 'success' => false,
-                'message' => 'An error occurred',
-                'error' => $e->getMessage() // Only in dev environment
+                'message' => 'An error occurred during face recognition. Please try again or use your password to sign in.',
+                'debug' => [
+                    'error' => $e->getMessage() // Only in dev environment
+                ]
             ]);
             $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
             return $response;

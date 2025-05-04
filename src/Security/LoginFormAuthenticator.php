@@ -54,9 +54,42 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $email = $request->request->get('email');
         $password = $request->request->get('password');
         $csrfToken = $request->request->get('_csrf_token');
+        $recaptchaResponse = $request->request->get('g-recaptcha-response');
 
         if (null === $email || null === $password) {
             throw new BadCredentialsException('Email or password is missing');
+        }
+
+        // Verify reCAPTCHA
+        if (empty($recaptchaResponse)) {
+            throw new CustomUserMessageAuthenticationException('Please complete the reCAPTCHA verification.');
+        }
+
+        // Get reCAPTCHA secret key from environment variables
+        $recaptchaSecret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'; // Use test key as fallback
+
+        // Make a POST request to Google's reCAPTCHA verification API
+        $verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
+        $data = [
+            'secret' => $recaptchaSecret,
+            'response' => $recaptchaResponse,
+            'remoteip' => $request->getClientIp()
+        ];
+
+        $options = [
+            'http' => [
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($data)
+            ]
+        ];
+
+        $context = stream_context_create($options);
+        $verifyResponse = file_get_contents($verifyUrl, false, $context);
+        $responseData = json_decode($verifyResponse, true);
+
+        if (!$responseData['success']) {
+            throw new CustomUserMessageAuthenticationException('reCAPTCHA verification failed. Please try again.');
         }
 
         // Debug information

@@ -1,0 +1,155 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+{% block stylesheets %}
+    <!--     Fonts and icons     -->
+    <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
+    <!-- Nucleo Icons -->
+    <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
+    <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <!-- CSS Files -->
+    <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.1.0') }}" rel="stylesheet" />
+    <style>
+        .product-card {
+            height: 500px; /* Set a fixed height */
+            width: 100%; /* Ensure cards take full width of the column */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .product-card img {
+            max-height: 250px; /* Limit image height */
+            object-fit: cover; /* Ensure images are cropped properly */
+        }
+    </style>
+{% endblock %}
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h6>Products</h6>
+                        </div>
+                        <div class="col-6 text-end">
+                            <a href="{{ path('product_new') }}" class="btn btn-primary">Add New Product</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filter Form -->
+                    <div class="mt-3">
+                        <form id="product-filter-form" method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Search by name" name="search" value="{{ app.request.query.get('search') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="category">
+                                    <option value="">All Categories</option>
+                                    {% set categories = [] %}
+                                    {% for product in products %}
+                                        {% if product.category not in categories %}
+                                            {% set categories = categories|merge([product.category]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for category in categories %}
+                                        <option value="{{ category }}" {% if app.request.query.get('category') == category %}selected{% endif %}>{{ category }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="stock">
+                                    <option value="">All Stock Status</option>
+                                    <option value="in_stock" {% if app.request.query.get('stock') == 'in_stock' %}selected{% endif %}>In Stock</option>
+                                    <option value="low_stock" {% if app.request.query.get('stock') == 'low_stock' %}selected{% endif %}>Low Stock (<10)</option>
+                                    <option value="out_of_stock" {% if app.request.query.get('stock') == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-info w-100">Filter</button>
+                            </div>
+                            <div class="col-md-1">
+                                <a href="{{ path('product_index') }}" class="btn btn-secondary w-100">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Stock</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Category</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                    <tr>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ product.id }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ product.nameproduct }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ product.priceproduct }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ product.stock }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ product.category }}</p>
+                                        </td>
+                                        <td class="align-middle">
+                                            <a href="{{ path('product_edit', { id: product.id }) }}" class="btn btn-warning btn-sm">Edit</a>
+                                            <form method="post" action="{{ path('product_delete', { id: product.id }) }}" style="display:inline-block;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                                                <button class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                {% for product in products %}
+                    <div class="col-md-4">
+                        <div class="card product-card mb-4">
+                            {% if product.image %}
+                                <img src="{{ asset('uploads/products/' ~ product.image) }}" class="card-img-top" alt="{{ product.nameproduct }}">
+                            {% else %}
+                                <img src="{{ asset('assets/images/default-product.png') }}" class="card-img-top" alt="Default Image">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.nameproduct }}</h5>
+                                <p class="card-text">
+                                    <strong>Price:</strong> {{ product.priceproduct }}<br>
+                                    <strong>Stock:</strong> {{ product.stock }}<br>
+                                    <strong>Category:</strong> {{ product.category }}
+                                </p>
+                                <a href="{{ path('product_edit', { id: product.id }) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <form method="post" action="{{ path('product_delete', { id: product.id }) }}" style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                                    <button class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -113,6 +113,40 @@ class Product
         return $this;
     }
 
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $image = null;
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+    
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $productdescription = null;
+    
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $deleted = false;
+    
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
+    public function getProductdescription(): ?string
+    {
+        return $this->productdescription;
+    }
+
+    public function setProductdescription(?string $productdescription): self
+    {
+        $this->productdescription = $productdescription;
+        return $this;
+    }
+
     #[ORM\OneToMany(targetEntity: Panier::class, mappedBy: 'product')]
     private Collection $paniers;
 
@@ -146,5 +180,53 @@ class Product
         $this->getPaniers()->removeElement($panier);
         return $this;
     }
-
+    
+    public function isDeleted(): bool
+    {
+        return $this->deleted;
+    }
+    
+    public function setDeleted(bool $deleted): self
+    {
+        $this->deleted = $deleted;
+        
+        if ($deleted && $this->deletedAt === null) {
+            $this->deletedAt = new \DateTime();
+        }
+        
+        if (!$deleted) {
+            $this->deletedAt = null;
+        }
+        
+        return $this;
+    }
+    
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+    
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
+        return $this;
+    }
+    
+    /**
+     * Soft delete this product
+     */
+    public function softDelete(): self
+    {
+        $this->setDeleted(true);
+        return $this;
+    }
+    
+    /**
+     * Restore a soft-deleted product
+     */
+    public function restore(): self
+    {
+        $this->setDeleted(false);
+        return $this;
+    }
 }

@@ -1,0 +1,57 @@
+<div class="section-title text-center mb-5">
+  <h2 class="fw-bold pb-3 border-bottom border-3 border-primary">Local Matches</h2>
+</div>
+<div class="row g-4">
+  {% for match in matches %}
+    {% set home = match.teamA %}
+    {% set away = match.teamB %}
+    <div class="col-xl-3 col-md-6">
+      <div class="match-card bg-white shadow-sm rounded-3 overflow-hidden h-100">
+        <div class="match-teams text-center pt-4 px-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="team text-center" style="width:40%">
+              <img src="{{ asset('assets/images/sportify.png') }}"
+                   class="img-fluid rounded-circle mb-2" width="70"
+                   alt="{{ home.nom }}">
+              <h6 class="fw-bold text-truncate">{{ home.nom }}</h6>
+            </div>
+            <div class="vs-badge fw-bold fs-5">VS</div>
+            <div class="team text-center" style="width:40%">
+              <img src="{{ asset('assets/images/sportify.png') }}"
+                   class="img-fluid rounded-circle mb-2" width="70"
+                   alt="{{ away.nom }}">
+              <h6 class="fw-bold text-truncate">{{ away.nom }}</h6>
+            </div>
+          </div>
+        </div>
+        <div class="match-details text-center p-3">
+          <div class="match-date mb-2">
+            <i class="far fa-calendar-alt me-2"></i>{{ match.matchTime|date('D, M d, Y') }}
+          </div>
+          <div class="match-time mb-3">
+            <i class="far fa-clock me-2"></i>{{ match.matchTime|date('h:i A') }}
+          </div>
+          <div class="match-status mb-3">
+            <span class="badge rounded-pill px-4 py-2
+              bg-{{ match.status == 'FINISHED' ? 'success'
+                     : match.status == 'UPCOMING' ? 'warning'
+                     : match.status == 'LIVE'     ? 'danger'
+                                                  : 'secondary' }}">
+              {{ match.status|capitalize }}
+            </span>
+          </div>
+          <a href="{{ path('app_front_match_show', { id: match.id }) }}"
+             class="btn btn-outline-primary rounded-pill w-100">
+            Details
+          </a>
+        </div>
+      </div>
+    </div>
+      {% else %}
+    <div class="col-12">
+      <div class="alert alert-info text-center">
+        No local matches found.
+      </div>
+    </div>
+  {% endfor %}
+</div>

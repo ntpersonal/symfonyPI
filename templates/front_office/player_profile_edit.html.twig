@@ -50,11 +50,6 @@
                             <h3 class="player-name mb-1">{{ user.firstname }} {{ user.lastname }}</h3>
                             <span class="player-role d-block text-muted mb-3">{{ user.role }}</span>
 
-                            <div class="upload-btn-wrapper mt-3">
-                                {{ form_row(form.profilepicture, {'label': 'Change Profile Picture', 'attr': {'class': 'profile-pic-input', 'onchange': 'previewImage(this)'}}) }}
-                                <small class="form-text text-muted mt-2">Recommended: Square image, at least 300×300 pixels</small>
-                            </div>
-
                             <div class="player-stats mt-4">
                                 <div class="row g-0">
                                     <div class="col-6 stat-item border-end">
@@ -98,6 +93,30 @@
                             </div>
                         {% endfor %}
                     {% endfor %}
+
+                    <!-- Profile Picture Upload -->
+                    <div class="profile-picture-card bg-white rounded-lg shadow mb-4">
+                        <div class="card-header p-4 border-bottom">
+                            <h4 class="mb-0"><i class="fas fa-image me-2"></i> Profile Picture</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="upload-btn-wrapper">
+                                        {{ form_row(form.profilepicture, {
+                                            'label': 'Change Profile Picture',
+                                            'attr': {
+                                                'class': 'form-control profile-pic-input',
+                                                'onchange': 'previewImage(this)',
+                                                'accept': 'image/*'
+                                            }
+                                        }) }}
+                                        <small class="form-text text-muted mt-2">Recommended: Square image, at least 300×300 pixels</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Personal Information Card -->
                     <div class="profile-info-card bg-white rounded-lg shadow mb-4">
@@ -159,27 +178,26 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="face-capture-container text-center">
-                                        <!-- Video/Canvas Container -->
-                                        <div class="position-relative mb-3" style="max-width: 640px; margin: 0 auto;">
-                                            <video id="video" width="100%" height="auto" autoplay muted class="rounded border" style="display:none; background: #f8f9fa;"></video>
-                                            <canvas id="canvas" width="640" height="480" class="rounded border" style="display:none;"></canvas>
-                                            <img id="photo" class="rounded border" style="display:none; width:100%; height:auto;" alt="Your captured face">
-
-                                            <!-- Face Guide Overlay -->
-                                            <div id="faceGuide" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-                            width:60%; height:70%; border:3px dashed rgba(255,255,255,0.7); border-radius:50%; pointer-events:none;"></div>
+                                        <div class="camera-frame mb-4">
+                                            <div class="camera-overlay">
+                                                <div class="face-guide"></div>
+                                            </div>
+                                            <video id="video" width="320" height="240" autoplay muted playsinline></video>
+                                            <canvas id="canvas" width="320" height="240" class="d-none"></canvas>
+                                            <img id="photo" class="preview-image d-none" alt="Your face">
                                         </div>
-
-                                        <!-- Control Buttons -->
-                                        <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
-                                            <button type="button" class="btn btn-primary" id="startCamera">
-                                                <i class="fas fa-video me-2"></i> Start Camera
+                                        <div class="camera-controls">
+                                            <button type="button" class="btn-camera" id="startCamera">
+                                                <i class="fas fa-video"></i>
+                                                <span>Start</span>
                                             </button>
-                                            <button type="button" class="btn btn-success" id="capture" disabled>
-                                                <i class="fas fa-camera me-2"></i> Capture
+                                            <button type="button" class="btn-camera btn-capture" id="capture" disabled>
+                                                <i class="fas fa-camera"></i>
+                                                <span>Capture</span>
                                             </button>
-                                            <button type="button" class="btn btn-danger" id="stopCamera" disabled>
-                                                <i class="fas fa-stop me-2"></i> Stop
+                                            <button type="button" class="btn-camera btn-stop" id="stopCamera" disabled>
+                                                <i class="fas fa-stop"></i>
+                                                <span>Stop</span>
                                             </button>
                                         </div>
 
@@ -229,46 +247,254 @@
     </div>
 
     <style>
-        /* [Previous CSS styles remain the same] */
-
-        /* Face Recognition Specific Styles */
-        .face-recognition-card {
+        /* Profile Card Styles */
+        .profile-card {
             border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+            transition: transform 0.3s ease;
         }
 
-        .video-container, .preview-container {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            text-align: center;
+        .profile-header {
+            position: relative;
         }
 
-        #video, #canvas, #photo {
-            max-width: 100%;
-            height: auto;
+        .profile-avatar-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-top: -75px;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid #ffffff;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .player-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 10px;
+            color: #333;
+        }
+
+        .player-role {
+            font-size: 1rem;
+            color: #777;
+            font-weight: 500;
+        }
+
+        .player-stats {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .stat-item {
+            padding: 10px 15px;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .upload-btn-wrapper {
+            margin-top: 20px;
+        }
+
+        .profile-pic-input {
+            margin-bottom: 10px;
+        }
+
+        /* Face Recognition Styles */
+        .face-capture-container {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        .camera-frame {
+            position: relative;
+            width: 320px;
+            height: 240px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
             background: #000;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border: 3px dashed rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .btn-camera {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
             border-radius: 8px;
+            font-weight: 600;
+            color: white;
+            background: #0d6efd;
+            transition: all 0.2s ease;
         }
 
-        .capture-buttons {
-            margin-bottom: 15px;
+        .btn-camera:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
         }
 
-        .face-status {
-            margin-top: 15px;
+        .btn-camera.btn-capture {
+            background: #198754;
+        }
+
+        .btn-camera.btn-capture:hover {
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.2);
+        }
+
+        .btn-camera.btn-stop {
+            background: #dc3545;
+        }
+
+        .btn-camera.btn-stop:hover {
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+        }
+
+        .btn-camera:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     </style>
 
     <script>
         function previewImage(input) {
+            console.log('Profile picture input changed:', input);
+            console.log('Files:', input.files);
+            
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profile-picture-preview').src = e.target.result;
+                const file = input.files[0];
+                console.log('Selected file:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    input.value = '';
+                    return;
                 }
-                reader.readAsDataURL(input.files[0]);
+
+                // Validate file size (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size must be less than 2MB');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    console.log('File successfully read');
+                    const preview = document.getElementById('profile-picture-preview');
+                    if (preview) {
+                        preview.src = e.target.result;
+                        console.log('Preview updated with:', e.target.result.substring(0, 50) + '...');
+                    } else {
+                        console.error('Preview element not found');
+                        // Create a preview element if it doesn't exist
+                        const previewContainer = document.querySelector('.profile-avatar-wrapper');
+                        if (previewContainer) {
+                            const newPreview = document.createElement('img');
+                            newPreview.id = 'profile-picture-preview';
+                            newPreview.className = 'profile-avatar';
+                            newPreview.alt = 'Profile Picture Preview';
+                            newPreview.src = e.target.result;
+                            // Replace existing image if any
+                            const existingImage = previewContainer.querySelector('img');
+                            if (existingImage) {
+                                previewContainer.replaceChild(newPreview, existingImage);
+                            } else {
+                                previewContainer.appendChild(newPreview);
+                            }
+                            console.log('Created new preview element');
+                        }
+                    }
+                }
+
+                reader.onerror = function(e) {
+                    console.error('Error reading file:', e);
+                    alert('Error reading file. Please try again.');
+                    input.value = '';
+                }
+
+                reader.readAsDataURL(file);
+            } else {
+                console.log('No file selected or input invalid');
             }
         }
 

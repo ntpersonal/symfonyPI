@@ -10,21 +10,32 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ImageController extends AbstractController
 {
-    #[Route('/img/{filename}', name: 'app_image')]
-    public function serveImage(string $filename): Response
+    #[Route('/img/{subdirectory}/{filename}', name: 'app_image', requirements: [
+        'subdirectory' => 'teams|players', // allowed subdirectories
+        'filename' => '.+' // allow any filename (including with slashes)
+    ])]
+    public function serveImage(string $subdirectory, string $filename): Response
     {
-        // Define the base path where your images are stored
-        $basePath = 'C:/xampp4/htdocs/img/';
-        $filePath = $basePath . $filename;
+        $validSubdirectories = ['teams', 'players']; // Add others as needed
+        $basePath = 'C:/xampp/htdocs/img/';
+        
+        // Security check
+        if (!in_array($subdirectory, $validSubdirectories, true)) {
+            throw new NotFoundHttpException('Invalid image category');
+        }
 
-        // Check if file exists
+        $filePath = $basePath . $subdirectory . '/' . $filename;
+
         if (!file_exists($filePath)) {
             throw new NotFoundHttpException('Image not found');
         }
 
-        // Create and return the response
         $response = new BinaryFileResponse($filePath);
         $response->headers->set('Content-Type', mime_content_type($filePath));
+        $response->setCache([
+            'public' => true,
+            'max_age' => '604800' // 1 week cache
+        ]);
         
         return $response;
     }

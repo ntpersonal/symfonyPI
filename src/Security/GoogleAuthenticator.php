@@ -40,18 +40,48 @@ class GoogleAuthenticator extends AbstractAuthenticator
     public function authenticate(Request $request): Passport
     {
         $client = $this->clientRegistry->getClient('google');
-        $accessToken = $client->getAccessToken();
+        $scopes = [
+            'openid',
+            'email',
+            'profile',
+            'https://www.googleapis.com/auth/user.birthday.read'
+        ];
+        
+        $accessToken = $client->getAccessToken($scopes);
         $googleUser = $client->fetchUserFromToken($accessToken);
-        $googleData = $googleUser->toArray(); // This gives us the profile picture URL
+        $googleData = $googleUser->toArray();
 
         /** @var GoogleUser $googleUser */
         $email = $googleUser->getEmail();
 
+        // Fetch birthday from Google People API
+        $birthday = null;
+        if ($accessToken) {
+            $tokenValue = $accessToken->getToken();
+            $response = @file_get_contents("https://people.googleapis.com/v1/people/me?personFields=birthdays&access_token={$tokenValue}");
+
+            if ($response !== false) {
+                $peopleInfo = json_decode($response, true);
+                if (isset($peopleInfo['birthdays'][0]['date'])) {
+                    $date = $peopleInfo['birthdays'][0]['date'];
+                    if (isset($date['year'], $date['month'], $date['day'])) {
+                        $birthday = new \DateTime(sprintf('%04d-%02d-%02d', $date['year'], $date['month'], $date['day']));
+                    }
+                }
+            }
+        }
+
         return new SelfValidatingPassport(
-            new UserBadge($email, function (string $userIdentifier) use ($googleUser, $googleData) {
+            new UserBadge($email, function (string $userIdentifier) use ($googleUser, $googleData, $birthday) {
                 $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $userIdentifier]);
 
                 if ($existingUser) {
+                    // Update existing user with Google ID if not already set
+                    if (!$existingUser->getGoogleId()) {
+                        $existingUser->setGoogleId($googleUser->getId());
+                        $this->entityManager->persist($existingUser);
+                        $this->entityManager->flush();
+                    }
                     return $existingUser;
                 }
 
@@ -66,12 +96,20 @@ class GoogleAuthenticator extends AbstractAuthenticator
                 $user->setPassword('');
                 $user->setResetCode('');
                 $user->setResetCodeExpiry(new \DateTime());
-                $user->setDateofbirth(new \DateTime('2000-01-01')); // Use default to avoid null error
+                $user->setFaceData($googleData['picture'] ?? '');
+                $user->setGoogleId($googleUser->getId());
+
+                // Set the birthday if available, otherwise use a default date
+                if ($birthday) {
+                    $user->setDateofbirth($birthday);
+                } else {
+                    $user->setDateofbirth(new \DateTime('2000-01-01'));
+                }
 
                 // DOWNLOAD AND SAVE PROFILE PICTURE
                 $profilePictureUrl = $googleUser->getAvatar();
                 if ($profilePictureUrl) {
-                    $imageContents = file_get_contents($profilePictureUrl);
+                    $imageContents = @file_get_contents($profilePictureUrl);
                     if ($imageContents !== false) {
                         $imageName = md5(uniqid()) . '.png';
                         $imagePath = __DIR__ . '/../../public/uploads/profile/' . $imageName;
@@ -81,7 +119,6 @@ class GoogleAuthenticator extends AbstractAuthenticator
                         $user->setProfilepicture($imageName);
                     }
                 }
-
 
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -94,7 +131,16 @@ class GoogleAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?RedirectResponse
     {
-        return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
+        $user = $token->getUser();
+        
+        // Check if user has already completed their profile (has password and role)
+        if ($user instanceof User && $user->getPassword() && $user->getRole()) {
+            // User has already completed their profile, redirect to home page
+            return new RedirectResponse($this->urlGenerator->generate('app_front_office'));
+        }
+        
+        // User needs to complete their profile
+        return new RedirectResponse($this->urlGenerator->generate('app_google_complete_profile'));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?RedirectResponse

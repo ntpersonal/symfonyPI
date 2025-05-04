@@ -1,0 +1,309 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>Add New Product</h6>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'id': 'product_form', 'novalidate': 'novalidate'}}) }}
+                        <div class="mb-3">
+                            {{ form_label(form.nameproduct) }}
+                            {{ form_widget(form.nameproduct, { 
+                                'attr': {
+                                    'class': form_errors(form.nameproduct) ? 'form-control is-invalid' : 'form-control'
+                                }
+                            }) }}
+                            {% if form_errors(form.nameproduct) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.nameproduct) }}
+                                </div>
+                            {% else %}
+                                <small class="form-text text-muted">Product name must be between 3 and 100 characters</small>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.priceproduct) }}
+                            {{ form_widget(form.priceproduct, { 
+                                'attr': {
+                                    'class': form_errors(form.priceproduct) ? 'form-control is-invalid' : 'form-control'
+                                }
+                            }) }}
+                            {% if form_errors(form.priceproduct) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.priceproduct) }}
+                                </div>
+                            {% else %}
+                                <small class="form-text text-muted">Price must be greater than 0</small>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.stock) }}
+                            {{ form_widget(form.stock, { 
+                                'attr': {
+                                    'class': form_errors(form.stock) ? 'form-control is-invalid' : 'form-control'
+                                }
+                            }) }}
+                            {% if form_errors(form.stock) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.stock) }}
+                                </div>
+                            {% else %}
+                                <small class="form-text text-muted">Stock quantity must be a positive number</small>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.category) }}
+                            {{ form_widget(form.category, { 
+                                'attr': {
+                                    'class': form_errors(form.category) ? 'form-control is-invalid' : 'form-control'
+                                }
+                            }) }}
+                            {% if form_errors(form.category) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.category) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.image) }}
+                            {{ form_widget(form.image, { 
+                                'attr': {
+                                    'class': form_errors(form.image) ? 'form-control is-invalid' : 'form-control'
+                                }
+                            }) }}
+                            {% if form_errors(form.image) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.image) }}
+                                </div>
+                            {% else %}
+                                <small class="form-text text-muted">Upload a product image (JPG, JPEG, PNG)</small>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.productdescription) }}
+                            {{ form_widget(form.productdescription, { 
+                                'attr': {
+                                    'class': form_errors(form.productdescription) ? 'form-control is-invalid' : 'form-control',
+                                    'rows': 5
+                                }
+                            }) }}
+                            {% if form_errors(form.productdescription) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.productdescription) }}
+                                </div>
+                            {% else %}
+                                <small class="form-text text-muted">Provide a detailed description of at least 10 characters</small>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="generate_ai_description" name="generate_ai_description">
+                            <label class="form-check-label" for="generate_ai_description">
+                                <strong>Generate AI Description</strong> - Let AI create a product description based on the image and product details
+                            </label>
+                            <div id="description_status" class="mt-2" style="display: none;"></div>
+                            <div class="form-text">
+                                <small>Check this box to immediately generate a description based on the product image and details.</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-success">Save</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productForm = document.getElementById('product_form');
+        const nameField = document.getElementById('product_nameproduct');
+        const priceField = document.getElementById('product_priceproduct');
+        const stockField = document.getElementById('product_stock');
+        const categoryField = document.getElementById('product_category');
+        const descriptionField = document.getElementById('product_productdescription');
+        
+        // Custom validation function
+        function validateForm(event) {
+            let isValid = true;
+            let errorMessages = {};
+            
+            // Validate product name (3-100 characters)
+            if (!nameField.value.trim()) {
+                errorMessages.name = 'Product name is required';
+                isValid = false;
+            } else if (nameField.value.trim().length < 3) {
+                errorMessages.name = 'Product name must be at least 3 characters';
+                isValid = false;
+            } else if (nameField.value.trim().length > 100) {
+                errorMessages.name = 'Product name cannot exceed 100 characters';
+                isValid = false;
+            }
+            
+            // Validate price (must be positive)
+            if (!priceField.value.trim()) {
+                errorMessages.price = 'Price is required';
+                isValid = false;
+            } else if (parseInt(priceField.value) <= 0) {
+                errorMessages.price = 'Price must be a positive number';
+                isValid = false;
+            }
+            
+            // Validate description (if provided, must be at least 10 chars)
+            if (descriptionField.value.trim() && descriptionField.value.trim().length < 10) {
+                errorMessages.description = 'Description must be at least 10 characters';
+                isValid = false;
+            }
+            
+            // If validation fails, prevent form submission and show errors
+            if (!isValid) {
+                event.preventDefault();
+                
+                // Display error messages
+                displayErrors(errorMessages);
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Display error messages next to fields
+        function displayErrors(errors) {
+            // Clear previous errors
+            document.querySelectorAll('.validation-error').forEach(el => el.remove());
+            
+            // Reset field styling
+            [nameField, priceField, descriptionField].forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+            
+            // Display new errors
+            if (errors.name) {
+                nameField.classList.add('is-invalid');
+                addErrorMessage(nameField, errors.name);
+            }
+            
+            if (errors.price) {
+                priceField.classList.add('is-invalid');
+                addErrorMessage(priceField, errors.price);
+            }
+            
+            if (errors.description) {
+                descriptionField.classList.add('is-invalid');
+                addErrorMessage(descriptionField, errors.description);
+            }
+        }
+        
+        // Add error message after an input field
+        function addErrorMessage(field, message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'validation-error invalid-feedback';
+            errorDiv.textContent = message;
+            field.parentNode.appendChild(errorDiv);
+        }
+        
+        // Add form submission handler with validation
+        if (productForm) {
+            productForm.addEventListener('submit', validateForm);
+        }
+        
+        const generateCheckbox = document.getElementById('generate_ai_description');
+        const imageField = document.getElementById('product_image');
+        const statusDiv = document.getElementById('description_status');
+        
+        // We'll save the description directly when it's generated, no need to handle form submission
+        
+        let uploadedFileName = null;
+        
+        // Handle image upload to get the filename
+        imageField.addEventListener('change', function(event) {
+            if (event.target.files && event.target.files[0]) {
+                // Store the file for later upload
+                uploadedFileName = event.target.files[0].name;
+            }
+        });
+        
+        // Generate description when checkbox is clicked
+        generateCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                generateDescription();
+            }
+        });
+        
+        function generateDescription() {
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<div class="alert alert-info">Generating description...</div>';
+            
+            const formData = new FormData();
+            formData.append('name', nameField.value);
+            formData.append('category', categoryField.value);
+            
+            // If we have an uploaded file, we need to upload it first
+            if (imageField.files && imageField.files[0]) {
+                const fileUploadData = new FormData();
+                fileUploadData.append('image', imageField.files[0]);
+                
+                // First upload the image
+                fetch('/admin/dashboard/product/upload-temp-image', {
+                    method: 'POST',
+                    body: fileUploadData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Now generate the description with the uploaded image
+                        formData.append('image', data.filename);
+                        callDescriptionAPI(formData);
+                    } else {
+                        // If image upload failed, try without image
+                        callDescriptionAPI(formData);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading image:', error);
+                    callDescriptionAPI(formData);
+                });
+            } else {
+                // No new image, try to use existing image or text-based description
+                callDescriptionAPI(formData);
+            }
+        }
+        
+        function callDescriptionAPI(formData) {
+            fetch('{{ path("generate_product_description") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the description field
+                    descriptionField.value = data.description;
+                    let tagsHtml = '';
+                    if (data.tags && data.tags.length > 0) {
+                        tagsHtml = '<div class="mt-2"><strong>Detected tags:</strong> ' + data.tags.join(', ') + '</div>';
+                    }
+                    statusDiv.innerHTML = '<div class="alert alert-success">Description generated successfully!</div>' + tagsHtml;
+                    
+                    // Hide the status after 3 seconds
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    statusDiv.innerHTML = '<div class="alert alert-danger">Failed to generate description. Please try again.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error generating description:', error);
+                statusDiv.innerHTML = '<div class="alert alert-danger">Error generating description. Please try again.</div>';
+            });
+        }
+    });
+</script>
+{% endblock %}

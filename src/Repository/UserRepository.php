@@ -47,6 +47,21 @@ class UserRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * Find all users who have face data registered
+     * 
+     * @return User[] Returns an array of User objects with face data
+     */
+    public function findUsersWithFaceData(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.faceData IS NOT NULL')
+            ->andWhere('u.faceData != :empty')
+            ->setParameter('empty', '')
+            ->getQuery()
+            ->getResult();
+    }
+
 
 
 

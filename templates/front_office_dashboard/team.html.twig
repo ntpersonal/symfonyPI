@@ -1,329 +1,812 @@
 {% extends 'front_office_dashboard/base.html.twig' %}
-{% block title %}Team{% endblock %}
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .team-section-title {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        .team-section-title h2 {
-            font-size: 36px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 15px;
-        }
-        .team-section-title p {
-            font-size: 16px;
-            color: #666;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        .player-single {
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-        }
-        .player-single:hover {
-            transform: translateY(-5px);
-        }
-        .player-picture {
-            position: relative;
-            overflow: hidden;
-            border-radius: 10px;
-        }
-        .player-picture img {
-            width: 100%;
-            height: auto;
-            transition: all 0.3s ease;
-        }
-        .player-single:hover .player-picture img {
-            transform: scale(1.1);
-        }
-        .player-content {
-            padding: 20px;
-            background: #fff;
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .player-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 5px;
-            display: block;
-        }
-        .player-role {
-            font-size: 14px;
-            color: #666;
-            display: block;
-        }
-        .player-social {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        .player-social a {
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f5f5f5;
-            border-radius: 50%;
-            color: #1a1a1a;
-            transition: all 0.3s ease;
-        }
-        .player-social a:hover {
-            background: #e41b23;
-            color: #fff;
-        }
-        .team-filter {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .team-filter button {
-            padding: 10px 25px;
-            border: none;
-            background: #f5f5f5;
-            color: #1a1a1a;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .team-filter button.active,
-        .team-filter button:hover {
-            background: #e41b23;
-            color: #fff;
-        }
-        .team-stats {
-            background: #f5f5f5;
-            padding: 50px 0;
-            margin-top: 50px;
-        }
-        .stat-item {
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 36px;
-            font-weight: 700;
-            color: #e41b23;
-            margin-bottom: 10px;
-        }
-        .stat-label {
-            font-size: 16px;
-            color: #1a1a1a;
-        }
-    </style>
+{% block title %}Team
 {% endblock %}
-
+{% block stylesheets %}
+	{{ parent() }}
+	<style>
+		.team-section-title {
+			text-align: center;
+			margin-bottom: 50px;
+		}
+		.team-section-title h2 {
+			font-size: 36px;
+			font-weight: 700;
+			color: #1a1a1a;
+			margin-bottom: 15px;
+		}
+		.team-section-title p {
+			font-size: 16px;
+			color: #666;
+			max-width: 700px;
+			margin: 0 auto;
+		}
+		.player-single {
+			margin-bottom: 30px;
+			transition: all 0.3s ease;
+		}
+		.player-single:hover {
+			transform: translateY(-5px);
+		}
+		.player-picture {
+			position: relative;
+			overflow: hidden;
+			border-radius: 10px;
+		}
+		.player-picture img {
+			width: 100%;
+			height: auto;
+			transition: all 0.3s ease;
+		}
+		.player-single:hover .player-picture img {
+			transform: scale(1.1);
+		}
+		.player-content {
+			padding: 20px;
+			background: #fff;
+			border-radius: 0 0 10px 10px;
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+		}
+		.player-name {
+			font-size: 20px;
+			font-weight: 600;
+			color: #1a1a1a;
+			margin-bottom: 5px;
+			display: block;
+		}
+		.player-role {
+			font-size: 14px;
+			color: #666;
+			display: block;
+		}
+		.player-social {
+			margin-top: 15px;
+			display: flex;
+			gap: 10px;
+		}
+		.player-social a {
+			width: 35px;
+			height: 35px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #f5f5f5;
+			border-radius: 50%;
+			color: #1a1a1a;
+			transition: all 0.3s ease;
+		}
+		.player-social a:hover {
+			background: #e41b23;
+			color: #fff;
+		}
+		.team-filter {
+			display: flex;
+			justify-content: center;
+			gap: 20px;
+			margin-bottom: 40px;
+		}
+		.team-filter button {
+			padding: 10px 25px;
+			border: none;
+			background: #f5f5f5;
+			color: #1a1a1a;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		.team-filter button.active,
+		.team-filter button:hover {
+			background: #e41b23;
+			color: #fff;
+		}
+		.team-stats {
+			background: #f5f5f5;
+			padding: 50px 0;
+			margin-top: 50px;
+		}
+		.stat-item {
+			text-align: center;
+		}
+		.stat-number {
+			font-size: 36px;
+			font-weight: 700;
+			color: #e41b23;
+			margin-bottom: 10px;
+		}
+		.stat-label {
+			font-size: 16px;
+			color: #1a1a1a;
+		}
+	</style>
+{% endblock %}
+{% block navbar %}
+	{{ parent() }}
+{% endblock %}
 {% block banner %}
-    <!--================= Banner Section Start Here =================-->
-     <div class="banner banner1">
-        <div class="inner-page-banner banner-bg">
-            <div class="container">
-                <div class="banner-content">
-                    <div class="page-path">
-                        <ul>
-                            <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
-                            <li><a class="current-page" href="#">Team</a></li>
-                        </ul>
-                    </div>
-                    <h1 class="banner-heading">OUR AVENGERS</h1>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--================= Banner Section End Here =================-->
+	<!--================= Banner Section Start Here =================-->
+	<div class="banner banner1">
+		<div class="inner-page-banner banner-bg">
+			<div class="container">
+				<div class="banner-content">
+					<div class="page-path">
+						<ul>
+							<li><a class="home-page-link"href="{{ path('app_home') }}">Home</a></li>
+							<li><a class="current-page" href="#">Team</a></li>
+						</ul>
+					</div>
+					<h1 class="banner-heading">OUR AVENGERS</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--================= Banner Section End Here =================-->
 {% endblock %}
 
 {% block content %}
-<!--================= Team Section Start Here =================-->
-    <div class="rts-team-section section-gap">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player1.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JAHID EMILY</a>
-                            <span class="player-role">GOALKEEPER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player2.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JOHN DOE</a>
-                            <span class="player-role">GOALKEEPER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player3.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">LAKATTURA</a>
-                            <span class="player-role">DEFENDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player4.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">NICHOLAS</a>
-                            <span class="player-role">DEFENDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player5.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">M. ROJO</a>
-                            <span class="player-role">DEFENDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player6.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">A. HAKIM</a>
-                            <span class="player-role">MID-FIELDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player7.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">A. DRAGO</a>
-                            <span class="player-role">MID-FIELDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player8.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">ANDREW GOMEZ</a>
-                            <span class="player-role">MID-FIELDER</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player9.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">M. ROLIN</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player10.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JIKU</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player11.jpg') }}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">DOMINGO</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-4 col-sm-6">
-                    <div class="player-single">
-                        <a href="team-details.html" class="player-picture"><img src="{{ asset('assets/images/team/player12.jpg')}}"
-                                alt="player-picture"></a>
-                        <div class="content">
-                            <a href="team-details.html" class="player-name">JOHN SNOW</a>
-                            <span class="player-role">FORWARD</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--================= Team Section End Here =================-->
+	{% if (app.user.team is null or app.user.team.id == 0) and app.user.role == 'player' %}
+		{#================= Team Selection Start Here =================#}
+		<div class="rts-team-section section-gap">
+			<div class="container">
+				<div class="row">
+					<div class="col-12 text-center">
+						<div class="alert alert-info">
+							<h4>You don't have a team yet</h4>
+							<p>Please select a team to join from the available options below</p>
+							<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#teamSelectionModal">
+								Select Team
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{# Team Selection Modal #}
+		<div class="modal fade" id="teamSelectionModal" tabindex="-1" aria-labelledby="teamSelectionModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="teamSelectionModalLabel">Join a Team</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div
+						class="modal-body">
+						{# Team Type Selection Tab #}
+						<ul class="nav nav-tabs mb-4" id="teamTypeTab" role="tablist">
+							<li class="nav-item" role="presentation">
+								<button class="nav-link active" id="local-tab" data-bs-toggle="tab" data-bs-target="#local-teams" type="button" role="tab">
+									Local Teams
+								</button>
+							</li>
+
+						</ul>
+
+						<div
+							class="tab-content" id="teamTypeTabContent">
+							{# Local Teams Tab #}
+							<div class="tab-pane fade show active" id="local-teams" role="tabpanel">
+								<div class="row">
+									{% for team in teamsWithStatus %}
+										<div class="col-md-4 mb-4">
+											<div class="card team-card-Player">
+												{% if team.team.logoPath %}
+													<img src="{{ path('app_image', {'subdirectory': 'teams', 'filename': team.team.logoPath|split('/')|last}) }}" alt="{{ team.team.nom }} logo">
+												{% else %}
+													<img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+												{% endif %}
+												<div class="card-body text-center">
+													<h5 class="card-title">{{ team.team.nom }}</h5>
+													<div class="team-meta mb-2">
+														{% if team.hasManager %}
+															<span class="badge bg-warning">Has Manager</span>
+														{% else %}
+															<span class="badge bg-success">Available</span>
+														{% endif %}
+													</div>
+													<button class="btn btn-primary btn-sm select-team-player" data-team-id="{{ team.team.id }}" data-team-type="local">
+														Select Team
+													</button>
+												</div>
+											</div>
+										</div>
+									{% else %}
+										<div class="col-12">
+											<div class="alert alert-warning">
+												No local teams available at the moment.
+											</div>
+										</div>
+									{% endfor %}
+								</div>
+							</div>
+
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-primary" id="confirm-selection-Player" disabled>Confirm Selection</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{#================= Team Player Selection End Here =================#}
+
+
+	{% elseif (app.user.team is null or app.user.team.id == 0) and app.user.role == 'organizer' %}
+		<div class="rts-team-section section-gap">
+			<div class="container">
+				<div class="row">
+					<div class="col-12 text-center">
+						<div class="alert alert-info">
+							<h4>You don't have a team yet</h4>
+							<p>Please select a team to join from the available options below</p>
+							<div class="d-flex justify-content-center gap-3">
+								<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#teamSelectionModal">
+									Select Existing Team
+								</button>
+								<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createTeamModal">
+									Create New Team
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{# Team Selection Modal #}
+		<div class="modal fade" id="teamSelectionModal" tabindex="-1" aria-labelledby="teamSelectionModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="teamSelectionModalLabel">Select Your Team</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<ul class="nav nav-tabs mb-4" id="teamTypeTab" role="tablist">
+							<li class="nav-item" role="presentation">
+								<button class="nav-link active" id="real-tab" data-bs-toggle="tab" data-bs-target="#real-teams" type="button" role="tab">
+									Real Teams (API)
+								</button>
+							</li>
+						</ul>
+						<div class="tab-content">
+							<div class="tab-pane fade show active" id="real-teams" role="tabpanel">
+								<div class="mb-3">
+									<label for="league-select" class="form-label">Select League:</label>
+									<select class="form-select" id="league-select">
+										<option value="">-- Select a league --</option>
+										{% for league in topLeagues %}
+											<option value="{{ league.id }}">{{ league.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="mb-3">
+									<div class="input-group">
+										<input type="text" class="form-control" id="api-team-search" placeholder="Search teams...">
+										<button class="btn btn-outline-secondary" type="button" id="search-api-teams">
+											<i class="fas fa-search"></i>
+										</button>
+									</div>
+								</div>
+								<div class="row" id="api-teams-container">
+									<div class="col-12 text-center py-4">
+										<p>Please select a league first</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary" id="confirm-selection" disabled>Confirm Selection</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{# Create Team Modal #}
+		{# <div class="modal fade" id="createTeamModal" tabindex="-1" aria-labelledby="createTeamModalLabel" aria-hidden="true">
+									<div class="modal-dialog modal-lg">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5 class="modal-title" id="createTeamModalLabel">Create New Team</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<div class="modal-body">
+												<form id="create-team-form">
+													<div class="mb-3">
+														<label for="team-name" class="form-label">Team Name</label>
+														<input type="text" class="form-control" id="team-name" required>
+													</div>
+													<div class="mb-3">
+														<label for="team-category" class="form-label">Category</label>
+														<input type="text" class="form-control" id="team-category" required>
+													</div>
+													<div class="mb-3">
+														<label for="team-players" class="form-label">Number of Players</label>
+														<input type="number" class="form-control" id="team-players" required>
+													</div>
+													<div class="mb-3">
+														<label for="team-mode" class="form-label">Game Mode</label>
+														<select class="form-select" id="team-mode" required>
+															<option value="EN_GROUPE">Group</option>
+															<option value="ELIMINATION">Elimination</option>
+															<option value="COMBINE">Combined</option>
+														</select>
+													</div>
+													<div class="mb-3">
+														<label for="team-logo" class="form-label">Team Logo</label>
+														<input type="file" class="form-control" id="team-logo">
+													</div>
+												</form>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+												<button type="button" class="btn btn-primary" id="create-team-submit">Create Team</button>
+											</div>
+										</div>
+									</div>
+								</div> #}
+		{# Create Team Modal #}
+			<div class="modal fade" id="createTeamModal" tabindex="-1" aria-labelledby="createTeamModalLabel" aria-hidden="true"> <div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<form id="create-team-form" action="{{ path('app_team') }}" {# ↪ your route name #} method="post" enctype="multipart/form-data" {# ↪ required for file uploads #}>
+						<div class="modal-header">
+							<h5 class="modal-title" id="createTeamModalLabel">Create New Team</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div
+							class="modal-body">
+							{# Team Name #}
+							<div class="mb-3">
+								<label for="team-name" class="form-label">Team Name</label>
+								<input type="text" class="form-control" id="team-name" name="team-name" {# ↪ name MUST match what you read server-side #} required>
+							</div>
+
+							{# Category #}
+							<div class="mb-3">
+								<label for="team-category" class="form-label">Category</label>
+								<input type="text" class="form-control" id="team-category" name="team-category" required>
+							</div>
+
+							{# Number of Players #}
+							<div class="mb-3">
+								<label for="team-players" class="form-label">Number of Players</label>
+								<input type="number" class="form-control" id="team-players" name="team-players" required>
+							</div>
+
+							{# Game Mode #}
+							<div class="mb-3">
+								<label for="team-mode" class="form-label">Game Mode</label>
+								<select class="form-select" id="team-mode" name="team-mode" required>
+									<option value="EN_GROUPE">Group</option>
+									<option value="ELIMINATION">Elimination</option>
+									<option value="COMBINE">Combined</option>
+								</select>
+							</div>
+
+							{# Team Logo #}
+							<div class="mb-3">
+								<label for="team-logo" class="form-label">Team Logo</label>
+								<input type="file" class="form-control" id="team-logo" name="team-logo">
+							</div>
+						</div>
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							{# now a real submit button inside the form #}
+							<button type="submit" class="btn btn-primary" id="create-team-submit">
+								Create Team
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		{#================= Team Orginizer Selection End Here =================#}
+
+	{% elseif app.user and app.user.team is not null and app.user.role == 'organizer' %}
+		<!--================= Team Section Start Here =================-->
+		<div class="rts-team-section section-gap">
+			<div class="container">
+				<div class="row">
+					<div class="col-12 d-flex align-items-center justify-content-between">
+						<h1 class="m-0">Your Team</h1>
+						<div class="d-flex gap-3">
+							<a href="#" class="btn btn-success">ADD Players</a>
+							{% if app.user.team.tournoi is null %}
+								<a href="{{ path('app_front_tournois')}}" class="btn btn-primary">Join Tournament</a>
+							{% endif %}
+						</div>
+					</div>
+
+					{% for player in players %}
+						<div class="col-xl-3 col-md-4 col-sm-6">
+							<div class="player-single">
+								<a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-picture">
+									{% if player.profilepicture %}
+										<img src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" alt="{{ player.firstname }} {{ player.lastname }} photo">
+									{% else %}
+										<img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+									{% endif %}
+								</a>
+								<div class="content">
+									<a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-name">
+										{{ player.firstname }}
+										{{ player.lastname }}
+									</a>
+									<span class="player-role">
+										{{ player.position|default('PLAYER')|upper }}
+									</span>
+								</div>
+							</div>
+						</div>
+					{% else %}
+						<div class="col-12">
+							<div class="alert alert-info">
+								No players found in your team
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% elseif app.user and app.user.team is not null and app.user.role == 'player' %}
+		<!--================= Team Section Start Here =================-->
+		<div class="rts-team-section section-gap">
+			<div class="container">
+				<div class="row">
+					<div class="col-12 d-flex align-items-center justify-content-between">
+						<h1 class="m-0">Your Team</h1>
+					</div>
+
+					{% for player in players %}
+						<div class="col-xl-3 col-md-4 col-sm-6">
+							<div class="player-single">
+								<a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-picture">
+									{% if player.profilepicture %}
+										<img src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" alt="{{ player.firstname }} {{ player.lastname }} photo">
+									{% else %}
+										<img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
+									{% endif %}
+								</a>
+								<div class="content">
+									<a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-name">
+										{{ player.firstname }}
+										{{ player.lastname }}
+									</a>
+									<span class="player-role">
+										{{ player.position|default('PLAYER')|upper }}
+									</span>
+								</div>
+							</div>
+						</div>
+					{% else %}
+						<div class="col-12">
+							<div class="alert alert-info">
+								No players found in your team
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+		<!--================= Team Section End Here =================-->
+	{% endif %}
 
 {% endblock %}
-{% block footer %}
- <!--================= Footer Start Here =================-->
-    <div class="footer footer1">
-        <div class="container">
-            <div class="footer-inner">
-                <div class="row">
-                    <div class="col-xl-3 col-md-6">
-                        <div class="footer-widget">
-                            <div class="footer-logo"><img src="{{ asset('assets/images/footer/footer-logo.png') }}" alt="footer-logo"></div>
-                            <p class="footer-text">It was the end of a period in the 1980s in which it seemed like every NBA Finals matchup featured the Celtics sports club.</p>
-                            <div class="social-links">
-                                <a href="#0" class="platform"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#0" class="platform"><i class="fab fa-pinterest-p"></i></a>
-                                <a href="#0" class="platform"><i class="fab fa-behance"></i></a>
-                                <a href="#0" class="platform"><i class="fab fa-youtube"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- ... other footer widgets ... -->
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom-area">
-            <div class="container">
-                <div class="bottom-area-inner">
-                    <span class="copyright">COPYRIGHT & DESIGN BY <span class="brand">SPORTIUS</span> - 2024</span>
-                    <div class="footer-bottom-links">
-                        <a href="{{ path('app_about') }}">ABOUT US</a>
-                        <a href="{{ path('app_faq') }}">FAQ</a>
-                        <a href="{{ path('app_front_office_contact') }}">CONTACT</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-   {% endblock %}
+
+{% block footer %}
+	<!--================= Footer Start Here =================-->
+	<div class="footer footer1">
+		<div class="container">
+			<div class="footer-inner">
+				<div class="row">
+					<div class="col-xl-3 col-md-6">
+						<div class="footer-widget">
+							<div class="footer-logo"><img src="{{ asset('assets/images/footer/footer-logo.png') }}" alt="footer-logo"></div>
+							<p class="footer-text">It was the end of a period in the 1980s in which it seemed like every NBA Finals matchup featured the Celtics sports club.</p>
+							<div class="social-links">
+								<a href="#0" class="platform">
+									<i class="fab fa-facebook-f"></i>
+								</a>
+								<a href="#0" class="platform">
+									<i class="fab fa-pinterest-p"></i>
+								</a>
+								<a href="#0" class="platform">
+									<i class="fab fa-behance"></i>
+								</a>
+								<a href="#0" class="platform">
+									<i class="fab fa-youtube"></i>
+								</a>
+							</div>
+						</div>
+					</div>
+					<!-- ... other footer widgets ... -->
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom-area">
+			<div class="container">
+				<div class="bottom-area-inner">
+					<span class="copyright">COPYRIGHT & DESIGN BY
+						<span class="brand">SPORTIUS</span>
+						- 2024</span>
+					<div class="footer-bottom-links">
+						<a href="{{ path('app_about') }}">ABOUT US</a>
+						<a href="{{ path('app_faq') }}">FAQ</a>
+						<a href="{{ path('app_front_office_contact') }}">CONTACT</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% include '_notifications_panel.html.twig' %}
+{% endblock %}
+
+
 {% block javascripts %}
-    {{ parent() }}
-    <script>
-        $(document).ready(function() {
-            // Team filter functionality
-            $('.team-filter button').click(function() {
-                $('.team-filter button').removeClass('active');
-                $(this).addClass('active');
-                
-                var filterValue = $(this).attr('data-filter');
-                
-                if(filterValue == 'all') {
-                    $('.col-xl-3').show();
-                } else {
-                    $('.col-xl-3').hide();
-                    $('.col-xl-3[data-category="' + filterValue + '"]').show();
-                }
-            });
-        });
-    </script>
-{% endblock %} 
+	{{ parent() }}
+
+	<script>
+		function showToast(message, type = 'info') { // You can swap this alert() for a custom toast UI if you like.
+alert(message);
+}
+
+document.addEventListener('DOMContentLoaded', () => { // ─── Organizer Team Selection ────────────────────────────────────────
+const leagueSelect = document.getElementById('league-select')
+const teamSearch = document.getElementById('api-team-search')
+const searchButton = document.getElementById('search-api-teams')
+const teamsContainer = document.getElementById('api-teams-container')
+const confirmSelection = document.getElementById('confirm-selection')
+let selectedTeam = null
+let currentTeams = []
+
+if (leagueSelect && teamsContainer) {
+leagueSelect.addEventListener('change', () => {
+if (leagueSelect.value) {
+loadTeamsForLeague(leagueSelect.value)
+} else {
+showInitialState()
+}
+})
+}
+
+if (searchButton && teamSearch) {
+searchButton.addEventListener('click', () => {
+filterTeams(teamSearch.value.trim().toLowerCase())
+})
+teamSearch.addEventListener('keypress', e => {
+if (e.key === 'Enter') {
+e.preventDefault()
+filterTeams(teamSearch.value.trim().toLowerCase())
+}
+})
+}
+
+if (confirmSelection) {
+confirmSelection.addEventListener('click', async () => {
+if (! selectedTeam) 
+return
+
+
+
+confirmSelection.disabled = true
+confirmSelection.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...'
+
+const leagueId = leagueSelect.value
+const leagueName = leagueSelect.options[leagueSelect.selectedIndex].text.trim()
+const teamCount = document.querySelectorAll('.team-card').length
+
+try {
+const res = await fetch('/front/dashboard/assign-team', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{
+leagueId: Number(leagueId),
+teamId: Number(selectedTeam.id),
+teamName: selectedTeam.name,
+leagueName,
+teamCount: Number(teamCount)
+}
+)
+})
+if (! res.ok) 
+throw new Error('Failed to assign team')
+
+
+
+showToast('Team assigned successfully!', 'success')
+setTimeout(() => window.location.reload(), 1500)
+} catch (err) {
+showToast(err.message, 'danger')
+confirmSelection.disabled = false
+confirmSelection.textContent = 'Confirm Selection'
+}
+})
+}
+
+// ─── Player Team Selection ────────────────────────────────────────────
+const confirmPlayer = document.getElementById('confirm-selection-Player')
+let selectedPlayerTeam = null
+
+document.addEventListener('click', e => {
+const btn = e.target.closest('.select-team-player')
+if (! btn) 
+return
+
+
+
+const card = btn.closest('.team-card-Player')
+selectedPlayerTeam = {
+id: btn.dataset.teamId,
+name: card.querySelector('.card-title').textContent.trim()
+}
+document.querySelectorAll('.team-card-Player').forEach(c => c.classList.remove('selected'))
+card.classList.add('selected')
+confirmPlayer && (confirmPlayer.disabled = false)
+})
+
+if (confirmPlayer) {
+confirmPlayer.addEventListener('click', async () => {
+confirmPlayer.disabled = true
+confirmPlayer.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...'
+const userId = {{ app.user ? app.user.id : 'null' }}
+if (! userId) {
+showToast('User not authenticated', 'danger')
+return
+}
+const mercureUrl = `http://127.0.0.1:3000/.well-known/mercure?topic=/user/${userId}/notifications`
+const es = new EventSource(mercureUrl)
+es.onmessage = e => {
+const data = JSON.parse(e.data)
+if (data.type === 'team_join_accepted') {
+showToast(data.message, 'success')
+es.close()
+return window.location.reload()
+}
+if (data.type === 'team_join_rejected') {
+showToast(data.message, 'danger')
+es.close()
+confirmPlayer.disabled = false
+confirmPlayer.textContent = 'Confirm Selection'
+}
+}
+try {
+const res = await fetch (`/team/${
+selectedPlayerTeam.id
+}/request-join`, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ?. content || ''
+},
+body: JSON.stringify(selectedPlayerTeam)
+})
+if (! res.ok) {
+const err = await res.json().catch(() => ({}))
+throw new Error(err.message || 'Failed to send request')
+}
+showToast('Join request sent! Waiting for approval...', 'info')
+} catch (err) {
+showToast(err.message, 'danger')
+confirmPlayer.disabled = false
+confirmPlayer.textContent = 'Confirm Selection'
+es.close()
+}
+})
+}
+
+// ─── Helper Functions ───────────────────────────────────────────────────
+async function loadTeamsForLeague(id) {
+teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>'
+try {
+const res = await fetch (`/api/teams/league/${id}`)
+const json = await res.json()
+currentTeams = json.teams || []
+
+displayTeams(currentTeams)
+} catch {showErrorMessage('Failed to load teams')}}
+function displayTeams(teams) {
+if (! teams.length) {
+showErrorMessage('No teams found')
+return
+
+}
+teamsContainer.innerHTML = teams
+    .map(t => `
+      <div class="col-md-4 mb-4">
+        <div class="card team-card ${selectedTeam?.id == t.id ? 'border-primary' : ''}">
+          <div class="card-body text-center">
+
+            <!-- team badge -->
+            <img src="${t.logo}"
+                 alt="${t.name} logo"
+                 class="img-fluid mb-2"
+                 style="max-height:80px">
+
+            <!-- team name -->
+            <h5 class="card-title">${t.name}</h5>
+
+            <!-- select / selected button -->
+            <button
+              class="btn btn-sm ${selectedTeam?.id == t.id ? 'btn-primary' : 'btn-outline-primary'} select-team"
+              data-team-id="${t.id}"
+              data-team-name="${t.name}">
+              Select Team
+            </button>
+
+          </div>
+        </div>
+      </div>
+    `)
+    .join('');
+teamsContainer.querySelectorAll('.select-team').forEach(b => {
+b.addEventListener('click', () => {
+selectedTeam = {
+id: b.dataset.teamId,
+name: b.dataset.teamName
+}
+document.querySelectorAll('.team-card').forEach(c => c.classList.remove('border-primary'))
+b.closest('.team-card').classList.add('border-primary')
+confirmSelection.disabled = false
+})
+})
+}
+function filterTeams(term) {
+displayTeams(currentTeams.filter(t => t.name.toLowerCase().includes(term)))
+}
+function showInitialState() {
+teamsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>Please select a league first</p></div>'
+}
+function showErrorMessage(msg) {
+teamsContainer.innerHTML = `<div class="col-12 text-center py-4 text-danger">${msg}</div>`
+}
+})</script>
+		<script>
+			// ——— NOTIFICATIONS PANEL TOGGLE & BUTTONS ———
+document.addEventListener('click', e => {
+const bell = document.getElementById('notification-bell');
+const panel = document.getElementById('notifications-panel');
+if (! bell || ! panel) 
+return;
+
+
+
+// 1) click on the bell → toggle
+if (e.target.closest('#notification-bell')) {
+e.stopPropagation();
+panel.classList.toggle('d-none');
+}
+// 2) click anywhere else → hide else if (!e.target.closest('#notifications-panel')) {
+panel.classList.add('d-none');
+}
+
+// wire up your accept / reject buttons
+['.accept-request', '.reject-request'].forEach(sel => {
+document.querySelectorAll(sel).forEach(btn => {
+btn.addEventListener('click', async e => {
+e.preventDefault();
+const res = await fetch(btn.dataset.url, {
+method: 'POST',
+headers: {
+'X-Requested-With': 'XMLHttpRequest'
+}
+});
+if (res.ok) 
+window.location.reload();
+ else 
+alert('Something went wrong.');
+
+
+});
+});
+});
+</script>
+{% endblock %}
+		

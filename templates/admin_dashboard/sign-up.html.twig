@@ -16,68 +16,68 @@
                             {% for message in app.flashes('error') %}
                                 <div class="alert alert-danger text-center mb-3">{{ message }}</div>
                             {% endfor %}
-                            <form id="signupForm" role="form text-left" method="POST" action="{{ path('app_sign_up') }}" enctype="multipart/form-data" novalidate>
+                            {% for message in app.flashes('success') %}
+                                <div class="alert alert-success text-center mb-3">{{ message }}</div>
+                            {% endfor %}
+                            
+                            {{ form_start(form, {'attr': {'id': 'signupForm', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
                                 <div class="row">
                                     <div class="col-md-6 mb-2">
-                                        <label for="inputFirstname" class="form-label">First Name</label>
-                                        <input type="text" name="firstname" class="form-control rounded-pill" id="inputFirstname" placeholder="First Name">
-                                        <div class="invalid-feedback">First name must contain only letters</div>
+                                        <label for="{{ form.firstname.vars.id }}" class="form-label">First Name</label>
+                                        {{ form_widget(form.firstname) }}
+                                        {{ form_errors(form.firstname) }}
                                     </div>
                                     <div class="col-md-6 mb-2">
-                                        <label for="inputLastname" class="form-label">Last Name</label>
-                                        <input type="text" name="lastname" class="form-control rounded-pill" id="inputLastname" placeholder="Last Name">
-                                        <div class="invalid-feedback">Last name must contain only letters</div>
+                                        <label for="{{ form.lastname.vars.id }}" class="form-label">Last Name</label>
+                                        {{ form_widget(form.lastname) }}
+                                        {{ form_errors(form.lastname) }}
                                     </div>
                                 </div>
                                 <div class="mb-2">
-                                    <label for="inputEmail" class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control rounded-pill" id="inputEmail" placeholder="Email">
-                                    <div class="invalid-feedback">Please enter a valid email address</div>
+                                    <label for="{{ form.email.vars.id }}" class="form-label">Email</label>
+                                    {{ form_widget(form.email) }}
+                                    {{ form_errors(form.email) }}
                                 </div>
                                 <div class="mb-2">
-                                    <label for="inputDateOfBirth" class="form-label">Date of Birth</label>
-                                    <input type="date" name="dateofbirth" class="form-control rounded-pill" id="inputDateOfBirth">
-                                    <div class="invalid-feedback">Please enter a valid date (must be at least 5 years old)</div>
+                                    <label for="{{ form.dateofbirth.vars.id }}" class="form-label">Date of Birth</label>
+                                    {{ form_widget(form.dateofbirth) }}
+                                    {{ form_errors(form.dateofbirth) }}
                                 </div>
                                 <div class="mb-2">
-                                    <label for="inputPassword" class="form-label">Password</label>
+                                    <label for="{{ form.password.vars.id }}" class="form-label">Password</label>
                                     <div class="input-group">
-                                        <input type="password" name="password" class="form-control rounded-pill" id="inputPassword" placeholder="Password">
+                                        {{ form_widget(form.password) }}
                                         <button class="btn btn-outline-secondary rounded-pill ms-2" type="button" id="togglePassword">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
-                                    <div class="invalid-feedback">Password must be at least 8 characters with uppercase, lowercase and numbers</div>
+                                    {{ form_errors(form.password) }}
                                 </div>
                                 <div class="mb-2">
-                                    <label for="inputRole" class="form-label">Role</label>
-                                    <select name="role" class="form-control rounded-pill" id="inputRole">
-                                        <option value="">Select Role</option>
-                                        <option value="player">Player</option>
-                                        <option value="organizer">Organizer</option>
-                                    </select>
-                                    <div class="invalid-feedback">Please select a role</div>
+                                    <label for="{{ form.role.vars.id }}" class="form-label">Role</label>
+                                    {{ form_widget(form.role) }}
+                                    {{ form_errors(form.role) }}
                                 </div>
                                 <div class="mb-2" id="coachingLicenseContainer" style="display: none;">
-                                    <label for="inputCoachingLicense" class="form-label">Coaching License</label>
-                                    <input type="text" name="coachinglicense" class="form-control rounded-pill" id="inputCoachingLicense" placeholder="Coaching License">
-                                    <div class="invalid-feedback">Coaching license is required for organizers (5-20 characters)</div>
+                                    <label for="{{ form.coachinglicense.vars.id }}" class="form-label">Coaching License</label>
+                                    {{ form_widget(form.coachinglicense) }}
+                                    {{ form_errors(form.coachinglicense) }}
                                 </div>
                                 <div class="mb-2">
-                                    <label for="inputProfilePicture" class="form-label">Profile Picture</label>
+                                    <label for="{{ form.profilePicture.vars.id }}" class="form-label">Profile Picture</label>
                                     <div class="custom-file-upload">
-                                        <input type="file" name="profilePicture" class="file-input" id="inputProfilePicture" accept="image/jpeg,image/png,image/gif">
+                                        {{ form_widget(form.profilePicture) }}
                                         <div class="file-upload-btn rounded-pill d-flex align-items-center">
                                             <i class="fas fa-cloud-upload-alt me-2"></i>
                                             <span id="file-chosen">Choose a file</span>
                                         </div>
-                                        <div class="invalid-feedback">Please select a valid image file (JPEG, PNG, or GIF, max 2MB)</div>
+                                        {{ form_errors(form.profilePicture) }}
                                     </div>
                                 </div>
                                 <div class="d-grid mt-3">
                                     <button type="submit" class="btn btn-info btn-block rounded-pill py-2">Sign Up</button>
                                 </div>
-                            </form>
+                            {{ form_end(form) }}
                         </div>
                         <div class="card-footer bg-transparent text-center border-0 pt-0 pb-2">
                             <p class="mb-0 text-muted">Already have an account?
@@ -189,6 +189,22 @@
             position: relative;
             z-index: 5;
         }
+        
+        /* Form validation styling */
+        .invalid-feedback {
+            display: block;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            color: #dc3545;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        
+        .is-valid {
+            border-color: #28a745 !important;
+        }
     </style>
 {% endblock %}
 
@@ -197,119 +213,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('signupForm');
-            const roleSelect = document.getElementById('inputRole');
+            const roleSelect = document.getElementById('{{ form.role.vars.id }}');
             const coachingLicenseContainer = document.getElementById('coachingLicenseContainer');
-            const coachingLicenseInput = document.getElementById('inputCoachingLicense');
-            const dateInput = document.getElementById('inputDateOfBirth');
-            const passwordInput = document.getElementById('inputPassword');
+            const coachingLicenseInput = document.getElementById('{{ form.coachinglicense.vars.id }}');
+            const passwordInput = document.getElementById('{{ form.password.vars.id }}');
             const togglePassword = document.getElementById('togglePassword');
-            const firstnameInput = document.getElementById('inputFirstname');
-            const lastnameInput = document.getElementById('inputLastname');
-            const emailInput = document.getElementById('inputEmail');
-
-            // Form validation
-            form.addEventListener('submit', function(event) {
-                let isValid = true;
-
-                // First name validation (only letters)
-                const nameRegex = /^[a-zA-Z]+$/;
-                if (!nameRegex.test(firstnameInput.value)) {
-                    firstnameInput.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    firstnameInput.classList.remove('is-invalid');
-                    firstnameInput.classList.add('is-valid');
-                }
-
-                // Last name validation (only letters)
-                if (!nameRegex.test(lastnameInput.value)) {
-                    lastnameInput.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    lastnameInput.classList.remove('is-invalid');
-                    lastnameInput.classList.add('is-valid');
-                }
-
-                // Email validation
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailInput.value)) {
-                    emailInput.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    emailInput.classList.remove('is-invalid');
-                    emailInput.classList.add('is-valid');
-                }
-
-                // Password validation
-                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-                if (!passwordRegex.test(passwordInput.value)) {
-                    passwordInput.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    passwordInput.classList.remove('is-invalid');
-                    passwordInput.classList.add('is-valid');
-                }
-
-                // Date validation
-                const selectedDate = new Date(dateInput.value);
-                const minDate = new Date();
-                minDate.setFullYear(minDate.getFullYear() - 5);
-                
-                if (!dateInput.value || selectedDate > minDate) {
-                    dateInput.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    dateInput.classList.remove('is-invalid');
-                    dateInput.classList.add('is-valid');
-                }
-
-                // Role validation
-                if (!roleSelect.value) {
-                    roleSelect.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    roleSelect.classList.remove('is-invalid');
-                    roleSelect.classList.add('is-valid');
-                }
-
-                // Coaching license validation
-                if (roleSelect.value === 'organizer') {
-                    if (!coachingLicenseInput.value || coachingLicenseInput.value.length < 5 || coachingLicenseInput.value.length > 20) {
-                        coachingLicenseInput.classList.add('is-invalid');
-                        isValid = false;
-                    } else {
-                        coachingLicenseInput.classList.remove('is-invalid');
-                        coachingLicenseInput.classList.add('is-valid');
-                    }
-                }
-
-                if (!isValid) {
-                    event.preventDefault();
-                }
-            });
-
-            // Real-time validation
-            firstnameInput.addEventListener('input', function() {
-                const nameRegex = /^[a-zA-Z]+$/;
-                if (nameRegex.test(this.value)) {
-                    this.classList.remove('is-invalid');
-                    this.classList.add('is-valid');
-                } else {
-                    this.classList.remove('is-valid');
-                    this.classList.add('is-invalid');
-                }
-            });
-
-            lastnameInput.addEventListener('input', function() {
-                const nameRegex = /^[a-zA-Z]+$/;
-                if (nameRegex.test(this.value)) {
-                    this.classList.remove('is-invalid');
-                    this.classList.add('is-valid');
-                } else {
-                    this.classList.remove('is-valid');
-                    this.classList.add('is-invalid');
-                }
-            });
+            const fileInput = document.getElementById('{{ form.profilePicture.vars.id }}');
+            const fileChosen = document.getElementById('file-chosen');
 
             // Role change handler
             if (roleSelect && coachingLicenseContainer) {
@@ -331,6 +241,17 @@
                     passwordInput.setAttribute('type', type);
                     this.querySelector('i').classList.toggle('fa-eye');
                     this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            // File input handler
+            if (fileInput && fileChosen) {
+                fileInput.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        fileChosen.textContent = this.files[0].name;
+                    } else {
+                        fileChosen.textContent = 'Choose a file';
+                    }
                 });
             }
         });

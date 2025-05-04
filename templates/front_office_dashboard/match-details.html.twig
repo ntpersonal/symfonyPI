@@ -1,4 +1,4 @@
-{#templates/front_office_dashboard/match-details.html.twig #}
+{# templates/front_office_dashboard/match-details.html.twig #}
 {% extends 'front_office_dashboard/base.html.twig' %}
 
 {% block title %}Match {{ match.id }}{% endblock %}
@@ -21,39 +21,78 @@
           <p><i class="far fa-clock"></i> {{ match.matchTime|date('g:i A') }}</p>
         </div>
         <div class="text-center mb-4">
-                {% if match.tournoi %}
-          <p class="text-secondary mb-3">
-            <strong>Tournament:</strong> {{ match.tournoi.nom }}
-          </p>
-        {% else %}
-          <p class="text-secondary mb-3">
-            <strong>Tournament:</strong> N/A
-          </p>
-        {% endif %}
-                  <p><i class="fas fa-map-marker-alt"></i> {{ match.locationMatch }}</p>
-
-         </div>
+          {% if match.tournoi %}
+            <p class="text-secondary mb-3">
+              <strong>Tournament:</strong> {{ match.tournoi.nom }}
+            </p>
+          {% else %}
+            <p class="text-secondary mb-3">
+              <strong>Tournament:</strong> N/A
+            </p>
+          {% endif %}
+          <p><i class="fas fa-map-marker-alt"></i> {{ match.locationMatch }}</p>
+        </div>
         <div class="d-flex justify-content-center gap-2">
           <a href="{{ path('app_front_matches') }}" class="btn btn-outline-primary">← All Matches</a>
           {% if match.tournoi %}
-  <a class="btn btn-outline-secondary ms-2"
-     href="{{ path('app_front_tournoi_show', { id: match.tournoi.id }) }}">
-    ← Back to “{{ match.tournoi.nom }}” matches
-  </a>
-{% endif %}
-          {# Remove or comment out the Edit and Delete buttons if they're not needed in the front office #}
-          {# <a href="{{ path('app_matches_edit', { id: match.id }) }}" class="btn btn-warning">Edit</a>
-          <form
-            action="{{ path('app_matches_delete', { id: match.id }) }}"
-            method="post"
-            onsubmit="return confirm('Are you sure?');"
-            class="d-inline"
-          >
-            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ match.id) }}">
-            <button class="btn btn-danger">Delete</button>
-          </form> #}
+            <a href="{{ path('app_front_tournoi_show', { id: match.tournoi.id }) }}"
+               class="btn btn-outline-secondary ms-2">
+              ← Back to “{{ match.tournoi.nom }}”
+            </a>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
-{% endblock %}
+
+  
+
+
+
+  {# ——— PITCH CANVAS ——— #}
+  <div class="text-center my-5">
+    <canvas id="pitchCanvas" width="600" height="800"
+            style="max-width:100%;border:1px solid #ccc;"></canvas>
+  </div>
+
+  <script>
+  (function() {
+    const c = document.getElementById('pitchCanvas');
+    const ctx = c.getContext('2d');
+    const W = c.width, H = c.height;
+
+    // Draw pitch
+    ctx.fillStyle = '#4CAF50'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    const m = 50;
+    ctx.strokeRect(m,m, W-2*m, H-2*m);
+    ctx.beginPath(); ctx.moveTo(m,H/2); ctx.lineTo(W-m,H/2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W/2,H/2,50,0,2*Math.PI); ctx.stroke();
+    ctx.strokeRect((W/2)-100, m, 200, 100);
+    ctx.strokeRect((W/2)-100, H-m-100, 200, 100);
+
+    // Player data from controller
+    const home = {{ playersHome|json_encode|raw }};
+    const away = {{ playersAway|json_encode|raw }};
+
+    // Draw dots + names
+    function drawTeam(arr,color) {
+      arr.forEach(p => {
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.arc(p.x,p.y,20,0,2*Math.PI);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(p.name, p.x, p.y+40);
+      });
+    }
+
+    drawTeam(home, '#007bff');
+    drawTeam(away, '#dc3545');
+  })();
+  </script>
+{% include 'chat/_widget.html.twig' with {
+    
+} %}{% endblock %}

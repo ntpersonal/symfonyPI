@@ -148,105 +148,80 @@
 {% block body %}
   
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-    <!-- Navbar -->
-    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
-      <div class="container-fluid py-1 px-3">
-
-            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                <div class="sidenav-toggler-inner">
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                </div>
-              </a>
-            </li>
-            <li class="nav-item px-3 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0">
-                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
-              </a>
-            </li>
-            <li class="nav-item dropdown pe-2 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa fa-bell cursor-pointer"></i>
-              </a>
-              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
-                <li class="mb-2">
-                  <a class="dropdown-item border-radius-md" href="javascript:;">
-                    <div class="d-flex py-1">
-                      <div class="my-auto">
-                        <img src="{{ asset('assets/images/team-2.jpg') }}" class="avatar avatar-sm  me-3 ">
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1">
-                          <span class="font-weight-bold">New message</span> from Laur
-                        </h6>
-                        <p class="text-xs text-secondary mb-0 ">
-                          <i class="fa fa-clock me-1"></i>
-                          13 minutes ago
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-                <li class="mb-2">
-                  <a class="dropdown-item border-radius-md" href="javascript:;">
-                    <div class="d-flex py-1">
-                      <div class="my-auto">
-                        <img src="{{ asset('assets/images/small-logos/logo-spotify.svg') }}" class="avatar avatar-sm bg-gradient-dark  me-3 ">
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1">
-                          <span class="font-weight-bold">New album</span> by Travis Scott
-                        </h6>
-                        <p class="text-xs text-secondary mb-0 ">
-                          <i class="fa fa-clock me-1"></i>
-                          1 day
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item border-radius-md" href="javascript:;">
-                    <div class="d-flex py-1">
-                      <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
-                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                          <title>credit-card</title>
-                          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                            <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                              <g transform="translate(1716.000000, 291.000000)">
-                                <g transform="translate(453.000000, 454.000000)">
-                                  <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
-                                  <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
-                                </g>
-                              </g>
-                            </g>
-                          </g>
-                        </svg>
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1">
-                          Payment successfully completed
-                        </h6>
-                        <p class="text-xs text-secondary mb-0 ">
-                          <i class="fa fa-clock me-1"></i>
-                          2 days
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </li>
+   <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+      <button class="btn btn-info btn-sm me-2" id="toggleFilterBtn" style="position:relative;margin-left: 1000px;margin-top: 20px; text-align: center; padding-right: 100px;">
+      <i class="fa fa-filter me-1"></i> Filter
+      </button>
+    </div>
+   </div>
+    <div id="filterSection" class="px-4 py-3 mb-3" style="display: none; background-color: #f8f9fa; border-radius: 0.5rem;">
+    <form id="teamFilterForm">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="filterName" name="name" placeholder="Filter by name">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterCategory" class="form-label">Category</label>
+            <input type="text" class="form-control" id="filterCategory" name="category" placeholder="Filter by category">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterGameMode" class="form-label">Game Mode</label>
+            <select class="form-control" id="filterGameMode" name="gameMode">
+              <option value="">All Modes</option>
+              <option value="EN_GROUPE">Group</option>
+              <option value="PAR_2">Pairs</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-group w-100">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fa fa-search me-1"></i> Apply
+            </button>
+          </div>
+        </div>
       </div>
-    </nav>
-    <!-- End Navbar -->
-
+      <div class="row mt-2">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterMinPlayers" class="form-label">Min Players</label>
+            <input type="number" class="form-control" id="filterMinPlayers" name="minPlayers" min="1" placeholder="Minimum">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterMaxPlayers" class="form-label">Max Players</label>
+            <input type="number" class="form-control" id="filterMaxPlayers" name="maxPlayers" min="1" placeholder="Maximum">
+          </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-group w-100">
+            <button type="reset" class="btn btn-outline-secondary w-100">
+              <i class="fa fa-times me-1"></i> Reset
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-group w-100">
+            <button type="button" id="closeFilterBtn" class="btn btn-outline-danger w-100">
+              <i class="fa fa-times-circle me-1"></i> Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
     <div class="container-fluid py-4">
       {% for label, messages in app.flashes %}
           {% for message in messages %}
-              <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+              <div cla
+ss="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
                   {{ message }}
                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
@@ -283,8 +258,16 @@
                       <td>
                         <div class="d-flex px-2 py-1">
                           <div>
-                            <img src="{{ asset('assets/images/team-2.jpg') }}" class="avatar avatar-sm me-3" alt="user1">
-                          </div>
+                            {% if team.logoPath %}
+                                <img src="{{ path('app_image', {
+                                    'subdirectory': 'teams', 
+                                    'filename': team.logoPath|split('/')|last
+                                }) }}" alt="{{ team.nom }} logo" style="width: 50px; height: 50px;" class="team-logo">
+                            {% else %}
+                                {# Fallback image when no logo exists #}
+                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" style="width: 50px; height: 50px;"alt="Default team logo" class="team-logo">
+                            {% endif %}
+                        </div>
                           <div class="d-flex flex-column justify-content-center">
                             <h6 class="mb-0 text-sm">{{ team.nom }}</h6>
                           </div>
@@ -343,7 +326,6 @@
       </div>
       </div>
       
-
   </main>
 
   <!-- Edit Team Modal -->
@@ -1191,6 +1173,54 @@
         joinBtn.textContent = 'Join';
       });
     });
+    // Filter toggle functionality
+const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+const filterSection = document.getElementById('filterSection');
+const closeFilterBtn = document.getElementById('closeFilterBtn');
+const filterForm = document.getElementById('teamFilterForm');
+
+if (toggleFilterBtn && filterSection) {
+  toggleFilterBtn.addEventListener('click', function() {
+    if (filterSection.style.display === 'none') {
+      filterSection.style.display = 'block';
+      this.innerHTML = '<i class="fa fa-filter me-1"></i> Hide Filter';
+    } else {
+      filterSection.style.display = 'none';
+      this.innerHTML = '<i class="fa fa-filter me-1"></i> Filter';
+    }
+  });
+}
+
+if (closeFilterBtn) {
+  closeFilterBtn.addEventListener('click', function() {
+    filterSection.style.display = 'none';
+    toggleFilterBtn.innerHTML = '<i class="fa fa-filter me-1"></i> Filter';
+  });
+}
+
+// Filter form submission
+if (filterForm) {
+  filterForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(filterForm);
+    const params = new URLSearchParams();
+    
+    // Add all filter values to URL params
+    formData.forEach((value, key) => {
+      if (value) params.append(key, value);
+    });
+    
+    // Reload the page with filter parameters
+    window.location.href = `${window.location.pathname}?${params.toString()}`;
+  });
+  
+  // Reset form handler
+  filterForm.addEventListener('reset', function() {
+    // Clear all filters and submit
+    window.location.href = window.location.pathname;
+  });
+}
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

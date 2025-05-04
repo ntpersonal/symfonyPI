@@ -6,12 +6,36 @@
 parameters:
     upload_directory: '%kernel.project_dir%/public/uploads'  # Adjust the path as per your project structure
     profile_pictures_directory: '%kernel.project_dir%/public/uploads/profile'
+    product_images_directory: '%kernel.project_dir%/public/uploads/products'
+    api_football_key: '%env(API_FOOTBALL_KEY)%'  # Use environment variable for sensitive data
+    gemini_api_key: '%env(string:GEMINI_API_KEY)%'
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
 
 services:
     # default configuration for services in *this* file
+    Symfony\Contracts\HttpClient\HttpClientInterface:
+        factory: ['Symfony\Component\HttpClient\HttpClient', 'create']
+        arguments:
+            - verify_peer: true
+              verify_host: true
+              # Let the system handle certificates automatically
+              # No need for cafile parameter
+              timeout: 30
+    
+    Symfony\Component\Mercure\HubInterface:
+        alias: 'mercure.hub.default'
+
+    Symfony\Component\Mercure\Publisher:
+        alias: 'mercure.hub.default.publisher'
+    
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $apiKey: '%api_football_key%'
+            $geminiApiKey: '%gemini_api_key%'
+            
+
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -28,6 +52,7 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
