@@ -3,29 +3,51 @@
 {% block body %}
 <h1 class="mb-4">Liste des réclamations</h1>
 
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filtrer par statut</h5>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ path('reclamation_index') }}" class="btn {{ currentStatus is null ? 'btn-primary' : 'btn-outline-secondary' }}">
+                Toutes les réclamations
+            </a>
+            {% for status, label in statusChoices %}
+                <a href="{{ path('reclamation_index', {'status': status}) }}" 
+                   class="btn {{ currentStatus == status ? 'btn-primary' : 'btn-outline-secondary' }}">
+                    {{ label }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Utilisateur</th>
             <th>Message</th>
             <th>Date</th>
+            <th>Statut</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for reclamation in reclamations %}
             <tr>
-                <td>{{ reclamation.id }}</td>
                 <td>{{ reclamation.user.firstname }} {{ reclamation.user.lastname }}</td>
                 <td>{{ reclamation.message }}</td>
                 <td>{{ reclamation.createdAt|date('Y-m-d H:i') }}</td>
                 <td>
-                    <a href="{{ path('reclamation_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-warning">Answer</a>
+                    <span class="badge bg-{{ reclamation.statusColor }}">{{ reclamation.status }}</span>
+                </td>
+                <td>
+                    <a href="{{ path('reclamation_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-warning">Répondre</a>
                     <a href="{{ path('reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
 
                     <form method="post" action="{{ path('reclamation_delete', {'id': reclamation.id}) }}" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?');">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                        <input type="hidden" name="_method" value="DELETE">
                         <button class="btn btn-sm btn-danger">Supprimer</button>
                     </form>
                 </td>
@@ -36,5 +58,5 @@
     </tbody>
 </table>
 
-<a href="{{ path('reclamation_new') }}" class="btn btn-primary mt-3">Créer une nouvelle réclamation</a>
+<a href="{{ path('app_reclamation_new') }}" class="btn btn-primary mt-3">Créer une nouvelle réclamation</a>
 {% endblock %}

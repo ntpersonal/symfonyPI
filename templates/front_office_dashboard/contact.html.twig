@@ -3,6 +3,82 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <style>
+        .bad-words-alert {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .bad-words-alert h5 {
+            color: #721c24;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .bad-words-list {
+            background-color: #f2f2f2;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .bad-words-list li {
+            display: inline-block;
+            background-color: #e2e2e2;
+            padding: 4px 8px;
+            margin: 3px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .realtime-alert {
+            display: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            background-color: #f8d7da;
+            color: #721c24;
+            margin-top: 10px;
+            border-left: 4px solid #dc3545;
+            animation: fadeIn 0.3s;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .realtime-alert i {
+            margin-right: 5px;
+        }
+        .blocked-word {
+            font-weight: bold;
+            text-decoration: line-through;
+            color: #dc3545;
+            margin: 0 3px;
+            padding: 0 3px;
+            background-color: rgba(220, 53, 69, 0.1);
+            border-radius: 3px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shakeAlert {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shakeAlert 0.6s;
+        }
+        .highlight-error {
+            background-color: rgba(220, 53, 69, 0.2);
+            transition: background-color 0.5s ease;
+        }
+        #word-counter {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85em;
+            color: #6c757d;
+            text-align: right;
+        }
+    </style>
 {% endblock %}
 
 {% block banner %}
@@ -31,7 +107,20 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8 col-md-12">
-                {{ form_start(form, {'attr': {'class': 'contact-form mb-10', 'novalidate': 'novalidate'}}) }}
+                {% if bad_words is defined and bad_words|length > 0 %}
+                    <div class="bad-words-alert">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Mots inappropriés détectés</h5>
+                        <p>Votre message contient les termes suivants qui ne sont pas autorisés:</p>
+                        <ul class="bad-words-list">
+                            {% for word in bad_words %}
+                                <li>{{ word }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p>Veuillez reformuler votre message sans utiliser ces termes.</p>
+                    </div>
+                {% endif %}
+                
+                {{ form_start(form, {'attr': {'class': 'contact-form mb-10', 'novalidate': 'novalidate', 'id': 'reclamation-form'}}) }}
                     <h3 class="post-title mb-35">Custom Request</h3>
                     <span class="sub-title">Have something to report or suggest? Send us your feedback.</span>
                     <div class="info-form">
@@ -42,13 +131,18 @@
                                         'attr': {
                                             'class': 'form-control',
                                             'placeholder': 'Enter message',
-                                            'rows': 10
+                                            'rows': 10,
+                                            'id': 'reclamation-message'
                                         }
                                     }) }}
+                                    <span id="word-counter">0 caractères</span>
+                                    <div id="realtime-alert" class="realtime-alert">
+                                        <i class="fas fa-exclamation-circle"></i> <span id="alert-message">Un mot inapproprié a été détecté et supprimé.</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12 mb-15">
-                                <button type="submit" class="form-btn form-btn4">
+                                <button type="submit" class="form-btn form-btn4" id="submit-button">
                                     Send Reclamation
                                 </button>
                             </div>
@@ -100,4 +194,264 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Correctly identify form elements
+            const form = document.getElementById('reclamation-form') || document.querySelector('form');
+            const messageInput = document.getElementById('reclamation-message') || document.querySelector('textarea[name="reclamation[message]"]');
+            const alertContainer = document.getElementById('realtime-alert');
+            const alertMessage = document.getElementById('alert-message');
+            const wordCounter = document.getElementById('word-counter');
+            
+            console.log('Form elements loaded:', {
+                form: form,
+                messageInput: messageInput,
+                alertContainer: alertContainer,
+                alertMessage: alertMessage,
+                wordCounter: wordCounter
+            });
+            
+            // Liste étendue de mots inappropriés
+            const badWords = [
+                'putain', 'pute', 'connard', 'con', 'encule', 'enculé', 'salope', 'bite', 
+                'couille', 'merde', 'connerie', 'foutre', 'pd', 'salaud', 'chier', 'cul',
+                'batard', 'bâtard', 'bordel', 'crétin', 'débile', 'nique', 'ta mère', 'ta mere',
+                'tg', 'ftg', 'ntm', 'ptn', 'fdp', 'va te faire', 'vtf', 'suce', 'fils de'
+            ];
+            
+            // Fonction pour normaliser le texte (enlever les accents, caractères spéciaux, etc.)
+            function normalizeText(text) {
+                if (!text) return '';
+                
+                // Remplacer les caractères spéciaux et accents
+                let normalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                // Remplacer les chiffres et caractères qui ressemblent à des lettres
+                normalized = normalized.replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a')
+                             .replace(/5/g, 's').replace(/0/g, 'o').replace(/8/g, 'b')
+                             .replace(/\$/g, 's').replace(/@/g, 'a');
+                // Supprimer les répétitions de caractères (ex: "puuutain" -> "putain")
+                normalized = normalized.replace(/(.)\1+/g, '$1');
+                // Supprimer les caractères qui ne sont pas des lettres
+                normalized = normalized.replace(/[^a-z]/gi, '');
+                
+                return normalized.toLowerCase();
+            }
+            
+            // Fonction pour détecter les mots inappropriés avec plusieurs stratégies
+            function findBadWords(text) {
+                if (!text) return { found: false };
+                
+                const textLower = text.toLowerCase();
+                const textNormalized = normalizeText(text);
+                
+                for (const badWord of badWords) {
+                    const badWordNormalized = normalizeText(badWord);
+                    
+                    // Méthode 1: Vérification simple d'inclusion
+                    if (textLower.includes(badWord)) {
+                        return { found: true, word: badWord, method: 'exact' };
+                    }
+                    
+                    // Méthode 2: Vérification avec limites de mots
+                    const regex = new RegExp(`\\b${badWord}\\b`, 'i');
+                    if (regex.test(textLower)) {
+                        return { found: true, word: badWord, method: 'word_boundary' };
+                    }
+                    
+                    // Méthode 3: Vérification sur le texte normalisé
+                    if (textNormalized.includes(badWordNormalized)) {
+                        return { found: true, word: badWord, method: 'normalized' };
+                    }
+                    
+                    // Méthode 4: Vérification avec séparation de caractères
+                    // Par exemple, "p.u.t.a.i.n" ou "p u t a i n"
+                    const separatedRegex = new RegExp(badWord.split('').join('[^a-zA-Z0-9]*'), 'i');
+                    if (separatedRegex.test(textLower)) {
+                        return { found: true, word: badWord, method: 'separated' };
+                    }
+                    
+                    // Méthode 5: Vérification des variations intentionnelles
+                    // Par exemple, "put@in", "put41n", etc.
+                    const specialCharsRegex = badWord.replace(/a/g, '[a@4]')
+                                              .replace(/e/g, '[e3]')
+                                              .replace(/i/g, '[i1!]')
+                                              .replace(/o/g, '[o0]')
+                                              .replace(/s/g, '[s$5]');
+                    const variantRegex = new RegExp(specialCharsRegex, 'i');
+                    if (variantRegex.test(textLower)) {
+                        return { found: true, word: badWord, method: 'variant' };
+                    }
+                }
+                
+                return { found: false };
+            }
+            
+            // Fonction pour filtrer un texte
+            function filterText(text) {
+                if (!text) return { text: text, detected: false };
+                
+                let filteredText = text;
+                let detected = false;
+                let detectedWord = '';
+                
+                for (const badWord of badWords) {
+                    const badWordPattern = new RegExp(badWord, 'gi');
+                    if (badWordPattern.test(filteredText)) {
+                        filteredText = filteredText.replace(badWordPattern, '*'.repeat(badWord.length));
+                        detected = true;
+                        detectedWord = badWord;
+                    }
+                    
+                    // Vérifier également les variations avec des caractères spéciaux
+                    const textNormalized = normalizeText(text);
+                    const badWordNormalized = normalizeText(badWord);
+                    
+                    if (textNormalized.includes(badWordNormalized)) {
+                        // Trouver l'occurrence originale et la remplacer
+                        const startPos = textNormalized.indexOf(badWordNormalized);
+                        if (startPos >= 0 && startPos < text.length) {
+                            const endPos = Math.min(startPos + badWordNormalized.length, text.length);
+                            if (startPos < endPos) {
+                                const originalPortion = text.substring(startPos, endPos);
+                                filteredText = filteredText.replace(originalPortion, '*'.repeat(originalPortion.length));
+                                detected = true;
+                                detectedWord = badWord;
+                            }
+                        }
+                    }
+                }
+                
+                return { 
+                    text: filteredText, 
+                    detected: detected,
+                    word: detectedWord
+                };
+            }
+            
+            // Met à jour le compteur de mots
+            function updateWordCounter() {
+                if (!messageInput || !wordCounter) return;
+                
+                const length = messageInput.value.length;
+                wordCounter.textContent = `${length} caractères`;
+                
+                // Change la couleur en fonction de la longueur
+                if (length > 200) {
+                    wordCounter.style.color = '#28a745'; // vert
+                } else if (length > 100) {
+                    wordCounter.style.color = '#6c757d'; // gris
+                } else if (length > 50) {
+                    wordCounter.style.color = '#ffc107'; // jaune
+                } else if (length > 0) {
+                    wordCounter.style.color = '#dc3545'; // rouge
+                }
+            }
+            
+            // Fonction pour afficher une alerte
+            function showAlert(message, type = 'danger') {
+                if (!alertContainer || !alertMessage) {
+                    console.error('Alert elements not found', { alertContainer, alertMessage });
+                    return;
+                }
+                
+                alertMessage.textContent = message;
+                alertContainer.style.display = 'block';
+                alertContainer.classList.add('shake');
+                
+                if (messageInput) {
+                    messageInput.classList.add('highlight-error');
+                }
+                
+                setTimeout(() => {
+                    alertContainer.classList.remove('shake');
+                    if (messageInput) {
+                        messageInput.classList.remove('highlight-error');
+                    }
+                }, 1000);
+                
+                setTimeout(() => {
+                    alertContainer.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Vérifie et filtre le contenu du champ message
+            function checkContent() {
+                if (!messageInput) {
+                    console.error('Message input not found');
+                    return false;
+                }
+                
+                const text = messageInput.value;
+                console.log('Checking content:', text);
+                
+                const badWordResult = findBadWords(text);
+                console.log('Bad word check result:', badWordResult);
+                
+                if (badWordResult.found) {
+                    const filtered = filterText(text);
+                    console.log('Filtered text:', filtered);
+                    messageInput.value = filtered.text;
+                    
+                    showAlert(`Le mot inapproprié "${badWordResult.word}" a été détecté et remplacé.`);
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            // Événement d'écoute pour le champ message (en temps réel)
+            if (messageInput) {
+                console.log('Adding event listeners to message input');
+                
+                // Vérifier immédiatement au chargement
+                setTimeout(checkContent, 500);
+                
+                messageInput.addEventListener('input', function() {
+                    console.log('Input event triggered');
+                    checkContent();
+                    updateWordCounter();
+                });
+                
+                messageInput.addEventListener('blur', function() {
+                    console.log('Blur event triggered');
+                    checkContent();
+                });
+                
+                // Initialiser le compteur de mots
+                updateWordCounter();
+            } else {
+                console.error('Message input element not found!');
+            }
+            
+            // Événement à la soumission du formulaire
+            if (form) {
+                console.log('Adding submit event listener to form');
+                form.addEventListener('submit', function(event) {
+                    console.log('Form submission triggered');
+                    
+                    // Vérifier une dernière fois à la soumission
+                    if (checkContent()) {
+                        event.preventDefault();
+                        showAlert('Veuillez corriger votre message avant de soumettre le formulaire.');
+                        return;
+                    }
+                    
+                    // Vérifier si le champ message est vide
+                    if (messageInput && !messageInput.value.trim()) {
+                        event.preventDefault();
+                        showAlert('Le message ne peut pas être vide.');
+                        return;
+                    }
+                    
+                    // Vérifier la longueur minimale
+                    if (messageInput && messageInput.value.trim().length < 10) {
+                        event.preventDefault();
+                        showAlert('Votre message est trop court. Veuillez fournir plus de détails.');
+                    }
+                });
+            } else {
+                console.error('Form element not found!');
+            }
+        });
+    </script>
 {% endblock %}

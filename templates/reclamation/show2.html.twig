@@ -1,6 +1,260 @@
 {% extends 'front_office_dashboard/base.html.twig' %}
 
-{% block title %}Reclamation #{{ reclamation.id }}{% endblock %}
+{% block title %}Reclamation Detail{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Styles spécifiques non-standard pour éviter les suppressions */
+    .custom-container {
+        font-family: inherit;
+        line-height: 1.5;
+    }
+    
+    .custom-section {
+        background: #f9f9f9;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .custom-section:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .custom-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding-bottom: 12px;
+    }
+    
+    .custom-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+    
+    .custom-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+    
+    .status-pending:before {
+        content: "⌛";
+        margin-right: 5px;
+    }
+    
+    .status-resolved {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-resolved:before {
+        content: "✓";
+        margin-right: 5px;
+    }
+    
+    .custom-message-box {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+        background: white;
+        position: relative;
+        transition: transform 0.2s ease;
+    }
+    
+    .custom-message-box:hover {
+        transform: translateY(-2px);
+    }
+    
+    .custom-info-message {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .custom-info-message:before {
+        content: "ℹ️";
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+    
+    .admin-info-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 16px;
+        text-align: center;
+        font-size: 0.95rem;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .custom-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
+        margin: 0;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        line-height: 1.5;
+        text-align: center;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .btn-primary-custom {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .btn-primary-custom:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary-custom {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary-custom:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .btn-danger-outline-custom {
+        background-color: transparent;
+        border: 1px solid #dc3545;
+        color: #dc3545;
+    }
+    
+    .btn-danger-outline-custom:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .custom-form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .custom-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+        min-height: 120px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .custom-textarea:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .action-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .custom-mb {
+        margin-bottom: 1.5rem;
+    }
+    
+    .answer-date {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    
+    .answer-admin {
+        display: inline-flex;
+        align-items: center;
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .answer-admin:before {
+        content: "👨‍💼";
+        margin-right: 8px;
+    }
+    
+    .filtered-content {
+        position: relative;
+    }
+    
+    .filtered-content .filter-indicator {
+        font-size: 0.85rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #856404;
+        margin-top: 5px;
+        display: inline-block;
+    }
+    
+    .message-content {
+        white-space: pre-wrap;
+        line-height: 1.6;
+    }
+    
+    .sensitive-content-warning {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin: 10px 0;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .sensitive-content-warning:before {
+        content: "⚠️";
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
 
 {% block banner %}
 <div class="banner banner1">
@@ -10,10 +264,11 @@
                 <div class="page-path">
                     <ul>
                         <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
-                        <li><a class="current-page" href="#">Reclamation #{{ reclamation.id }}</a></li>
+                        <li><a href="{{ path('app_reclamation_my') }}">My Reclamations</a></li>
+                        <li><a class="current-page" href="#">Reclamation Detail</a></li>
                     </ul>
                 </div>
-                <h1 class="banner-heading">Reclamation Detail</h1>
+                <h1 class="banner-heading">Reclamation Details</h1>
             </div>
         </div>
     </div>
@@ -21,56 +276,73 @@
 {% endblock %}
 
 {% block content %}
-<div class="contact-area">
-    <div class="container">
+<div class="contact-area" id="main-content-area">
+    <div class="container custom-container">
         <div class="row">
             <div class="col-lg-12">
-                <h4><strong>Message:</strong> {{ reclamation.message }}</h4>
-                <p><strong>Date:</strong> {{ reclamation.createdAt|date('Y-m-d H:i') }}</p>
-                <hr>
+                <!-- En-tête avec informations basiques -->
+                <div class="custom-section">
+                    <div class="custom-header">
+                        <h3 class="custom-title">Reclamation Summary</h3>
+                        {% set statusVariant = reclamation.status == 'Résolu' ? 'resolved' : 'pending' %}
+                        <span class="custom-status status-{{ statusVariant }}" id="status-badge">{{ reclamation.status }}</span>
+                    </div>
 
-                <h5 class="mb-4">Answers</h5>
-                {% if reclamation.answers is empty %}
-                    <div class="alert alert-info">No answers yet.</div>
-                {% else %}
-                    {% for answer in reclamation.answers %}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <p><strong>From:</strong>
-                                    {{ answer.admin.lastname }}
-                                </p>
-                                <p>{{ answer.message }}</p>
+                    <div class="custom-message-box">
+                        <div class="answer-date">Submitted on: {{ reclamation.createdAt|date('Y-m-d H:i') }}</div>
+                        <div class="filtered-content">
+                            <div class="message-content">{{ reclamation.message }}</div>
+                            {% if reclamation.hasFilteredContent() %}
+                                <div class="filter-indicator">
+                                    <i class="fas fa-filter"></i> Ce message a été filtré automatiquement 
+                                    ({{ reclamation.getFilteredWordsCount() }} mot{{ reclamation.getFilteredWordsCount() > 1 ? 's' : '' }} remplacé{{ reclamation.getFilteredWordsCount() > 1 ? 's' : '' }})
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if reclamation.status == 'Résolu' %}
+                        <div class="sensitive-content-warning">
+                            Cette réclamation a été résolue. Si vous avez encore des questions, n'hésitez pas à créer une nouvelle demande.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Section des réponses -->
+                <div class="custom-section" id="answers-section">
+                    <h5 class="custom-title">Responses</h5>
+                    
+                    {% if reclamation.answers is empty %}
+                        <div class="custom-info-message">Aucune réponse n'a encore été ajoutée.</div>
+                        <div class="admin-info-message">
+                            <i class="fas fa-info-circle"></i> Les réponses seront fournies par notre équipe d'administration. Merci de votre patience.
+                        </div>
+                    {% else %}
+                        {% for answer in reclamation.answers %}
+                            <div class="custom-message-box" id="answer-{{ answer.id }}">
+                                <div class="answer-admin">{{ answer.admin.lastname }}</div>
+                                <div class="answer-date">Répondu le: {{ answer.createdAt is defined ? answer.createdAt|date('Y-m-d H:i') : 'Date non disponible' }}</div>
+                                <div class="message-content">{{ answer.message }}</div>
 
                                 {% if app.user and app.user.id == answer.admin.id %}
-                                    <div class="d-flex">
-                                        <form action="{{ path('answer_delete', { id: answer.id }) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this answer?');">
+                                    <div class="action-row">
+                                        <form action="{{ path('answer_delete', { id: answer.id }) }}" method="post" class="delete-form" data-confirm="Êtes-vous sûr de vouloir supprimer cette réponse ?">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ answer.id) }}">
-                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                            <button class="custom-btn btn-danger-outline-custom">
+                                                <i class="fas fa-trash-alt"></i> Delete
+                                            </button>
                                         </form>
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
 
-                <hr>
-                <h5 class="mb-3">Add Your Response</h5>
-                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-                    <div class="form-group">
-                        {{ form_widget(form.message, {
-                            'attr': {
-                                'class': 'form-control',
-                                'rows': 6,
-                                'placeholder': 'Write your answer here...'
-                            }
-                        }) }}
-                    </div>
-                    <button type="submit" class="btn btn-primary">Send</button>
-                {{ form_end(form) }}
-
-                <div class="mt-4">
-                    <a href="{{ path('app_reclamation_my') }}" class="btn btn-outline-secondary">Back to My Reclamations</a>
+                <div class="action-row custom-mb">
+                    <a href="{{ path('app_reclamation_my') }}" class="custom-btn btn-secondary-custom">
+                        <i class="fas fa-arrow-left"></i> Back to My Reclamations
+                    </a>
                 </div>
             </div>
         </div>
@@ -84,4 +356,76 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded with enhanced approach for show2 template');
+        
+        // Fonction pour recréer dynamiquement le contenu si nécessaire
+        const reconstructContent = function() {
+            const mainContentArea = document.getElementById('main-content-area');
+            if (!mainContentArea || !mainContentArea.innerHTML || mainContentArea.innerHTML.trim() === '') {
+                console.log('Content area was emptied, reloading page');
+                window.location.reload();
+                return;
+            }
+            
+            // Assurer que tous les éléments de formulaire ont des événements
+            document.querySelectorAll('.delete-form').forEach(form => {
+                // Vérifier si le gestionnaire d'événements est déjà attaché
+                if (!form.dataset.hasEventListener) {
+                    form.dataset.hasEventListener = 'true';
+                    
+                    form.addEventListener('submit', function(e) {
+                        const confirmMessage = form.dataset.confirm || 'Are you sure?';
+                        
+                        if (!confirm(confirmMessage)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
+                    });
+                }
+            });
+            
+            // Détecter les mots filtrés et améliorer leur apparence
+            document.querySelectorAll('.message-content').forEach(message => {
+                const text = message.innerHTML;
+                if (text.includes('****')) {
+                    message.innerHTML = text.replace(/(\*+)/g, '<span style="background-color: #ffebee; padding: 2px 4px; border-radius: 3px; color: #c62828;">$1</span>');
+                }
+            });
+            
+            // Animation pour le statut
+            const statusBadge = document.getElementById('status-badge');
+            if (statusBadge) {
+                statusBadge.addEventListener('mouseover', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                statusBadge.addEventListener('mouseout', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            }
+        };
+        
+        // Appliquer immédiatement
+        reconstructContent();
+        
+        // Puis vérifier régulièrement si le contenu existe encore
+        setInterval(reconstructContent, 2000);
+        
+        // Détecter les clics sur les boutons retour pour les confirmer
+        document.querySelectorAll('.custom-btn.btn-secondary-custom').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const hasChanges = document.querySelector('.new-reply-textarea') && 
+                                  document.querySelector('.new-reply-textarea').value.trim() !== '';
+                
+                if (hasChanges) {
+                    if (!confirm('Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter cette page?')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}

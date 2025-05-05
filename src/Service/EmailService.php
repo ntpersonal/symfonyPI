@@ -2,69 +2,148 @@
 
 namespace App\Service;
 
+use App\Entity\Reclamation;
+use App\Entity\User;
 use App\Entity\Order;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Part\DataPart;
-use Symfony\Component\Mime\Part\File;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Twig\Environment;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Security\Core\Security;
 
 class EmailService
 {
     private $mailer;
     private $pdfService;
     private $senderEmail;
-    
-    public function __construct(MailerInterface $mailer, PdfService $pdfService, string $senderEmail = 'noreply@sportify.com')
-    {
+    private $router;
+    private $twig;
+    private $params;
+    private $logger;
+    private $security;
+
+    public function __construct(
+        MailerInterface $mailer,
+        UrlGeneratorInterface $router,
+        Environment $twig,
+        ParameterBagInterface $params,
+        Security $security,
+        PdfService $pdfService,
+        LoggerInterface $logger = null,
+        string $senderEmail = 'noreply@sportify.com'
+    ) {
         $this->mailer = $mailer;
         $this->pdfService = $pdfService;
         $this->senderEmail = $senderEmail;
+        $this->router = $router;
+        $this->twig = $twig;
+        $this->params = $params;
+        $this->security = $security;
+        $this->logger = $logger;
     }
-    
+
+    /**
+     * Send order confirmation email
+     */
     public function sendOrderConfirmation(Order $order, ?string $customEmail = null): void
     {
-        $email = $customEmail;
-        if (!$email) {
-            $email = 'customer@example.com'; // fallback if not provided
-        }
-        if (!$email) {
+        $emailAddress = $customEmail ?: 'customer@example.com';
+
+        if (!$emailAddress) {
             return;
         }
-        // Generate PDF invoice
-        $pdfContent = $this->pdfService->generateInvoicePdf($order);
-        
-        // Create email
-        $emailMessage = (new Email())
-            ->from($this->senderEmail)
-            ->to($email) // Use the custom or user email
-            ->subject('Sportify - Order Confirmation #' . $order->getId())
-            ->html($this->getOrderConfirmationHtml($order))
-            ->attach($pdfContent, 'invoice-' . $order->getId() . '.pdf', 'application/pdf');
-        
+
         try {
-            // Send email
+            $pdfContent = $this->pdfService->generateInvoicePdf($order);
+
+            $emailMessage = (new Email())
+                ->from($this->senderEmail)
+                ->to($emailAddress)
+                ->subject('Sportify - Order Confirmation #' . $order->getId())
+                ->html($this->getOrderConfirmationHtml($order))
+                ->attach($pdfContent, 'invoice-' . $order->getId() . '.pdf', 'application/pdf');
+
             $this->mailer->send($emailMessage);
-            
-            // Also log the email to a file for debugging
+
             $this->logEmailToFile($emailMessage, $order->getId());
-        } catch (\Exception $e) {
-            // Create log directory if it doesn't exist
-            $logDir = __DIR__ . '/../../var/log';
-            if (!is_dir($logDir)) {
-                mkdir($logDir, 0777, true);
+
+            if ($this->logger) {
+                $this->logger->info('Order confirmation email sent to: ' . $emailAddress);
             }
-            
-            // Log the error
-            file_put_contents(
-                $logDir . '/email_errors.log',
-                date('Y-m-d H:i:s') . ' - Error sending email for order #' . $order->getId() . ': ' . $e->getMessage() . "\n",
-                FILE_APPEND
-            );
+        } catch (\Exception $e) {
+            if ($this->logger) {
+                $this->logger->error('Error sending order confirmation: ' . $e->getMessage());
+            }
+            $this->logEmailError($order->getId(), $e->getMessage());
         }
     }
-    
+
     /**
-     * Log email content to a file for debugging purposes
+     * Send reclamation confirmation email
+     */
+    public function sendReclamationConfirmation(Reclamation $reclamation): void
+    {
+        try {
+            $connectedUser = $this->security->getUser();
+            $userFromReclamation = $reclamation->getUser();
+
+            $user = ($connectedUser && $connectedUser->getUserIdentifier() === $userFromReclamation->getEmail())
+                ? $connectedUser
+                : $userFromReclamation;
+
+            if (!$user) {
+                if ($this->logger) {
+                    $this->logger->error('No user associated with reclamation #' . $reclamation->getId());
+                }
+                return;
+            }
+
+            $userEmail = $user->getEmail();
+            if (!$userEmail) {
+                if ($this->logger) {
+                    $this->logger->error('User #' . $user->getId() . ' has no email');
+                }
+                return;
+            }
+
+            if ($this->logger) {
+                $this->logger->info('Sending reclamation confirmation to: ' . $userEmail);
+            }
+
+            $url = $this->router->generate('reclamation_show2', [
+                'id' => $reclamation->getId()
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+            $context = [
+                'reclamation' => $reclamation,
+                'user' => $user,
+                'url' => $url
+            ];
+
+            $email = (new TemplatedEmail())
+                ->from('sportius.noreply@gmail.com')
+                ->to($userEmail)
+                ->subject('Confirmation de votre réclamation #' . $reclamation->getId())
+                ->htmlTemplate('emails/reclamation_confirmation.html.twig')
+                ->context($context);
+
+            $this->mailer->send($email);
+
+            if ($this->logger) {
+                $this->logger->info('Reclamation confirmation email sent to: ' . $userEmail);
+            }
+        } catch (\Exception $e) {
+            if ($this->logger) {
+                $this->logger->error('Error sending reclamation confirmation: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Log email content to a file
      */
     private function logEmailToFile(Email $email, $orderId): void
     {
@@ -72,35 +151,44 @@ class EmailService
         if (!is_dir($logDir)) {
             mkdir($logDir, 0777, true);
         }
-        
+
         $timestamp = date('Y-m-d_H-i-s');
         $filename = $logDir . '/email_' . $orderId . '_' . $timestamp . '.html';
-        
-        // Convert Address objects to strings
-        $toAddresses = [];
-        foreach ($email->getTo() as $address) {
-            $toAddresses[] = $address->getAddress();
-        }
-        
-        $fromAddresses = [];
-        foreach ($email->getFrom() as $address) {
-            $fromAddresses[] = $address->getAddress();
-        }
-        
+
+        $toAddresses = array_map(fn($a) => $a->getAddress(), $email->getTo());
+        $fromAddresses = array_map(fn($a) => $a->getAddress(), $email->getFrom());
+
         $content = "To: " . implode(', ', $toAddresses) . "\n";
         $content .= "From: " . implode(', ', $fromAddresses) . "\n";
         $content .= "Subject: " . $email->getSubject() . "\n";
         $content .= "Date: " . date('Y-m-d H:i:s') . "\n\n";
         $content .= "HTML Content:\n" . $email->getHtmlBody() . "\n";
-        
+
         file_put_contents($filename, $content);
     }
-    
+
+    /**
+     * Log email errors to file
+     */
+    private function logEmailError($orderId, string $errorMessage): void
+    {
+        $logDir = __DIR__ . '/../../var/log';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0777, true);
+        }
+
+        file_put_contents(
+            $logDir . '/email_errors.log',
+            date('Y-m-d H:i:s') . ' - Error sending email for order #' . $orderId . ': ' . $errorMessage . "\n",
+            FILE_APPEND
+        );
+    }
+
     private function getOrderConfirmationHtml(Order $order): string
     {
         $product = $order->getProduct();
         $productName = $product ? $product->getNameproduct() : 'Unknown Product';
-        
+
         return "
             <html>
             <head>
