@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Reclamation;
+use App\Entity\TeamRequest;
 use App\Entity\User;
 use App\Entity\Answer;
 use App\Form\ReclamationType;
@@ -15,48 +16,95 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
 
 #[Route('/reclamation')]
 class ReclamationController extends AbstractController
 {
+    private ReclamationRepository $reclamationRepository;
+    private ContentFilterService $contentFilter;
+
+    public function __construct(ReclamationRepository $reclamationRepository, ContentFilterService $contentFilter)
+    {
+        $this->reclamationRepository = $reclamationRepository;
+        $this->contentFilter = $contentFilter;
+    }
+
+
+    private function getTeamRequestsData(?User $user, EntityManagerInterface $em): array
+    {
+        if (!$user) {
+            return ['teamRequests' => [], 'playerRequests' => []];
+        }
+
+        $team = $user->getTeam();
+
+        // only users with ROLE_ORGANIZER see team requests
+        $teamRequests = [];
+        if ($this->isGranted('ROLE_ORGANIZER') && $team) {
+            $teamRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'team'   => $team,
+                'status' => 'pending',
+            ]);
+        }
+
+        // only users with ROLE_PLAYER see their own requests
+        $playerRequests = [];
+        if ($this->isGranted('ROLE_PLAYER')) {
+            $playerRequests = $em->getRepository(TeamRequest::class)->findBy([
+                'player' => $user,
+                'status' => 'pending',
+            ]);
+        }
+
+        return [
+            'teamRequests'   => $teamRequests,
+            'playerRequests' => $playerRequests,
+        ];
+    }
     #[Route('/', name: 'reclamation_index', methods: ['GET'])]
     public function index(Request $request, ReclamationRepository $reclamationRepository): Response
     {
         // Récupérer le statut demandé depuis la query string, par défaut afficher toutes
         $statusFilter = $request->query->get('status');
-        
+
         // Préparer les filtres
         $criteria = [];
         if ($statusFilter && in_array($statusFilter, array_keys(Reclamation::getStatusChoices()))) {
             $criteria['status'] = $statusFilter;
         }
-        
+
         // Récupérer les réclamations filtrées ou toutes si pas de filtre
-        $reclamations = empty($criteria) 
-            ? $reclamationRepository->findBy([], ['created_at' => 'DESC']) 
+        $reclamations = empty($criteria)
+            ? $reclamationRepository->findBy([], ['created_at' => 'DESC'])
             : $reclamationRepository->findBy($criteria, ['created_at' => 'DESC']);
-        
+
         return $this->render('reclamation/index.html.twig', [
             'reclamations' => $reclamations,
             'statusChoices' => Reclamation::getStatusChoices(),
             'currentStatus' => $statusFilter,
         ]);
     }
-    
+
     #[Route('/my', name: 'app_reclamation_my')]
-    public function myReclamations(Request $request, ReclamationRepository $reclamationRepository): Response
+    public function myReclamations(Request $request, ReclamationRepository $reclamationRepository, Security $security,
+                                   EntityManagerInterface $em): Response
     {
-        $user = $this->getUser();
+
+        /** @var User|null $user */
+        $user = $security->getUser();
+        $data = $this->getTeamRequestsData($user, $em);
+
         $statusFilter = $request->query->get('status');
-        
+
         // Critères de base: réclamations de l'utilisateur connecté
         $criteria = ['user' => $user];
-        
+
         // Ajouter le filtre par statut si présent
         if ($statusFilter && in_array($statusFilter, array_keys(Reclamation::getStatusChoices()))) {
             $criteria['status'] = $statusFilter;
         }
-        
+
         $reclamations = $reclamationRepository->findBy(
             $criteria,
             ['created_at' => 'DESC']
@@ -66,41 +114,41 @@ class ReclamationController extends AbstractController
             'reclamations' => $reclamations,
             'statusChoices' => Reclamation::getStatusChoices(),
             'currentStatus' => $statusFilter,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
 
     #[Route('/new', name: 'app_reclamation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, ReclamationRepository $reclamationRepository, ContentFilterService $contentFilter, EmailService $emailService): Response
+    public function new(Request $request, EmailService $emailService): Response
     {
         $reclamation = new Reclamation();
         $form = $this->createForm(ReclamationType::class, $reclamation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Vérifier si le message contient des mots inappropriés
             $message = $reclamation->getMessage();
-            $badWords = $contentFilter->containsInappropriateContent($message);
-            
+            $badWords = $this->contentFilter->containsInappropriateContent($message);
+
             if (!empty($badWords)) {
                 $badWordsStr = implode(', ', $badWords);
                 $this->addFlash('danger', "Votre message contient des mots inappropriés ($badWordsStr). Veuillez les supprimer avant de soumettre.");
-                
+
                 return $this->renderForm('reclamation/new.html.twig', [
                     'reclamation' => $reclamation,
                     'form' => $form,
                 ]);
             }
-            
+
             $reclamation->setCreatedAt(new \DateTimeImmutable());
             $reclamation->setStatus('En attente');
             $reclamation->setUser($this->getUser());
-            
-            $reclamationRepository->add($reclamation, true);
+
+            $this->reclamationRepository->add($reclamation, true);
 
             $this->addFlash('success', 'Votre réclamation a été soumise avec succès.');
-            
-            // Envoyer un email de confirmation
+
             $emailService->sendReclamationConfirmation($reclamation);
 
             return $this->redirectToRoute('app_reclamation_user_reclamations', [], Response::HTTP_SEE_OTHER);
@@ -161,8 +209,13 @@ class ReclamationController extends AbstractController
     }
     
     #[Route('/front/{id}', name: 'reclamation_show2', methods: ['GET', 'POST'])]
-    public function show2(Reclamation $reclamation, Request $request, EntityManagerInterface $em): Response
+    public function show2(Reclamation $reclamation, Request $request, EntityManagerInterface $em, Security $security,
+                         ): Response
     {
+
+        /** @var User|null $user */
+        $user = $security->getUser();
+        $data = $this->getTeamRequestsData($user, $em);
         // Prepare a new Answer object
         $answer = new Answer();
         $answer->setReclamation($reclamation);
@@ -187,6 +240,8 @@ class ReclamationController extends AbstractController
         return $this->render('reclamation/show2.html.twig', [
             'reclamation' => $reclamation,
             'form' => $form->createView(),
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
     
@@ -298,13 +353,18 @@ class ReclamationController extends AbstractController
         Request $request, 
         EntityManagerInterface $em, 
         EmailService $emailService,
-        ContentFilterService $contentFilterService
+        ContentFilterService $contentFilterService,
+        Security $security,
+
     ): Response
     {
+        /** @var User|null $user */
+        $user = $security->getUser();
+        $data = $this->getTeamRequestsData($user, $em);
         $reclamation = new Reclamation();
 
         // Récupérer l'utilisateur connecté
-        $user = $this->getUser();
+
         
         // Vérifier que l'utilisateur est connecté
         if (!$user) {
@@ -403,6 +463,8 @@ class ReclamationController extends AbstractController
         return $this->render('front_office_dashboard/contact.html.twig', [
             'form' => $form->createView(),
             'bad_words' => $detectedBadWords,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
         ]);
     }
 
