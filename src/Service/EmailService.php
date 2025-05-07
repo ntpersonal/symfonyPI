@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Reclamation;
+use App\Entity\Answer;
 use App\Entity\User;
 use App\Entity\Order;
 use Symfony\Component\Mailer\MailerInterface;
@@ -255,4 +256,75 @@ class EmailService
             </html>
         ";
     }
+
+
+    public function sendAnswerNotification(Answer $answer): void
+    {
+        try {
+            $reclamation = $answer->getReclamation();
+            $user = $reclamation->getUser();
+
+            if (!$user) {
+                if ($this->logger) {
+                    $this->logger->error('Aucun utilisateur associé à la réclamation #' . $reclamation->getId());
+                }
+                return;
+            }
+
+            $userEmail = $user->getEmail();
+
+            if (!$userEmail) {
+                if ($this->logger) {
+                    $this->logger->error('L\'utilisateur #' . $user->getId() . ' n\'a pas d\'email');
+                }
+                return;
+            }
+
+            // Journaliser l'email utilisé
+            if ($this->logger) {
+                $this->logger->info('Tentative d\'envoi d\'email de notification de réponse à: ' . $userEmail);
+            }
+
+            // Générer l'URL absolue pour voir la réclamation et sa réponse
+            $url = $this->router->generate('reclamation_show2', [
+                'id' => $reclamation->getId()
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+            // Préparer les données pour le template
+            $context = [
+                'reclamation' => $reclamation,
+                'answer' => $answer,
+                'user' => $user,
+                'url' => $url
+            ];
+
+            // Créer l'email
+            $email = (new TemplatedEmail())
+                ->from('sportius.noreply@gmail.com')
+                ->to($userEmail)
+                ->subject('Nouvelle réponse à votre réclamation #' . $reclamation->getId())
+                ->htmlTemplate('emails/answer_notification.html.twig')
+                ->context($context);
+
+            // Envoyer l'email
+            $this->mailer->send($email);
+
+            // Journaliser le succès
+            if ($this->logger) {
+                $this->logger->info('Email de notification de réponse envoyé avec succès à: ' . $userEmail);
+            }
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne bloque pas le processus
+            error_log('Erreur lors de l\'envoi de l\'email de notification: ' . $e->getMessage());
+            if ($this->logger) {
+                $this->logger->error('Erreur lors de l\'envoi de l\'email de notification: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        }
+    }
+
+
+
 }

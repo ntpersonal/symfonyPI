@@ -17,7 +17,7 @@ class Reclamation
 {
     const STATUS_PENDING = 'En attente';
     const STATUS_RESOLVED = 'Résolu';
-    
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -35,7 +35,7 @@ class Reclamation
     #[ORM\Column(type: 'datetime')]
     #[Assert\Type(\DateTimeInterface::class)]
     private ?\DateTimeInterface $created_at = null;
-    
+
     #[ORM\Column(type: 'string', length: 20)]
     private string $status = self::STATUS_PENDING;
 
@@ -57,10 +57,10 @@ class Reclamation
 
     public function getCreatedAt(): ?\DateTimeInterface { return $this->created_at; }
     public function setCreatedAt(\DateTimeInterface $created_at): self { $this->created_at = $created_at; return $this; }
-    
+
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $status): self { $this->status = $status; return $this; }
-    
+
     /**
      * Retourne la liste des statuts possibles pour une réclamation
      *
@@ -73,7 +73,7 @@ class Reclamation
             self::STATUS_RESOLVED => self::STATUS_RESOLVED,
         ];
     }
-    
+
     /**
      * Retourne la couleur associée au statut
      *
@@ -96,7 +96,7 @@ class Reclamation
         if (!$this->answers->contains($answer)) {
             $this->answers[] = $answer;
             $answer->setReclamation($this);
-            
+
             // Passer automatiquement le statut à "Résolu" lorsqu'une réponse est ajoutée
             $this->status = self::STATUS_RESOLVED;
         }
@@ -109,7 +109,7 @@ class Reclamation
             if ($answer->getReclamation() === $this) {
                 $answer->setReclamation(null);
             }
-            
+
             // Si plus de réponses, revenir à "En attente"
             if ($this->answers->isEmpty()) {
                 $this->status = self::STATUS_PENDING;
@@ -128,12 +128,12 @@ class Reclamation
         if (null === $this->message) {
             return false;
         }
-        
+
         // Un message est considéré comme filtré s'il contient des séquences d'astérisques
         // (au moins 3 astérisques consécutifs)
         return preg_match('/\*{3,}/', $this->message) === 1;
     }
-    
+
     /**
      * Retourne le nombre de mots censurés dans le message
      *
@@ -144,10 +144,10 @@ class Reclamation
         if (null === $this->message) {
             return 0;
         }
-        
+
         // Compte les séquences d'astérisques (qui représentent des mots censurés)
         preg_match_all('/\*{3,}/', $this->message, $matches);
-        
+
         return count($matches[0]);
     }
 }
