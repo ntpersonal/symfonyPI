@@ -1,0 +1,975 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}Gestion des Événements | Sportify{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Add custom styles for the event list if needed -->
+    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
+    <!-- Sweet Alert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+    <style>
+        /* Styles améliorés pour la gestion des événements */
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(to right, #e6304a, #e65245);
+            color: white;
+            border-top-left-radius: 15px !important;
+            border-top-right-radius: 15px !important;
+            border-bottom: none;
+            padding: 20px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%);
+            z-index: 0;
+        }
+        
+        .card-header h6 {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        
+        .search-input {
+            border: 1px solid #e0e0e0;
+            padding: 12px 20px;
+            border-radius: 50px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            padding-left: 45px;
+            background-color: #f8f9fa;
+        }
+        
+        .search-input:focus {
+            border-color: #e6304a;
+            box-shadow: 0 0 10px rgba(230, 48, 74, 0.15);
+            background-color: white;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            transition: color 0.3s;
+        }
+        
+        .search-input:focus + .search-icon {
+            color: #e6304a;
+        }
+        
+        .loading-spinner {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            color: #e6304a;
+        }
+        
+        .loading .loading-spinner {
+            display: block;
+        }
+        
+        .btn-primary {
+            background: #e6304a;
+            border-color: #e6304a;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(230, 48, 74, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .btn-primary:hover {
+            background: #d42840;
+            border-color: #d42840;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(230, 48, 74, 0.3);
+        }
+        
+        .card-header .btn-primary {
+            position: relative;
+            z-index: 100;
+        }
+        
+        .card-header .d-flex {
+            position: relative;
+            z-index: 50;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border-left: 4px solid #28a745;
+        }
+        
+        .alert-info {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        table.table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            color: #8898aa;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+        }
+        
+        .table tbody tr {
+            transition: all 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(230, 48, 74, 0.03);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .table td {
+            padding: 16px;
+            vertical-align: middle;
+            color: #525f7f;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-active {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+        
+        .status-inactive {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+        
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+        
+        .event-name {
+            font-weight: 600;
+            color: #344767;
+            transition: color 0.2s;
+        }
+        
+        .event-name:hover {
+            color: #e6304a;
+        }
+        
+        .event-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .event-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .event-meta {
+            font-size: 0.8rem;
+            color: #8898aa;
+            margin-top: 5px;
+        }
+        
+        .event-meta i {
+            margin-right: 5px;
+            color: #e6304a;
+        }
+        
+        .table-responsive {
+            padding: 0 15px;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+        
+        .btn-edit {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: none;
+        }
+        
+        .btn-edit:hover {
+            background-color: #17a2b8;
+            color: white;
+            box-shadow: 0 4px 10px rgba(23, 162, 184, 0.2);
+        }
+        
+        .btn-view {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: none;
+        }
+        
+        .btn-view:hover {
+            background-color: #6c757d;
+            color: white;
+            box-shadow: 0 4px 10px rgba(108, 117, 125, 0.2);
+        }
+        
+        .btn-delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: none;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+        }
+        
+        .action-btn i {
+            margin-right: 5px;
+        }
+        
+        /* Style pour la pagination */
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .page-link {
+            border-radius: 50%;
+            margin: 0 5px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #495057;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .page-link:hover {
+            background-color: rgba(230, 48, 74, 0.1);
+            color: #e6304a;
+        }
+        
+        .page-item.active .page-link {
+            background-color: #e6304a;
+            border-color: #e6304a;
+            box-shadow: 0 4px 10px rgba(230, 48, 74, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .card-header .btn {
+                margin-top: 15px;
+                align-self: flex-start;
+            }
+            
+            .event-image {
+                display: none;
+            }
+            
+            .action-btn {
+                padding: 5px 10px;
+                font-size: 0.7rem;
+            }
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+            padding: 10px;
+        }
+        
+        .stat-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            z-index: 2;
+        }
+        
+        .stat-progress .progress-bar {
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: width 1.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stat-card {
+            position: relative;
+            padding: 25px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #e6304a, #ff4d6d);
+            color: white;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(230, 48, 74, 0.15);
+            transition: all 0.3s;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(230, 48, 74, 0.2);
+        }
+        
+        .stat-card h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            z-index: 2;
+            position: relative;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card p {
+            font-size: 1rem;
+            margin: 5px 0 0;
+            opacity: 0.9;
+            z-index: 2;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        .stat-card .icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            opacity: 0.2;
+            z-index: 1;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at bottom right, rgba(255,255,255,0.1), transparent 70%);
+            z-index: 0;
+        }
+        
+        .new-event-btn {
+            position: relative;
+            z-index: 1000;
+            padding: 12px 25px;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(230, 48, 74, 0.3);
+            font-weight: 700;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        
+        .new-event-btn:hover, .new-event-btn:focus {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(230, 48, 74, 0.4);
+            background-color: #e1263f;
+            border-color: #e1263f;
+        }
+        
+        .new-event-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .new-event-btn i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(230, 48, 74, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 8px 20px rgba(230, 48, 74, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(230, 48, 74, 0.3); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        .new-event-btn.clicked {
+            transform: scale(0.95);
+            transition: transform 0.2s;
+            background-color: #d42840;
+        }
+        
+        /* Corriger les problèmes de z-index pour garantir que le bouton est toujours cliquable */
+        .card {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .new-event-btn {
+            position: relative;
+            z-index: 1000;
+            padding: 12px 25px;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(230, 48, 74, 0.3);
+            font-weight: 700;
+            border: 2px solid transparent;
+            cursor: pointer;
+            pointer-events: auto !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle mr-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+            
+            <!-- Statistics Section -->
+            {% if eventStats is defined %}
+            <!-- Stats Cards Row -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E);">
+                        <h3>{{ eventStats.totalEvents }}</h3>
+                        <p>Nombre total d'événements</p>
+                        <div class="icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4D96FF, #84BDFF);">
+                        <h3>{{ eventStats.averageFillRate }}%</h3>
+                        <p>Taux de remplissage moyen</p>
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" style="width: {{ eventStats.averageFillRate }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #6BCB77, #8EE59B);">
+                        <h3>{{ eventStats.popularEvents|length > 0 ? eventStats.popularEvents[0].participantCount : 0 }}</h3>
+                        <p>Participants à l'événement le plus populaire</p>
+                        <div class="icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" style="width: {{ eventStats.popularEvents|length > 0 ? (eventStats.popularEvents[0].participantCount / max(1, eventStats.totalEvents)) * 100 : 0 }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Événements par statut</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Répartition des participants</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="participantChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event List -->
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Liste des Événements</h6>
+                        <a href="{{ path('app_event_new') }}" class="btn btn-primary btn-sm new-event-btn">
+                            <i class="fas fa-plus-circle mr-2"></i> Nouvel événement
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body p-3">
+                    <div class="search-container">
+                        <input type="text" id="event-search" class="search-input" placeholder="Rechercher un événement par nom, date, lieu..." autocomplete="off">
+                        <i class="fas fa-search search-icon"></i>
+                        <div class="loading-spinner">
+                            <i class="fas fa-circle-notch fa-spin fa-lg"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ÉVÉNEMENT</th>
+                                    <th>DATE</th>
+                                    <th>STATUT</th>
+                                    <th>PARTICIPANTS</th>
+                                    <th>LIEU</th>
+                                    <th class="text-center">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="events-list">
+                                {% include 'admin_dashboard/events/_event_list.html.twig' with {'events': events} %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% if events.haveToPaginate is defined and events.haveToPaginate %}
+                    <div class="mt-4">
+                        <ul class="pagination">
+                            {% if events.hasPreviousPage %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_event_index', {page: events.previousPage}) }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                                </li>
+                            {% endif %}
+
+                            {% for i in 1..events.lastPage %}
+                                <li class="page-item {{ events.currentPage == i ? 'active' }}">
+                                    <a class="page-link" href="{{ path('app_event_index', {page: i}) }}">{{ i }}</a>
+                                </li>
+                            {% endfor %}
+
+                            {% if events.hasNextPage %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_event_index', {page: events.nextPage}) }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Sweet Alert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.all.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('event-search');
+    const eventsList = document.getElementById('events-list');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const searchContainer = this.closest('.search-container');
+        searchContainer.classList.add('loading');
+
+        searchTimeout = setTimeout(() => {
+            const searchTerm = this.value;
+            
+            fetch(`{{ path('app_event_search') }}?q=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.text())
+                .then(html => {
+                    eventsList.innerHTML = html;
+                    searchContainer.classList.remove('loading');
+                    initializeActionButtons();
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la recherche:', error);
+                    searchContainer.classList.remove('loading');
+                    Swal.fire({
+                        title: 'Erreur',
+                        text: 'Une erreur est survenue lors de la recherche',
+                        icon: 'error',
+                        confirmButtonColor: '#e6304a'
+                    });
+                });
+        }, 300);
+    });
+
+    {% if eventStats is defined %}
+    // Préparation des données pour les graphiques
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const participantCtx = document.getElementById('participantChart').getContext('2d');
+    
+    // Définir un dégradé pour les graphiques
+    const gradientStatus = statusCtx.createLinearGradient(0, 0, 0, 250);
+    gradientStatus.addColorStop(0, 'rgba(230, 48, 74, 0.8)');
+    gradientStatus.addColorStop(1, 'rgba(230, 48, 74, 0.4)');
+    
+    // Couleurs modernes pour le graphique en donut
+    const statusColors = [
+        '#FF6B6B', // Rouge vif
+        '#4D96FF', // Bleu clair
+        '#6BCB77', // Vert clair
+        '#FFD93D', // Jaune
+        '#9B59B6'  // Violet
+    ];
+    
+    // Graphique des statuts d'événements
+    const statusLabels = [];
+    const statusData = [];
+    
+    {% if eventStats.statusStats is defined %}
+    {% for stat in eventStats.statusStats %}
+        statusLabels.push("{{ stat.status|default('Non défini')|capitalize }}");
+        statusData.push({{ stat.eventCount }});
+    {% endfor %}
+    {% endif %}
+    
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusData,
+                backgroundColor: statusColors,
+                borderColor: 'white',
+                borderWidth: 2,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            family: "'Poppins', sans-serif",
+                            size: 13
+                        },
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#333',
+                    bodyColor: '#666',
+                    bodyFont: {
+                        family: "'Poppins', sans-serif"
+                    },
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 15,
+                    caretSize: 8,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    boxWidth: 10,
+                    boxHeight: 10,
+                    boxPadding: 5,
+                    usePointStyle: true
+                }
+            },
+            cutout: '70%',
+            animation: {
+                animateScale: true,
+                animateRotate: true,
+                duration: 2000,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+    
+    // Graphique de la répartition des participants
+    const participantLabels = [];
+    const participantData = [];
+    
+    {% if eventStats.participantStats is defined %}
+    {% for stat in eventStats.participantStats %}
+        participantLabels.push("{{ stat.label }}");
+        participantData.push({{ stat.count }});
+    {% endfor %}
+    {% endif %}
+    
+    // Créer un dégradé pour les barres
+    const gradientParticipant = participantCtx.createLinearGradient(0, 0, 0, 300);
+    gradientParticipant.addColorStop(0, 'rgba(230, 48, 74, 0.9)');
+    gradientParticipant.addColorStop(1, 'rgba(230, 48, 74, 0.5)');
+    
+    new Chart(participantCtx, {
+        type: 'bar',
+        data: {
+            labels: participantLabels,
+            datasets: [{
+                label: 'Nombre d\'événements',
+                data: participantData,
+                backgroundColor: gradientParticipant,
+                borderColor: '#e6304a',
+                borderWidth: 1,
+                borderRadius: 10,
+                barPercentage: 0.7,
+                maxBarThickness: 60,
+                hoverBackgroundColor: '#ff4d6d'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 10,
+                    right: 20,
+                    bottom: 10,
+                    left: 20
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#333',
+                    bodyColor: '#666',
+                    bodyFont: {
+                        family: "'Poppins', sans-serif"
+                    },
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 15,
+                    caretSize: 8,
+                    cornerRadius: 10,
+                    callbacks: {
+                        label: function(context) {
+                            return `Nombre d'événements: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        font: {
+                            family: "'Poppins', sans-serif",
+                            size: 12
+                        },
+                        color: '#666'
+                    },
+                    grid: {
+                        display: true,
+                        color: 'rgba(200, 200, 200, 0.3)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            family: "'Poppins', sans-serif",
+                            size: 12
+                        },
+                        color: '#666',
+                        padding: 10
+                    },
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    }
+                }
+            },
+            animation: {
+                delay: function(context) {
+                    return context.dataIndex * 100;
+                },
+                duration: 1000,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+    {% endif %}
+
+    function initializeActionButtons() {
+    // Gestion de la suppression
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+            e.preventDefault();
+                const form = this.closest('.delete-form');
+            const eventId = form.dataset.eventId;
+            const eventName = form.dataset.eventName;
+
+            Swal.fire({
+                title: 'Supprimer l\'événement',
+                    html: `Êtes-vous sûr de vouloir supprimer l'événement <strong>${eventName}</strong> ?<br>Cette action est irréversible.`,
+                icon: 'warning',
+                showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-trash mr-2"></i> Oui, supprimer',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i> Annuler',
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-secondary'
+                    }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            });
+    });
+        
+        // Gestion des boutons de visualisation
+        document.querySelectorAll('.view-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                window.location.href = url;
+            });
+        });
+    }
+
+    // Initialiser les boutons au chargement
+    initializeActionButtons();
+    
+    // Amélioration du bouton d'ajout d'événement
+    const newEventBtn = document.querySelector('.new-event-btn');
+    if (newEventBtn) {
+        // Ajout d'un effet de pulsation pour attirer l'attention
+        setTimeout(() => {
+            newEventBtn.classList.add('pulse-animation');
+        }, 1000);
+        
+        // Gestion du clic explicite
+        newEventBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Animation lors du clic
+            this.classList.add('clicked');
+            
+            // Redirection explicite
+            setTimeout(() => {
+                window.location.href = this.getAttribute('href');
+            }, 200);
+        });
+    }
+});
+</script>
+{% endblock %} 

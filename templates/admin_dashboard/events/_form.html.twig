@@ -1,0 +1,543 @@
+{{ form_start(form, {'attr': {'class': 'form needs-validation', 'enctype': 'multipart/form-data', 'novalidate': 'novalidate', 'id': 'event-form'}}) }}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.nom, 'Nom de l\'événement') }} <span class="text-danger">*</span>
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.nom) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.status, 'Statut') }} <span class="text-danger">*</span>
+                {{ form_widget(form.status, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.status) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(form.description, 'Description') }} <span class="text-danger">*</span>
+        <div class="input-group">
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'required': 'required', 'id': 'event_description'}}) }}
+            <div class="input-group-append">
+                <button type="button" class="btn btn-success" id="quick-generate-btn">
+                    <i class="fas fa-magic"></i> Générer
+                </button>
+            </div>
+        </div>
+        <div class="invalid-feedback">
+            {{ form_errors(form.description) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.maxParticipants, 'Nombre maximum de participants') }}
+        {{ form_widget(form.maxParticipants, {'attr': {'class': 'form-control', 'min': '0'}}) }}
+        <div class="invalid-feedback">
+            {{ form_errors(form.maxParticipants) }}
+        </div>
+        <small class="form-text text-muted">Laissez vide pour un nombre illimité de participants</small>
+    </div>
+    
+    {% if form.imageFile is defined %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.imageFile, 'Image (affiche de l\'événement)') }}
+                {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.imageFile) }}
+                </div>
+                <small class="form-text text-muted">Formats acceptés: JPG, PNG, GIF. Taille max: 2Mo</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            {% if event.image is defined and event.image %}
+                <div class="image-preview mt-3">
+                    <p>Image actuelle:</p>
+                    <img src="{{ asset(event.image) }}" class="img-fluid rounded" style="max-height: 150px;" alt="{{ event.nom }}">
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {# Champ caché pour stocker le chemin de l'image #}
+    {{ form_widget(form.image) }}
+    {% endif %}
+    
+    {% if form.start_time is defined or form.event_date is defined %}
+    <div class="row">
+        {% if form.start_time is defined %}
+        <div class="col-md-{% if form.break_time is defined %}4{% else %}6{% endif %}">
+            <div class="form-group">
+                {{ form_label(form.start_time, 'Date de début') }} <span class="text-danger">*</span>
+                {{ form_widget(form.start_time, {'attr': {'class': 'form-control datepicker', 'required': 'required'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.start_time) }}
+                </div>
+            </div>
+        </div>
+        {% if form.break_time is defined %}
+        <div class="col-md-4">
+            <div class="form-group">
+                {{ form_label(form.break_time, 'Pause (optionnel)') }}
+                {{ form_widget(form.break_time, {'attr': {'class': 'form-control datepicker'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.break_time) }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if form.end_time is defined %}
+        <div class="col-md-{% if form.break_time is defined %}4{% else %}6{% endif %}">
+            <div class="form-group">
+                {{ form_label(form.end_time, 'Date de fin') }} <span class="text-danger">*</span>
+                {{ form_widget(form.end_time, {'attr': {'class': 'form-control datepicker', 'required': 'required'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.end_time) }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.event_date, 'Date de l\'événement') }} <span class="text-danger">*</span>
+                {{ form_widget(form.event_date, {'attr': {'class': 'form-control datepicker', 'required': 'required'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.event_date) }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if form.address is defined %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.address, 'Adresse') }}
+                {{ form_widget(form.address, {'attr': {'class': 'form-control', 'id': 'event_address'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.address) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if form.latitude is defined and form.longitude is defined %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.latitude, 'Latitude') }}
+                {{ form_widget(form.latitude, {'attr': {'class': 'form-control', 'id': 'event_latitude'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.latitude) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.longitude, 'Longitude') }}
+                {{ form_widget(form.longitude, {'attr': {'class': 'form-control', 'id': 'event_longitude'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.longitude) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="map" style="height: 300px; width: 100%; margin-bottom: 20px;"></div>
+    {% endif %}
+    {% endif %}
+    
+    <div class="row">
+        <div class="col-md-{% if form.users is defined %}6{% else %}12{% endif %}">
+            <div class="form-group">
+                {{ form_label(form.user, 'Organisateur') }} <span class="text-danger">*</span>
+                {{ form_widget(form.user, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.user) }}
+                </div>
+            </div>
+        </div>
+        {% if form.users is defined %}
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.users, 'Participants') }}
+                {{ form_widget(form.users, {'attr': {'class': 'form-control'}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.users) }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if form._token is defined %}
+    {{ form_widget(form._token) }}
+    {% endif %}
+    
+    {% if form.created_at is defined %}
+    {{ form_widget(form.created_at) }}
+    {% endif %}
+    
+    {% if form.updated_at is defined %}
+    {{ form_widget(form.updated_at) }}
+    {% endif %}
+    
+    <div class="mt-4">
+        <p><small class="text-danger">* Champs obligatoires</small></p>
+    </div>
+    
+    <div class="d-flex justify-content-between">
+        <a href="{{ path('app_event_index') }}" class="btn btn-outline-secondary">Retour à la liste</a>
+        <button type="submit" class="btn btn-primary" id="btn-submit-event">{{ button_label|default('Enregistrer') }}</button>
+    </div>
+{{ form_end(form, {'render_rest': false}) }}
+
+<!-- Sweet Alert -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.all.min.js"></script>
+
+<!-- Script du générateur de description -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Éléments principaux
+        const formNameInput = document.getElementById('{{ form.nom.vars.id }}');
+        const descriptionTextarea = document.getElementById('event_description');
+        const quickGenerateBtn = document.getElementById('quick-generate-btn');
+        
+        // Bibliothèque de descriptions par type d'événement
+        const descriptions = [
+            "Rejoignez-nous pour un événement exceptionnel qui promet d'être inoubliable. Une occasion unique de partager des moments privilégiés avec d'autres passionnés et de vivre des expériences enrichissantes. Nous avons préparé un programme varié qui saura satisfaire toutes les attentes. Ne manquez pas cette opportunité de faire partie d'une communauté dynamique et enthousiaste.",
+            "Nous sommes ravis de vous inviter à participer à cet événement spécial. Une journée riche en découvertes et en rencontres vous attend. Le programme a été soigneusement élaboré pour offrir une expérience complète et adaptée à tous les participants. Venez nombreux pour profiter de cette occasion unique de partager votre passion avec d'autres amateurs.",
+            "Cet événement est l'occasion idéale pour tous ceux qui souhaitent approfondir leurs connaissances et élargir leur réseau. Au programme : des activités variées, des intervenants de qualité et de nombreuses opportunités d'échanges. Rejoignez-nous pour vivre une expérience enrichissante dans une ambiance conviviale et professionnelle."
+        ];
+
+        const descriptionsByType = {
+            'sportif': [
+                "Préparez-vous pour un événement sportif exceptionnel qui mettra à l'épreuve vos compétences et votre esprit d'équipe ! Que vous soyez un athlète chevronné ou un amateur passionné, cette compétition vous permettra de vous dépasser dans une ambiance à la fois compétitive et conviviale. Des infrastructures de qualité et une organisation professionnelle garantiront une expérience optimale pour tous les participants.",
+                "Rejoignez-nous pour cette rencontre sportive unique qui rassemblera des passionnés de tous niveaux. Au programme : des défis stimulants, un esprit de camaraderie et l'opportunité de repousser vos limites personnelles. Encadré par des professionnels expérimentés, cet événement mettra l'accent sur le fair-play et le plaisir de pratiquer ensemble.",
+                "Ne manquez pas cet événement sportif d'exception qui s'annonce comme l'un des temps forts de la saison ! Une organisation méticuleuse, des équipes motivées et des installations haut de gamme vous garantissent une journée riche en émotions. Venez vivre ou revivre l'intensité de la compétition dans une atmosphère électrisante mais toujours respectueuse."
+            ],
+            'culturel': [
+                "Plongez dans un univers artistique captivant lors de cet événement culturel unique. Une programmation riche et diversifiée vous attend, mettant en lumière des talents locaux et internationaux. Expositions, performances, ateliers interactifs... Chaque moment vous offrira une nouvelle perspective et stimulera votre créativité. Un rendez-vous immanquable pour tous les amateurs d'art et de culture.",
+                "Cet événement culturel exceptionnel vous propose une expérience immersive au cœur de la création contemporaine. Entre tradition et innovation, découvrez des œuvres qui questionnent notre rapport au monde et ouvrent de nouveaux horizons. Un moment privilégié d'échanges et de découvertes, accessible à tous les publics, des novices aux connaisseurs les plus exigeants.",
+                "Laissez-vous porter par l'émotion et l'émerveillement lors de cette manifestation culturelle unique en son genre. Dans un cadre enchanteur, venez à la rencontre d'artistes passionnés qui partageront avec vous leur vision et leur savoir-faire. Un programme soigneusement élaboré pour surprendre, émouvoir et inspirer tous les participants, quel que soit leur âge."
+            ],
+            'éducatif': [
+                "Cet événement éducatif innovant vous offre une occasion exceptionnelle d'enrichir vos connaissances et de développer de nouvelles compétences. À travers des conférences dynamiques, des ateliers pratiques et des sessions de networking, vous bénéficierez d'un apprentissage interactif et stimulant. Des intervenants experts dans leur domaine partageront leurs précieuses expériences et répondront à toutes vos questions.",
+                "Participez à cette journée dédiée au savoir et à la transmission des connaissances. Notre événement éducatif a été conçu pour inspirer, informer et outiller tous les participants, quel que soit leur niveau. Une approche pédagogique moderne et inclusive, des supports de qualité et un environnement propice aux échanges vous garantissent une expérience d'apprentissage optimale.",
+                "Ne manquez pas cette opportunité unique d'approfondir vos connaissances dans un cadre stimulant et bienveillant. Notre événement éducatif rassemble des experts reconnus et des participants motivés autour de thématiques actuelles et pertinentes. Les méthodes d'enseignement innovantes et participatives vous permettront d'assimiler efficacement de nouveaux concepts et de les appliquer concrètement."
+            ],
+            'social': [
+                "Rejoignez-nous pour cet événement social où convivialité et partage seront à l'honneur. Une occasion parfaite pour élargir votre réseau, échanger des idées et créer des liens durables dans une ambiance détendue et chaleureuse. Des activités variées faciliteront les interactions et vous permettront de rencontrer des personnes partageant vos centres d'intérêt ou apportant de nouvelles perspectives.",
+                "Cet événement social unique vous invite à une expérience de rencontres authentiques et enrichissantes. Dans un cadre soigneusement aménagé pour favoriser les échanges, vous découvrirez de nouvelles personnes, cultures et idées. Notre équipe attentionnée veillera à créer une atmosphère inclusive où chacun se sentira bienvenu et valorisé.",
+                "Venez participer à cette célébration de la communauté et du vivre-ensemble. Notre événement social rassemble des personnes de tous horizons autour de valeurs communes : respect, ouverture d'esprit et solidarité. À travers des animations ludiques et des moments de partage, vous vivrez une expérience humaine riche et mémorable qui renforcera votre sentiment d'appartenance."
+            ],
+            'autre': [
+                "Cet événement unique en son genre vous propose une expérience innovante qui sort des sentiers battus. Conçu avec passion et rigueur, il vous garantit des moments mémorables dans un cadre exceptionnel. Que vous veniez seul, en famille ou entre amis, vous trouverez votre place et repartirez avec des souvenirs précieux et peut-être même de nouvelles perspectives.",
+                "Préparez-vous à vivre une expérience incomparable lors de cet événement spécialement conçu pour surprendre et émerveiller. Chaque détail a été pensé pour créer une ambiance unique et offrir aux participants des moments d'exception. Une organisation professionnelle, une équipe attentive et un programme soigneusement élaboré vous garantissent une journée hors du commun.",
+                "Ne manquez pas cette occasion exceptionnelle de participer à un événement qui sort de l'ordinaire. Entre innovation et tradition, nous vous proposons une expérience immersive qui sollicitera tous vos sens et nourrira votre curiosité. Laissez-vous guider et préparez-vous à être surpris par un programme riche en découvertes et en émotions."
+            ]
+        };
+        
+        // Fonction de génération rapide de description
+        if (quickGenerateBtn) {
+            quickGenerateBtn.addEventListener('click', function() {
+                const eventName = formNameInput ? formNameInput.value : '';
+                const eventStatus = document.getElementById('{{ form.status.vars.id }}');
+                let eventType = 'sportif'; // Type par défaut
+                
+                // Essayer de déterminer le type d'événement d'après le nom
+                const nameLower = eventName.toLowerCase();
+                if (nameLower.includes('sport') || nameLower.includes('tournoi') || nameLower.includes('match') || 
+                    nameLower.includes('compétition') || nameLower.includes('tennis') || nameLower.includes('football')) {
+                    eventType = 'sportif';
+                } else if (nameLower.includes('art') || nameLower.includes('expo') || nameLower.includes('concert') || 
+                           nameLower.includes('spectacle') || nameLower.includes('musique') || nameLower.includes('théâtre')) {
+                    eventType = 'culturel';
+                } else if (nameLower.includes('cours') || nameLower.includes('formation') || nameLower.includes('atelier') || 
+                           nameLower.includes('conférence') || nameLower.includes('séminaire')) {
+                    eventType = 'éducatif';
+                } else if (nameLower.includes('rencontre') || nameLower.includes('networking') || nameLower.includes('social') || 
+                           nameLower.includes('communauté') || nameLower.includes('solidarité')) {
+                    eventType = 'social';
+                }
+                
+                if (!eventName) {
+                    Swal.fire({
+                        title: 'Attention',
+                        text: 'Veuillez entrer un nom d\'événement',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+                
+                // Animation de chargement
+                Swal.fire({
+                    title: 'Génération en cours...',
+                    text: 'Veuillez patienter pendant la génération de la description',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        
+                        // Délai simulé (à remplacer par un appel API réel)
+                        setTimeout(() => {
+                            // Choisir une description adaptée
+                            let descriptionPool = descriptions;
+                            if (descriptionsByType[eventType]) {
+                                descriptionPool = descriptionsByType[eventType];
+                            }
+                            
+                            // Sélectionner aléatoirement une description
+                            const randomDescription = descriptionPool[Math.floor(Math.random() * descriptionPool.length)];
+                            
+                            // Personnaliser avec le nom de l'événement
+                            let finalDescription = randomDescription;
+                            if (randomDescription.includes("cet événement") && eventName) {
+                                finalDescription = randomDescription.replace(/cet événement/gi, eventName);
+                            }
+                            
+                            // Insérer la description dans le champ
+                            if (descriptionTextarea) {
+                                descriptionTextarea.value = finalDescription;
+                                
+                                // Fermer le loading et afficher confirmation
+                                Swal.fire({
+                                    title: 'Succès',
+                                    text: 'Description générée avec succès!',
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            }
+                        }, 1000);
+                    }
+                });
+            });
+        }
+    });
+</script>
+
+{% if form.address is defined and form.latitude is defined and form.longitude is defined %}
+{# Leaflet CSS #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""/>
+
+{# Leaflet JavaScript #}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+{# OpenStreetMap Nominatim pour la recherche d'adresse #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation des valeurs par défaut
+        var latitude = document.getElementById('event_latitude').value || 36.806496;
+        var longitude = document.getElementById('event_longitude').value || 10.181532;
+        
+        // Création de la carte
+        var map = L.map('map').setView([latitude, longitude], 13);
+        
+        // Ajout de la couche OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Création d'un marqueur déplaçable
+        var marker = L.marker([latitude, longitude], {
+            draggable: true
+        }).addTo(map);
+        
+        // Mise à jour des coordonnées quand le marqueur est déplacé
+        marker.on('dragend', function(event) {
+            var position = marker.getLatLng();
+            document.getElementById('event_latitude').value = position.lat.toFixed(6);
+            document.getElementById('event_longitude').value = position.lng.toFixed(6);
+        });
+        
+        // Fonction pour rechercher une adresse avec OSM Nominatim
+        function searchAddress() {
+            var address = document.getElementById('event_address').value;
+            if (!address) return;
+            
+            // Appel à l'API Nominatim
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        // Mettre à jour les coordonnées
+                        var lat = parseFloat(data[0].lat);
+                        var lon = parseFloat(data[0].lon);
+                        
+                        document.getElementById('event_latitude').value = lat.toFixed(6);
+                        document.getElementById('event_longitude').value = lon.toFixed(6);
+                        
+                        // Déplacer la carte et le marqueur
+                        map.setView([lat, lon], 13);
+                        marker.setLatLng([lat, lon]);
+                    } else {
+                        Swal.fire({
+                            title: 'Erreur',
+                            text: 'Adresse non trouvée',
+                            icon: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la recherche:', error);
+                    Swal.fire({
+                        title: 'Erreur',
+                        text: 'Erreur lors de la recherche de l\'adresse',
+                        icon: 'error'
+                    });
+                });
+        }
+        
+        // Ajouter un écouteur pour la recherche d'adresse
+        var addressInput = document.getElementById('event_address');
+        // Rechercher quand l'utilisateur appuie sur Entrée
+        addressInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Empêcher la soumission du formulaire
+                searchAddress();
+            }
+        });
+        
+        // Ajouter un bouton de recherche à côté du champ d'adresse
+        var searchButton = document.createElement('button');
+        searchButton.textContent = 'Rechercher';
+        searchButton.className = 'btn btn-secondary mt-2';
+        searchButton.type = 'button';
+        searchButton.onclick = function(e) {
+            e.preventDefault();
+            searchAddress();
+        };
+        
+        addressInput.parentNode.appendChild(searchButton);
+        
+        // Mise à jour de la carte quand les coordonnées sont modifiées manuellement
+        document.getElementById('event_latitude').addEventListener('change', updateMapFromCoords);
+        document.getElementById('event_longitude').addEventListener('change', updateMapFromCoords);
+        
+        function updateMapFromCoords() {
+            var lat = parseFloat(document.getElementById('event_latitude').value);
+            var lng = parseFloat(document.getElementById('event_longitude').value);
+            
+            if (!isNaN(lat) && !isNaN(lng)) {
+                map.setView([lat, lng], 13);
+                marker.setLatLng([lat, lng]);
+            }
+        }
+    });
+</script>
+{% endif %}
+
+<script>
+// Validation du formulaire côté client avec Sweet Alert
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('event-form');
+    const submitButton = document.getElementById('btn-submit-event');
+    
+    if (form && submitButton) {
+        submitButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            
+            // Vérifier si les champs obligatoires sont remplis
+            let errorMessages = [];
+            
+            // Vérifier le nom
+            const nomInput = document.getElementById('event_nom');
+            if (nomInput && (!nomInput.value || nomInput.value.trim() === '')) {
+                errorMessages.push('Le nom de l\'événement est obligatoire');
+                nomInput.classList.add('is-invalid');
+            } else if (nomInput && nomInput.value.length < 3) {
+                errorMessages.push('Le nom doit contenir au moins 3 caractères');
+                nomInput.classList.add('is-invalid');
+            } else if (nomInput) {
+                nomInput.classList.remove('is-invalid');
+            }
+            
+            // Vérifier la description
+            const descriptionInput = document.getElementById('event_description');
+            if (descriptionInput && (!descriptionInput.value || descriptionInput.value.trim() === '')) {
+                errorMessages.push('La description est obligatoire');
+                descriptionInput.classList.add('is-invalid');
+            } else if (descriptionInput && descriptionInput.value.length < 10) {
+                errorMessages.push('La description doit contenir au moins 10 caractères');
+                descriptionInput.classList.add('is-invalid');
+            } else if (descriptionInput) {
+                descriptionInput.classList.remove('is-invalid');
+            }
+            
+            // Vérifier le statut
+            const statusInput = document.getElementById('event_status');
+            if (statusInput && (!statusInput.value || statusInput.value === '')) {
+                errorMessages.push('Le statut est obligatoire');
+                statusInput.classList.add('is-invalid');
+            } else if (statusInput) {
+                statusInput.classList.remove('is-invalid');
+            }
+            
+            // Vérifier les dates
+            const startTimeInput = document.getElementById('event_start_time');
+            const endTimeInput = document.getElementById('event_end_time');
+            const eventDateInput = document.getElementById('event_event_date');
+            
+            if (startTimeInput && !startTimeInput.value) {
+                errorMessages.push('La date de début est obligatoire');
+                startTimeInput.classList.add('is-invalid');
+            } else if (startTimeInput) {
+                startTimeInput.classList.remove('is-invalid');
+            }
+            
+            if (endTimeInput && !endTimeInput.value) {
+                errorMessages.push('La date de fin est obligatoire');
+                endTimeInput.classList.add('is-invalid');
+            } else if (endTimeInput) {
+                endTimeInput.classList.remove('is-invalid');
+            }
+            
+            if (eventDateInput && !eventDateInput.value) {
+                errorMessages.push('La date de l\'événement est obligatoire');
+                eventDateInput.classList.add('is-invalid');
+            } else if (eventDateInput) {
+                eventDateInput.classList.remove('is-invalid');
+            }
+            
+            // Vérifier l'organisateur
+            const userInput = document.getElementById('event_user');
+            if (userInput && (!userInput.value || userInput.value === '')) {
+                errorMessages.push('L\'organisateur est obligatoire');
+                userInput.classList.add('is-invalid');
+            } else if (userInput) {
+                userInput.classList.remove('is-invalid');
+            }
+            
+            // Si des erreurs sont présentes, afficher un message Sweet Alert
+            if (errorMessages.length > 0) {
+                Swal.fire({
+                    title: 'Erreur de validation',
+                    html: errorMessages.map(msg => `<p>${msg}</p>`).join(''),
+                    icon: 'error',
+                    confirmButtonText: 'Corriger'
+                });
+            } else {
+                // Si tout est valide, soumettre le formulaire
+                form.submit();
+            }
+        });
+    }
+});
+</script> 

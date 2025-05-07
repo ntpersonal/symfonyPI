@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche d'événements{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Recherche d'événements</h1>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form method="GET" action="{{ path('admin_event_search') }}" class="form-inline">
+                    <div class="input-group w-100">
+                        <input type="text" name="q" class="form-control" placeholder="Rechercher un événement..." 
+                               value="{{ app.request.query.get('q') }}">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if events is defined %}
+            {{ include('admin_dashboard/events/_event_list.html.twig') }}
+        {% endif %}
+    </div>
+{% endblock %} 

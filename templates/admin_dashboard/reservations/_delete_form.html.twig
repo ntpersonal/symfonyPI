@@ -1,0 +1,35 @@
+<form method="post" action="{{ path('app_reservation_delete', {'id': reservation.id}) }}" class="delete-form" data-id="{{ reservation.id }}" data-event="{{ reservation.event.nom }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.id) }}">
+    <button type="button" class="btn btn-link text-danger text-gradient px-2 mb-0 delete-btn" data-id="{{ reservation.id }}">
+        <i class="fa fa-trash me-2"></i>Supprimer
+    </button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gérer les clics sur les boutons de suppression
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const form = this.closest('.delete-form');
+                const id = form.getAttribute('data-id');
+                const event = form.getAttribute('data-event');
+                
+                Swal.fire({
+                    title: 'Êtes-vous sûr?',
+                    html: `Vous êtes sur le point de supprimer la réservation pour l'événement <strong>${event}</strong>.<br>Cette action est irréversible!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Oui, supprimer!',
+                    cancelButtonText: 'Annuler',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script> 

@@ -148,6 +148,15 @@
 			background: #e9ecef;
 			margin: 5px 0;
 		}
+
+		/* Navigation Menu Spacing */
+		.nav__menu > li {
+			margin: 0 15px;
+		}
+		
+		.nav__menu > li > a {
+			padding: 10px 0;
+		}
 	</style>
 {% endblock %}
 {% block navbar %}
@@ -192,6 +201,11 @@
 										</a>
 										<ul class="dropdown-ul"></ul>
 									</li>
+
+									<li>
+										<a class="menu-item" href="{{ path('app_front_tournois') }}">Tournaments</a>
+									</li>
+
 									<li class="has-dropdown">
 										<a class="menu-item" href="#">Pages
 											<i class="fal fa-angle-down"></i>
@@ -224,7 +238,7 @@
 														<a class="dropdown-link" href="{{ path('app_history') }}">History</a>
 													</li>
 													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_event') }}">Event</a>
+														<a class="dropdown-link" href="{{ path('app_event_front') }}">Event</a>
 													</li>
 													<li class="dropdown-li">
 														<a class="dropdown-link" href="{{ path('app_event_details',{'id': 1}) }}">Event Details</a>
@@ -285,19 +299,7 @@
 											</li>
 										</ul>
 									</li>
-									<li class="has-dropdown">
-										<a class="menu-item" href="#">News
-											<i class="fal fa-angle-down"></i>
-										</a>
-										<ul class="dropdown-ul">
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_blog_front') }}">News</a>
-											</li>
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_blog_front_details', {'id': 1}) }}">News Details</a>
-											</li>
-										</ul>
-									</li>
+
 									<li>
 										<a class="menu-item" href="{{ path('app_front_office_contact') }}">Contact</a>
 									</li>

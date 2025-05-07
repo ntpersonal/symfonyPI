@@ -1,0 +1,107 @@
+{% if events is empty %}
+    <tr>
+        <td colspan="6" class="text-center p-4">
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle mr-2"></i> Aucun événement trouvé.
+            </div>
+        </td>
+    </tr>
+{% else %}
+    {% for event in events %}
+        <tr>
+            <td>
+                <div class="event-info">
+                    <div class="event-image">
+                        {% if event.image is defined and event.image %}
+                            <img src="{{ asset(event.image) }}" alt="{{ event.nom }}">
+                        {% else %}
+                            <img src="{{ asset('assets/images/bg_1.jpg') }}" alt="Default Event Image">
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="{{ path('app_event_show', {'id': event.id}) }}" class="event-name">{{ event.nom }}</a>
+                        <div class="event-meta">
+                            <i class="fas fa-user"></i> 
+                            {% if event.user is defined and event.user %}
+                                {{ event.user.email|default('Organisateur inconnu') }}
+                            {% else %}
+                                Non spécifié
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div>
+                    {% if attribute(event, 'startTime') is defined and event.startTime %}
+                        <div><i class="far fa-calendar-alt text-primary mr-1"></i> {{ event.startTime|date('d/m/Y') }}</div>
+                        <div class="event-meta"><i class="far fa-clock text-success mr-1"></i> {{ event.startTime|date('H:i') }}</div>
+                    {% elseif attribute(event, 'event_date') is defined and event.event_date %}
+                        <div><i class="far fa-calendar-alt text-primary mr-1"></i> {{ event.event_date|date('d/m/Y') }}</div>
+                    {% else %}
+                        Non spécifiée
+                    {% endif %}
+                </div>
+            </td>
+            <td>
+                <span class="status-badge {{ event.status == 'active' ? 'status-active' : 'status-inactive' }}">
+                    {% if event.status == 'active' %}
+                        <i class="fas fa-check-circle mr-1"></i> Actif
+                    {% else %}
+                        <i class="fas fa-clock mr-1"></i> Inactif
+                    {% endif %}
+                </span>
+            </td>
+            <td>
+                <div>
+                    {% if attribute(event, 'users') is defined %}
+                        <span class="font-weight-bold">{{ event.users|length }}</span>
+                        {% if event.maxParticipants %}
+                            <span class="event-meta">sur {{ event.maxParticipants }}</span>
+                            {% if event.isEventFull %}
+                                <span class="status-badge status-inactive ml-1"><i class="fas fa-users-slash mr-1"></i> Complet</span>
+                            {% else %}
+                                <span class="status-badge status-active ml-1"><i class="fas fa-users mr-1"></i> Disponible</span>
+                            {% endif %}
+                        {% endif %}
+                    {% elseif attribute(event, 'reservations') is defined %}
+                        <span class="font-weight-bold">{{ event.reservations|length }}</span> réservation(s)
+                    {% else %}
+                        0 participants
+                    {% endif %}
+                </div>
+            </td>
+            <td>
+                {% if attribute(event, 'address') is defined and event.address %}
+                    <div title="{{ event.address }}">
+                        <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                        {{ event.address|length > 30 ? event.address|slice(0, 30) ~ '...' : event.address }}
+                    </div>
+                {% elseif attribute(event, 'latitude') is defined and attribute(event, 'longitude') is defined and event.latitude and event.longitude %}
+                    <div>
+                        <i class="fas fa-map-pin text-danger mr-1"></i>
+                        Coordonnées GPS
+                    </div>
+                {% else %}
+                    <span class="text-muted"><i class="fas fa-times-circle mr-1"></i> Non spécifié</span>
+                {% endif %}
+            </td>
+            <td class="text-center">
+                <div class="d-flex justify-content-center">
+                    <a href="{{ path('app_event_show', {'id': event.id}) }}" class="action-btn btn-view mr-2" title="Voir les détails">
+                        <i class="fas fa-eye"></i> Voir
+                    </a>
+                    <a href="{{ path('app_event_edit', {'id': event.id}) }}" class="action-btn btn-edit mr-2" title="Modifier l'événement">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <form method="post" action="{{ path('app_event_delete', {'id': event.id}) }}" class="delete-form d-inline" data-event-id="{{ event.id }}" data-event-name="{{ event.nom }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                        <button type="button" class="action-btn btn-delete delete-btn" title="Supprimer l'événement">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+{% endif %} 

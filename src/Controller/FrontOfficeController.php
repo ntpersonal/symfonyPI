@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Repository\EventRepository;
 use App\Repository\MatchesRepository;
+use App\Repository\ReservationRepository;
 use App\Repository\TournoiRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
+use App\Entity\Reservation;
 
 
 use App\Entity\Team;
@@ -35,7 +38,7 @@ final class FrontOfficeController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    #[Route('/front/dashboard', name: 'app_front_office')]
+    #[Route('/front/dashboard/dash', name: 'app_front_office')]
     public function index(Security $security, EntityManagerInterface $em): Response
     {
         /** @var User|null $user */
@@ -298,13 +301,14 @@ final class FrontOfficeController extends AbstractController
         return $this->render('front_office_dashboard/event.html.twig');
     }
     
-    #[Route('/front/dashboard/event/{id}', name: 'app_event_details')]
+   /* #[Route('/front/dashboard/event/{id}', name: 'app_event_details')]
     public function event_details(int $id): Response
     {
         return $this->render('front_office_dashboard/event-details.html.twig', [
             'event' => null // TODO: Fetch team data from database
         ]);
     }
+   */
     
     #[Route('/front/dashboard/error', name: 'app_error')]
     public function error(): Response
@@ -1064,4 +1068,164 @@ public function tournois(
          'playerRequests'  => $data['playerRequests'],
      ]);
  }
+
+    #[Route('/front/dashboard/events', name: 'app_event_front')]
+    public function event_front(EventRepository $eventRepository, Security $security, EntityManagerInterface $em): Response
+    {
+        /** @var User|null $user */
+        $user = $security->getUser();
+
+        $data = $this->getTeamRequestsData($user, $em);
+        // Pour le débogage, récupérer tous les événements
+        $allEvents = $eventRepository->findAll();
+
+        // Récupérer les événements actifs en utilisant une requête personnalisée
+        $activeEvents = $eventRepository->createQueryBuilder('e')
+            ->where('LOWER(e.status) = :active OR LOWER(e.status) = :actif')
+            ->setParameter('active', 'active')
+            ->setParameter('actif', 'actif')
+            ->orderBy('e.created_at', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        // Debug - à commenter ou supprimer en production
+        dump([
+            'Tous les événements' => array_map(function($e) {
+                return [
+                    'id' => $e->getId(),
+                    'nom' => $e->getNom(),
+                    'status' => $e->getStatus()
+                ];
+            }, $allEvents),
+            'Événements actifs trouvés' => array_map(function($e) {
+                return [
+                    'id' => $e->getId(),
+                    'nom' => $e->getNom(),
+                    'status' => $e->getStatus()
+                ];
+            }, $activeEvents),
+        ]);
+
+        return $this->render('front_office_dashboard/events.html.twig', [
+            'events' => $activeEvents,
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
+        ]);
+    }
+
+
+    #[Route('/front/dashboard/event/{id}', name: 'app_event_details')]
+    public function event_details(int $id, EventRepository $eventRepository, ReservationRepository $reservationRepository, Security $security, EntityManagerInterface $em): Response
+    {
+        /** @var User|null $user */
+        $user = $security->getUser();
+
+        $data = $this->getTeamRequestsData($user, $em);
+        $event = $eventRepository->find($id);
+
+        if (!$event) {
+            throw $this->createNotFoundException('L\'événement demandé n\'existe pas');
+        }
+
+        // Check if user is registered for this event
+        $isRegistered = false;
+        $user = $this->getUser();
+        if ($user) {
+            $reservation = $reservationRepository->findOneBy([
+                'event' => $event,
+                'user' => $user
+            ]);
+            $isRegistered = ($reservation !== null);
+        }
+
+
+
+        return $this->render('front_office_dashboard/event-details-new.html.twig', [
+            'event' => $event,
+            'register_path' => $this->generateUrl('app_event_register', ['id' => $id]),
+            'cancel_registration_path' => $this->generateUrl('app_event_cancel', ['id' => $id]),
+            'is_registered' => $isRegistered,
+
+            'teamRequests'    => $data['teamRequests'],
+            'playerRequests'  => $data['playerRequests'],
+        ]);
+    }
+
+    #[Route('/front/dashboard/event/{id}/register', name: 'app_event_register', methods: ['POST'])]
+    public function event_register(int $id, Request $request, EventRepository $eventRepository, EntityManagerInterface $entityManager): Response
+    {
+        // Check if user is logged in
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_home');
+        }
+
+        // CSRF protection
+        if (!$this->isCsrfTokenValid('register'.$id, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_event_details', ['id' => $id]);
+        }
+
+        $event = $eventRepository->find($id);
+        if (!$event) {
+            throw $this->createNotFoundException('L\'événement demandé n\'existe pas');
+        }
+
+        // Create a new reservation
+        $reservation = new Reservation();
+        $reservation->setEvent($event);
+        $reservation->setUser($user);
+        $reservation->setDate(new \DateTime());
+        $reservation->setStatus('pending');
+
+        // Add comment if provided
+        if ($request->request->has('comment')) {
+            $comment = $request->request->get('comment');
+            if (!empty($comment)) {
+                $reservation->setComment($comment);
+            }
+        }
+
+        $entityManager->persist($reservation);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Votre réservation a été enregistrée avec succès.');
+        return $this->redirectToRoute('app_event_details', ['id' => $id]);
+    }
+
+    #[Route('/front/dashboard/event/{id}/cancel', name: 'app_event_cancel', methods: ['POST'])]
+    public function event_cancel(int $id, Request $request, ReservationRepository $reservationRepository, EntityManagerInterface $entityManager): Response
+    {
+        // Check if user is logged in
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_home');
+        }
+
+        // CSRF protection
+        if (!$this->isCsrfTokenValid('cancel'.$id, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_event_details', ['id' => $id]);
+        }
+
+        // Find the user's reservation for this event
+        $reservation = $reservationRepository->findOneBy([
+            'event' => $id,
+            'user' => $user->getId()
+        ]);
+
+        if (!$reservation) {
+            $this->addFlash('error', 'Vous n\'êtes pas inscrit à cet événement.');
+            return $this->redirectToRoute('app_event_details', ['id' => $id]);
+        }
+
+        // Remove the reservation
+        $entityManager->remove($reservation);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Votre inscription à l\'événement a été annulée avec succès.');
+        return $this->redirectToRoute('app_event_details', ['id' => $id]);
+    }
+
+
 }

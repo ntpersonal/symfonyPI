@@ -57,21 +57,105 @@ class Event
         return $this;
     }
 
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $event_date = null;
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $image = null;
 
-    public function getEvent_date(): ?\DateTimeInterface
+    public function getImage(): ?string
     {
-        return $this->event_date;
+        return $this->image;
     }
 
-    public function setEvent_date(\DateTimeInterface $event_date): self
+    public function setImage(?string $image): self
     {
-        $this->event_date = $event_date;
+        $this->image = $image;
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'events')]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $address = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $latitude = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $longitude = null;
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): self
+    {
+        $this->address = $address;
+        return $this;
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): self
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): self
+    {
+        $this->longitude = $longitude;
+        return $this;
+    }
+
+    #[ORM\Column(type: 'datetime', nullable: false)]
+    private ?\DateTimeInterface $start_time = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $break_time = null;
+
+    #[ORM\Column(type: 'datetime', nullable: false)]
+    private ?\DateTimeInterface $end_time = null;
+
+    public function getStartTime(): ?\DateTimeInterface
+    {
+        return $this->start_time;
+    }
+
+    public function setStartTime(\DateTimeInterface $start_time): self
+    {
+        $this->start_time = $start_time;
+        return $this;
+    }
+
+    public function getBreakTime(): ?\DateTimeInterface
+    {
+        return $this->break_time;
+    }
+
+    public function setBreakTime(?\DateTimeInterface $break_time): self
+    {
+        $this->break_time = $break_time;
+        return $this;
+    }
+
+    public function getEndTime(): ?\DateTimeInterface
+    {
+        return $this->end_time;
+    }
+
+    public function setEndTime(\DateTimeInterface $end_time): self
+    {
+        $this->end_time = $end_time;
+        return $this;
+    }
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'organizedEvents')]
     #[ORM\JoinColumn(name: 'id_organizer', referencedColumnName: 'id')]
     private ?User $user = null;
 
@@ -128,7 +212,7 @@ class Event
         return $this;
     }
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'events')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'participatedEvents')]
     #[ORM\JoinTable(
         name: 'reservation',
         joinColumns: [
@@ -140,9 +224,19 @@ class Event
     )]
     private Collection $users;
 
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Reservation::class, orphanRemoval: true)]
+    private Collection $reservations;
+
+    #[ORM\Column(type: 'integer', nullable: true, options: ['default' => 0])]
+    private ?int $current_participants = 0;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $max_participants = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     /**
@@ -170,14 +264,32 @@ class Event
         return $this;
     }
 
-    public function getEventDate(): ?\DateTimeInterface
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
     {
-        return $this->event_date;
+        return $this->reservations;
     }
 
-    public function setEventDate(\DateTimeInterface $event_date): static
+    public function addReservation(Reservation $reservation): self
     {
-        $this->event_date = $event_date;
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): self
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getEvent() === $this) {
+                $reservation->setEvent(null);
+            }
+        }
 
         return $this;
     }
@@ -206,4 +318,62 @@ class Event
         return $this;
     }
 
+    public function getCurrentParticipants(): ?int
+    {
+        return $this->current_participants;
+    }
+
+    public function setCurrentParticipants(?int $current_participants): self
+    {
+        $this->current_participants = $current_participants;
+        return $this;
+    }
+
+    public function incrementCurrentParticipants(): self
+    {
+        $this->current_participants++;
+        return $this;
+    }
+
+    public function decrementCurrentParticipants(): self
+    {
+        if ($this->current_participants > 0) {
+            $this->current_participants--;
+        }
+        return $this;
+    }
+
+    public function isEventFull(): bool
+    {
+        return $this->max_participants !== null && $this->current_participants >= $this->max_participants;
+    }
+
+    public function getRemainingSpots(): ?int
+    {
+        if ($this->max_participants === null) {
+            return null; // Unlimited spots
+        }
+        return $this->max_participants - $this->current_participants;
+    }
+
+    public function getMaxParticipants(): ?int
+    {
+        return $this->max_participants;
+    }
+
+    public function setMaxParticipants(?int $max_participants): self
+    {
+        $this->max_participants = $max_participants;
+        return $this;
+    }
+
+    /**
+     * Méthode magique qui permet de convertir l'objet en chaîne de caractères
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->nom ?? 'Événement #' . $this->id;
+    }
 }

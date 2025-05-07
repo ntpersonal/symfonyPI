@@ -7,6 +7,7 @@ parameters:
     upload_directory: '%kernel.project_dir%/public/uploads'  # Adjust the path as per your project structure
     profile_pictures_directory: '%kernel.project_dir%/public/uploads/profile'
     product_images_directory: '%kernel.project_dir%/public/uploads/products'
+    event_images_directory: '%kernel.project_dir%/public/uploads/event_images'
     api_football_key: '%env(API_FOOTBALL_KEY)%'  # Use environment variable for sensitive data
     gemini_api_key: '%env(string:GEMINI_API_KEY)%'
     google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
