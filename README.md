@@ -1,32 +1,44 @@
-# Sportius - Plateforme de gestion sportive
+⚽ Sportify — Football Tournament Organizer (Symfony Project)
+Sportify is a Symfony 6.4 web application for managing football tournaments. Users can sign up as players or organizers, while admins oversee all system management. It covers user management, tournaments, teams, events, reclamations, and a built-in shop.
 
-## Filtrage de contenu avec Kaggle
+🚀 Features
+✅ User Authentication & Roles
 
-Le système intègre un filtre de contenu intelligent basé sur des données de Kaggle pour détecter les mots inappropriés dans les réclamations des utilisateurs.
+Sign up/login as Player, Organizer, or Admin
 
-### Fonctionnalités du filtrage de contenu
+Role-based dashboards and access control
 
-- **Détection automatique** : Les réclamations soumises sont automatiquement analysées pour détecter les mots inappropriés
-- **Liste personnalisable** : La liste des mots inappropriés peut être facilement mise à jour dans le fichier CSV
-- **Deux modes de fonctionnement** :
-  - Mode blocage : Empêche la soumission et affiche les mots problématiques à l'utilisateur
-  - Mode filtrage : Remplace automatiquement les mots inappropriés par des astérisques (nécessite décommenter le code)
-- **Intégration avec Kaggle** : Possibilité d'utiliser des datasets Kaggle pour améliorer la liste de mots filtrés
+✅ Tournament Management
 
-### Configuration du filtre
+Organizers create, update, and manage tournaments
 
-1. La liste des mots à filtrer se trouve dans `data/bad_words.csv`
-2. Vous pouvez ajouter de nouveaux mots en ajoutant une ligne par mot dans ce fichier
-3. Pour activer le mode de filtrage automatique au lieu du blocage, décommentez les sections marquées dans le contrôleur ReclamationController.php
+Players join tournaments and build/join teams
 
-### Utilisation de l'API Kaggle
+✅ Team Management
 
-Pour utiliser directement les datasets Kaggle, vous devez :
+Team creation, player assignments, roster management
 
-1. Créer un compte sur Kaggle et générer une clé API
-2. Décommenter et configurer la section d'API Kaggle dans `ContentFilterService.php`
-3. Spécifier le dataset Kaggle à utiliser
+✅ Events System
 
-## Installation
+Manage tournament events (matches, schedules, venues)
 
-[Instructions d'installation existantes...] 
+✅ Reclamations (Complaints)
+
+Players and organizers submit reclamations; admins handle resolutions
+
+✅ Integrated Shop
+
+Browse and purchase football-related products
+
+✅ Admin Dashboard
+
+Manage users, tournaments, teams, events, reclamations, and shop items
+
+🏗️ Tech Stack
+Backend: Symfony 6.4, Doctrine ORM, PHP 8.x
+
+Frontend: Twig templates, Bootstrap or custom CSS
+
+Database: MySQL / MariaDB
+
+Payments: (future) Stripe or PayPal integration
