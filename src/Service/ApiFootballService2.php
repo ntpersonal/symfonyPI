@@ -10,7 +10,7 @@ class ApiFootballService2
     private $httpClient;
     private $apiHost = 'https://apiv3.apifootball.com';
     private $apiKey = '16739ae9f2e5652e296f27c46d1375c199bff5ac615755a05fa2f51f540528e4';
-    private $certPath = 'C:/xampp4/php/extras/ssl/cacert.pem';
+    private $certPath = 'C:/xampp/php/extras/ssl/cacert.pem';
     public function __construct()
     {
         $this->ensureCertificateExists();
