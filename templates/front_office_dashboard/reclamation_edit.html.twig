@@ -1,0 +1,262 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}Modifier votre réclamation{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .edit-form-section {
+        padding: 60px 0;
+        background-color: #f8f9fa;
+    }
+    
+    .page-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #222;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .page-title:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -10px;
+        width: 50px;
+        height: 3px;
+        background-color: #e91e63;
+    }
+    
+    .form-card {
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
+    
+    .form-card-header {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .form-card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+    
+    .form-card-subtitle {
+        color: #666;
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .form-card-body {
+        padding: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+        border-color: #e91e63;
+    }
+    
+    .form-text {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #888;
+    }
+    
+    .form-footer {
+        padding: 20px 30px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .btn {
+        font-weight: 600;
+        padding: 10px 25px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background-color: #e91e63;
+        border-color: #e91e63;
+    }
+    
+    .btn-primary:hover {
+        background-color: #d81b60;
+        border-color: #d81b60;
+        box-shadow: 0 4px 8px rgba(233, 30, 99, 0.3);
+    }
+    
+    .btn-secondary {
+        background-color: #f5f5f5;
+        border-color: #ddd;
+        color: #666;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #eee;
+        border-color: #ccc;
+        color: #333;
+    }
+    
+    .bad-words-alert {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .bad-words-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .bad-words-list {
+        margin: 0;
+        padding-left: 20px;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block banner %}
+<!--================= Banner Section Start Here =================-->
+<div class="banner banner1">
+    <div class="inner-page-banner banner-bg">
+        <div class="container">
+            <div class="banner-content">
+                <div class="page-path">
+                    <ul>
+                        <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                        <li><a href="{{ path('app_reclamation_my') }}">Mes Réclamations</a></li>
+                        <li><a class="current-page" href="#">Modifier une réclamation</a></li>
+                    </ul>
+                </div>
+                <h1 class="banner-heading">Modifier votre réclamation</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<!--================= Banner Section End Here =================-->
+{% endblock %}
+
+{% block content %}
+<div class="edit-form-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <h2 class="page-title">Modifier votre réclamation</h2>
+                
+                {% if bad_words is defined and bad_words|length > 0 %}
+                    <div class="bad-words-alert">
+                        <div class="bad-words-title">
+                            <i class="fas fa-exclamation-triangle"></i> Attention : Certains termes utilisés sont inappropriés
+                        </div>
+                        <p>Votre message contient des termes qui pourraient être considérés comme inappropriés :</p>
+                        <ul class="bad-words-list">
+                            {% for word in bad_words %}
+                                <li>{{ word }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p class="mb-0">Veuillez reformuler votre message en utilisant un langage plus approprié.</p>
+                    </div>
+                {% endif %}
+                
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="form-card-title">Formulaire de modification</h3>
+                        <p class="form-card-subtitle">Réclamation #{{ reclamation.id }} créée le {{ reclamation.createdAt|date('d/m/Y à H:i') }}</p>
+                    </div>
+                    <div class="form-card-body">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                            <div class="form-group">
+                                <label for="{{ form.message.vars.id }}" class="form-label">Votre message</label>
+                                {{ form_widget(form.message, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'rows': 8,
+                                        'placeholder': 'Décrivez en détail votre réclamation ici...'
+                                    }
+                                }) }}
+                                <div class="form-text">
+                                    Veuillez être aussi précis que possible pour nous permettre de mieux traiter votre réclamation.
+                                </div>
+                                {{ form_errors(form.message) }}
+                            </div>
+                            
+                            <div class="form-footer">
+                                <a href="{{ path('app_reclamation_my') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation pour le formulaire
+        const formCard = document.querySelector('.form-card');
+        formCard.style.opacity = '0';
+        formCard.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            formCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            formCard.style.opacity = '1';
+            formCard.style.transform = 'translateY(0)';
+        }, 100);
+        
+        // Focus sur le champ message
+        const messageField = document.getElementById('{{ form.message.vars.id }}');
+        if (messageField) {
+            setTimeout(() => {
+                // Placer le curseur à la fin du texte
+                messageField.focus();
+                messageField.setSelectionRange(messageField.value.length, messageField.value.length);
+            }, 700);
+        }
+    });
+</script>
+{% endblock %} 

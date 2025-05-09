@@ -1,0 +1,355 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}Shopping Cart - Sportius{% endblock %}
+
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+    <div class="banner banner1">
+        <div class="swiper bannerSlide">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <div class="banner-single banner-single-1 banner-bg">
+                        <div class="container">
+                            <div class="banner-content">
+                                <span class="pretitle">YOUR ITEMS</span>
+                                <h1 class="banner-heading">SHOPPING CART</h1>
+                                <div class="banner-btn-area">
+                                    <a href="{{ path('app_shop') }}" class="team-btn banner-btn">CONTINUE SHOPPING <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    {% if items|length > 0 %}
+                                        <a href="{{ path('app_checkout') }}" class="nxt-match-btn banner-btn">CHECKOUT <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    {% else %}
+                                        <span class="nxt-match-btn banner-btn disabled">CHECKOUT</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
+
+{% block content %}
+
+
+    <!--================= Cart Section Start Here =================-->
+    <div class="rts-cart-section section-gap">
+        <div class="container">
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success mb-4">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('warning') %}
+                <div class="alert alert-warning mb-4">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+            
+            {% if items|length > 0 %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="title-area text-center mb-5">
+                            <span class="pretitle">YOUR ITEMS</span>
+                            <h2 class="section-title">SHOPPING CART</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="cart-table-wrapper">
+                            <table class="cart-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                        <tr>
+                                            <td class="product-info">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="product-thumb me-3">
+                                                        {% if item.product.image %}
+                                                            <img src="{{ asset('uploads/products/' ~ item.product.image) }}" alt="{{ item.product.nameproduct }}" width="80">
+                                                        {% else %}
+                                                            <div class="no-image-placeholder">
+                                                                <i class="fal fa-image"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="product-name">
+                                                        <a href="{{ path('app_product_details', {'id': item.product.id}) }}">{{ item.product.nameproduct }}</a>
+                                                        <div class="product-category">{{ item.product.category|capitalize }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="product-price">${{ item.product.priceproduct }}</td>
+                                            <td class="product-quantity">
+                                                <form action="{{ path('cart_update_quantity', {'id': item.product.id}) }}" method="post" class="d-flex align-items-center quantity-form">
+                                                    <div class="quantity-input">
+                                                        <button type="button" class="quantity-minus"><i class="fal fa-minus"></i></button>
+                                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" style="width: 50px; text-align: center;">
+                                                        <button type="button" class="quantity-plus"><i class="fal fa-plus"></i></button>
+                                                    </div>
+                                                    <button type="submit" class="update-btn ms-2"><i class="fal fa-sync"></i></button>
+                                                </form>
+                                            </td>
+                                            <td class="product-total">${{ (item.product.priceproduct * item.quantity)|number_format(2, '.', ',') }}</td>
+                                            <td class="product-actions">
+                                                <a href="{{ path('cart_remove', {'id': item.product.id}) }}" class="remove-btn" onclick="return confirm('Are you sure you want to remove this item?')">
+                                                    <i class="fal fa-times"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="cart-actions mt-4 d-flex justify-content-between">
+                            <a href="{{ path('app_shop') }}" class="rts-btn btn-secondary">
+                                <i class="fal fa-arrow-left me-2"></i> Continue Shopping
+                            </a>
+                            <a href="{{ path('cart_clear') }}" class="rts-btn btn-danger" onclick="return confirm('Are you sure you want to clear your cart?')">
+                                <i class="fal fa-trash-alt me-2"></i> Clear Cart
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="cart-summary">
+                            <h3 class="summary-title">Cart Summary</h3>
+                            <div class="summary-item">
+                                <span class="label">Subtotal:</span>
+                                <span class="value">${{ total|number_format(2, '.', ',') }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Shipping:</span>
+                                <span class="value">$0.00</span>
+                            </div>
+                            <div class="summary-item total">
+                                <span class="label">Total:</span>
+                                <span class="value">${{ total|number_format(2, '.', ',') }}</span>
+                            </div>
+                            <div class="checkout-btn-area mt-4">
+                                <a href="{{ path('app_checkout') }}" class="rts-btn btn-primary w-100">
+                                    Proceed to Checkout <i class="fal fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-cart text-center py-5">
+                    <i class="fal fa-shopping-cart fa-5x mb-4"></i>
+                    <h3>Your cart is empty</h3>
+                    <p>Looks like you haven't added any products to your cart yet.</p>
+                    <a href="{{ path('app_shop') }}" class="rts-btn btn-primary mt-4">
+                        <i class="fal fa-arrow-left me-2"></i> Start Shopping
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <!--================= Cart Section End Here =================-->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add custom styles for better organization
+            const style = document.createElement('style');
+            style.textContent = `
+                .cart-table {
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    margin-bottom: 30px;
+                }
+                
+                .cart-table th {
+                    background-color: #f5f5f5;
+                    color: #333;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    padding: 15px;
+                    text-align: left;
+                    border-bottom: 2px solid #ee1e46;
+                }
+                
+                .cart-table td {
+                    padding: 15px;
+                    vertical-align: middle;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .product-thumb img {
+                    width: 80px;
+                    height: 80px;
+                    object-fit: cover;
+                    border-radius: 5px;
+                }
+                
+                .product-name a {
+                    font-weight: 600;
+                    color: #333;
+                    text-decoration: none;
+                    transition: color 0.3s;
+                }
+                
+                .product-name a:hover {
+                    color: #ee1e46;
+                }
+                
+                .product-category {
+                    font-size: 12px;
+                    color: #777;
+                    margin-top: 5px;
+                }
+                
+                .product-price, .product-total {
+                    font-weight: 600;
+                    color: #333;
+                }
+                
+                .quantity-input {
+                    display: flex;
+                    align-items: center;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    overflow: hidden;
+                }
+                
+                .quantity-minus, .quantity-plus {
+                    background: #f5f5f5;
+                    border: none;
+                    padding: 8px 12px;
+                    cursor: pointer;
+                    transition: background 0.3s;
+                }
+                
+                .quantity-minus:hover, .quantity-plus:hover {
+                    background: #ee1e46;
+                    color: white;
+                }
+                
+                .quantity-input input {
+                    border: none;
+                    text-align: center;
+                    width: 50px;
+                    padding: 8px 0;
+                }
+                
+                .update-btn {
+                    background: #f5f5f5;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 8px;
+                    cursor: pointer;
+                    transition: background 0.3s;
+                }
+                
+                .update-btn:hover {
+                    background: #ee1e46;
+                    color: white;
+                }
+                
+                .remove-btn {
+                    color: #ee1e46;
+                    font-size: 18px;
+                    transition: color 0.3s;
+                }
+                
+                .remove-btn:hover {
+                    color: #333;
+                }
+                
+                .cart-summary {
+                    background: #f9f9f9;
+                    border-radius: 8px;
+                    padding: 25px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+                }
+                
+                .summary-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #ee1e46;
+                    color: #333;
+                }
+                
+                .summary-item {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 15px;
+                    padding-bottom: 15px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .summary-item.total {
+                    border-bottom: none;
+                    margin-top: 15px;
+                    padding-top: 15px;
+                    border-top: 2px solid #ee1e46;
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+                
+                .label {
+                    color: #555;
+                }
+                
+                .value {
+                    font-weight: 600;
+                    color: #333;
+                }
+                
+                .checkout-btn-area .rts-btn {
+                    padding: 12px 20px;
+                    font-weight: 600;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Quantity increment/decrement for all quantity inputs
+            const quantityForms = document.querySelectorAll('.quantity-form');
+            
+            quantityForms.forEach(form => {
+                const minusBtn = form.querySelector('.quantity-minus');
+                const plusBtn = form.querySelector('.quantity-plus');
+                const quantityInput = form.querySelector('input[name="quantity"]');
+                
+                if (minusBtn && plusBtn && quantityInput) {
+                    minusBtn.addEventListener('click', function() {
+                        const currentValue = parseInt(quantityInput.value);
+                        if (currentValue > 1) {
+                            quantityInput.value = currentValue - 1;
+                        }
+                    });
+                    
+                    plusBtn.addEventListener('click', function() {
+                        const currentValue = parseInt(quantityInput.value);
+                        quantityInput.value = currentValue + 1;
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

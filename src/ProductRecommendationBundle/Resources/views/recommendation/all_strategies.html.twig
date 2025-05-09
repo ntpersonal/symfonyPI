@@ -1,0 +1,35 @@
+{% if allRecommendations|length > 0 %}
+<div class="all-recommendation-strategies">
+    {% for strategyName, products in allRecommendations %}
+        {% if products|length > 0 %}
+            <div class="recommendation-section mb-5">
+                <h3 class="recommendation-title">{{ strategyName }}</h3>
+                <div class="row">
+                    {% for product in products %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                {% if product.image %}
+                                    <img src="{{ asset('uploads/products/' ~ product.image) }}" class="card-img-top" alt="{{ product.nameproduct }}" style="height: 150px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                        <span class="text-muted">No image</span>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.nameproduct }}</h5>
+                                    <p class="card-text">
+                                        <strong>${{ product.priceproduct }}</strong>
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-white border-top-0">
+                                    <a href="{{ path('app_product_details', {'id': product.id}) }}" class="btn btn-sm btn-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}

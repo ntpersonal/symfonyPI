@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Forgot Password - Soccer{% endblock %}
+
+{% block body %}
+    <div class="hero overlay d-flex align-items-center" style="background-image: url('{{ asset('assets/images/bg_3.jpg') }}'); min-height: calc(100vh - 120px); padding-top: 300px; padding-bottom: 110px;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7 col-12">
+                    <div class="card glass-card border-0 rounded-3 shadow-sm p-3 mb-4" style="max-width: 450px; margin: 0 auto;">
+                        <div class="card-header bg-transparent text-center py-2 border-0">
+                            <h3 class="font-weight-bold text-dark mb-1">Reset Password</h3>
+                            <p class="mb-0 text-muted">Enter your email to receive a reset link</p>
+                        </div>
+                        <div class="card-body p-3">
+                            {% for flash_error in app.flashes('reset_password_error') %}
+                                <div class="alert alert-danger text-center mb-3">{{ flash_error }}</div>
+                            {% endfor %}
+
+                            {{ form_start(requestForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                            <div class="mb-3">
+                                {{ form_label(requestForm.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(requestForm.email, {'attr': {'class': 'form-control rounded-pill', 'placeholder': 'Enter your email address'}}) }}
+                                {{ form_errors(requestForm.email) }}
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    We'll send you an email with instructions to reset your password.
+                                </small>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-info btn-block rounded-pill py-2">Send Reset Link</button>
+                            </div>
+                            {{ form_end(requestForm) }}
+                        </div>
+                        <div class="card-footer bg-transparent text-center border-0 pt-0 pb-2">
+                            <p class="mb-0 text-muted">Remember your password?
+                                <a href="{{ path('app_log_in') }}" class="text-info font-weight-bold">Sign In</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px) saturate(120%);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.18);
+            position: relative;
+            z-index: 10;
+        }
+
+        .glass-card .form-label {
+            color: #222;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .glass-card .form-control {
+            background: #f7f7f9;
+            border: 1px solid #e3e3e3;
+            font-size: 0.9rem;
+            padding: 0.45rem 1rem;
+            color: #222 !important;
+            box-shadow: none;
+            transition: border-color 0.2s;
+        }
+
+        .glass-card .form-control:focus {
+            border-color: #fd7e14;
+            background: #fff;
+            color: #222;
+            box-shadow: 0 0 0 0.15rem rgba(253,126,20,0.10);
+        }
+
+        .glass-card .form-control::placeholder {
+            color: #888;
+            opacity: 1;
+        }
+
+        .glass-card .btn-info {
+            background: linear-gradient(90deg, #ff8800 0%, #fd7e14 100%);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            box-shadow: 0 2px 8px rgba(253,126,20,0.10);
+            transition: all 0.2s;
+        }
+
+        .glass-card .btn-info:hover {
+            background: linear-gradient(90deg, #fd7e14 0%, #ff8800 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(253,126,20,0.20);
+        }
+
+        /* Fix for footer */
+        .footer-section {
+            position: relative;
+            z-index: 5;
+        }
+    </style>
+{% endblock %}

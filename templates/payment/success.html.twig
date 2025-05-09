@@ -1,0 +1,51 @@
+{% extends 'Home/base.html.twig' %}
+
+{% block title %}Payment Confirmed!{% endblock %}
+
+{% block body %}
+<div class="hero-section" style="background-image: url('{{ asset('assets/images/bg_1.jpg') }}');">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mx-auto text-center">
+                <h1 class="text-white">Payment Successful</h1>
+                <p>Thank you for your purchase!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container mt-5">
+        <div class="alert alert-success" role="alert">
+            <h2 class="mb-3">Thank you for your purchase!</h2>
+            <p>Your payment was successful and your order is confirmed.</p>
+            <p>A confirmation email has been sent to your address.</p>
+            <a href="{{ path('app_shop') }}" class="btn btn-primary mt-3">Continue Shopping</a>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                        </div>
+                        <h2 class="card-title mb-3 text-dark">Payment Successful!</h2>
+                        <p class="card-text text-dark">Your order has been placed successfully. We've sent a confirmation email with your order details.</p>
+                        <p class="card-text text-dark">Thank you for shopping with us!</p>
+                        
+                        <div class="mt-4">
+                            <a href="{{ path('app_home') }}" class="btn btn-primary">Return to Home</a>
+                            <a href="{{ path('shop_index') }}" class="btn btn-outline-primary">Continue Shopping</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

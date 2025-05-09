@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+###> doctrine/doctrine-bundle ###
+  mercure:
+    image: dunglas/mercure:v0.14.5
+    ports:
+      - "3000:80"
+    environment:
+      # Autorise l'abonnement anonyme (pas besoin de JWT côté client)
+      MERCURE_ANONYMOUS: "1"
+      # Clés JWT (inutile si on reste en anonymous, mais on les définit quand même)
+      MERCURE_PUBLISHER_JWT_KEY: "insecure"
+      MERCURE_SUBSCRIBER_JWT_KEY: "insecure"
+      # Caddy listens on port 80 à l'intérieur du conteneur
+      SERVER_NAME: ":80"
+      # Injection des directives Caddy/Mercure
+      MERCURE_EXTRA_DIRECTIVES: |
+        anonymous
+        # Autorise votre front
+        cors_origins http://127.0.0.1:8000
+        # Autorise la publication et la souscription
+        publish_allowed_origins *
+        subscribe_allowed_origins *
+    
+
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sportifydb2}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+###< doctrine/doctrine-bundle ###
+
+volumes:
+###> doctrine/doctrine-bundle ###
+  mysql_data:
+###< doctrine/doctrine-bundle ###

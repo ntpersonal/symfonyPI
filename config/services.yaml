@@ -1,0 +1,84 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    upload_directory: '%kernel.project_dir%/public/uploads'  # Adjust the path as per your project structure
+    profile_pictures_directory: '%kernel.project_dir%/public/uploads/profile'
+    product_images_directory: '%kernel.project_dir%/public/uploads/products'
+    event_images_directory: '%kernel.project_dir%/public/uploads/event_images'
+    api_football_key: '%env(API_FOOTBALL_KEY)%'  # Use environment variable for sensitive data
+    gemini_api_key: '%env(string:GEMINI_API_KEY)%'
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
+
+
+
+    google_cloud_project_id: 'oceanic-abacus-422500-d7'
+    gemini_model_id: 'gemini-1.5-flash'
+
+services:
+
+    App\Controller\ReclamationController:
+        autowire: true
+        autoconfigure: true
+        public: true
+    # default configuration for services in *this* file
+    Symfony\Contracts\HttpClient\HttpClientInterface:
+        factory: ['Symfony\Component\HttpClient\HttpClient', 'create']
+        arguments:
+            - verify_peer: true
+              verify_host: true
+              # Let the system handle certificates automatically
+              # No need for cafile parameter
+              timeout: 30
+    
+    Symfony\Component\Mercure\HubInterface:
+        alias: 'mercure.hub.default'
+
+    Symfony\Component\Mercure\Publisher:
+        alias: 'mercure.hub.default.publisher'
+    
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $apiKey: '%api_football_key%'
+            $geminiApiKey: '%gemini_api_key%'
+            
+
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/Tests/'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    App\Controller\DownloadController:
+        autowire: true
+
+    # App\Entity\User:
+    #     class: App\Entity\User
+    #     autowire: true
+
+    App\EventListener\NoCacheListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+
+
+
+    App\Security\RequestMatcher\ApiRequestMatcher:
+            public: true

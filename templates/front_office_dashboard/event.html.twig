@@ -1,0 +1,245 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}Events | Sportius{% endblock %}
+
+{% block active_page %}app_event_front{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .event-single {
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+        .event-single:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        .event-picture {
+            position: relative;
+            height: 240px;
+            overflow: hidden;
+        }
+        .event-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .event-single:hover .event-picture img {
+            transform: scale(1.05);
+        }
+        .event-date-floating {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e6304a;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            width: 70px;
+            box-shadow: 0 3px 10px rgba(230, 48, 74, 0.3);
+        }
+        .event-date-floating .day {
+            font-size: 24px;
+            display: block;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .event-date-floating .month {
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .contents {
+            padding: 20px;
+        }
+        .post-info {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .post-date, .post-location {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .post-date i, .post-location i {
+            margin-right: 5px;
+            color: #e6304a;
+        }
+        .event-title {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .event-title:hover {
+            color: #e6304a;
+        }
+        .rts-section-gap {
+            padding: 100px 0;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+            display: inline-block;
+        }
+        .section-title h2:after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: #e6304a;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="rts-section-gap">
+        <div class="container">
+            <div class="section-title">
+                <h2>Upcoming Events</h2>
+            </div>
+            <div class="row">
+                {% for event in events %}
+                    <div class="col-xl-4 col-md-6">
+                        <div class="event-single">
+                            <div class="event-picture">
+                                {% if event.image is defined and event.image %}
+                                    <img src="{{ asset(event.image) }}" alt="{{ event.nom }}">
+                                {% else %}
+                                    <img src="{{ asset('assets/images/event/event1.jpg') }}" alt="event-picture">
+                                {% endif %}
+                                <div class="event-date-floating">
+                                    {% set event_date = null %}
+                                    {% if attribute(event, 'startTime') is defined and event.startTime %}
+                                        {% set event_date = event.startTime %}
+                                    {% elseif attribute(event, 'event_date') is defined and event.event_date %}
+                                        {% set event_date = event.event_date %}
+                                    {% endif %}
+
+                                    {% if event_date %}
+                                        <span class="day">{{ event_date|date('d') }}</span>
+                                        <span class="month">{{ event_date|date('M')|upper }}</span>
+                                    {% else %}
+                                        <span class="day">-</span>
+                                        <span class="month">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="contents">
+                                <div class="post-info">
+                            <span class="post-date"><i class="fal fa-clock"></i>
+                                {% if event_date %}
+                                    {{ event_date|date('M d, Y') }}
+                                {% else %}
+                                    Date non définie
+                                {% endif %}
+                            </span>
+                                    <span class="post-location" id="event-location-{{ event.id }}">
+                                <i class="fal fa-map-marker-alt"></i>
+                                {% if attribute(event, 'address') is defined and event.address %}
+                                    {{ event.address }}
+                                {% else %}
+                                    {% if attribute(event, 'latitude') is defined and attribute(event, 'longitude') is defined and event.latitude and event.longitude %}
+                                        Chargement...
+                                    {% else %}
+                                        Lieu non défini
+                                    {% endif %}
+                                {% endif %}
+                            </span>
+                                </div>
+                                <a href="{{ path('app_event_details', {'id': event.id}) }}" class="event-title">{{ event.nom }}</a>
+                                <p>
+                                    {% if event.description|length > 120 %}
+                                        {{ event.description|slice(0, 120) }}...
+                                    {% else %}
+                                        {{ event.description }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 text-center">
+                        <div class="alert alert-info">
+                            <p>Aucun événement n'est disponible pour le moment.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer les événements qui ont des coordonnées mais pas d'adresse
+            {% for event in events %}
+            {% if (attribute(event, 'latitude') is defined and attribute(event, 'longitude') is defined and event.latitude and event.longitude) and not (attribute(event, 'address') is defined and event.address) %}
+            fetchAddress({{ event.latitude }}, {{ event.longitude }}, 'event-location-{{ event.id }}');
+            {% endif %}
+            {% endfor %}
+
+            // Fonction pour récupérer l'adresse via l'API Nominatim
+            function fetchAddress(latitude, longitude, elementId) {
+                const locationElement = document.getElementById(elementId);
+                if (!locationElement) return;
+
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            // Créer un texte d'adresse plus court pour l'affichage en liste
+                            let shortAddress = data.display_name;
+
+                            // Si on a des données d'adresse détaillées, créer une version abrégée
+                            if (data.address) {
+                                const parts = [];
+                                if (data.address.city || data.address.town || data.address.village) {
+                                    parts.push(data.address.city || data.address.town || data.address.village);
+                                }
+                                if (data.address.country) {
+                                    parts.push(data.address.country);
+                                }
+
+                                if (parts.length > 0) {
+                                    shortAddress = parts.join(', ');
+                                }
+                            }
+
+                            locationElement.innerHTML = '<i class="fal fa-map-marker-alt"></i> ' + shortAddress;
+                        } else {
+                            locationElement.innerHTML = '<i class="fal fa-map-marker-alt"></i> Lieu non disponible';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la récupération de l\'adresse:', error);
+                        locationElement.innerHTML = '<i class="fal fa-map-marker-alt"></i> Erreur de localisation';
+                    });
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

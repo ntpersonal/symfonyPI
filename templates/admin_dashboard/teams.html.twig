@@ -1,0 +1,1228 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}Tables - Soft UI Dashboard 3{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <!--     Fonts and icons     -->
+  <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
+  <!-- Nucleo Icons -->
+  <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <!-- CSS Files -->
+  <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.1.0') }}" rel="stylesheet" />
+  <style>
+    /* New pagination styles */
+    .pagination {
+      width: 100%;
+      padding: 0 1rem;
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .page-btn {
+      color: #000000;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: inline-flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      background-color: #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: color 128ms ease-out, background-color 128ms ease-out;
+      border: 1px solid #e9ecef;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .page-btn:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-1px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .page-btn:target {
+      color: #ffffff;
+      background-color: #344767;
+      border-color: #344767;
+      box-shadow: 0 4px 6px -1px rgba(52, 71, 103, 0.4), 0 2px 4px -1px rgba(52, 71, 103, 0.3);
+    }
+
+    .page-step {
+      display: none;
+    }
+
+    .pagination:not(:has(.page-btn:target)) .page-step[data-shown="1"] {
+      display: inline-flex;
+    }
+
+    @for $i from 1 through 5 {
+      .pagination:has(#page-#{$i}:target) .page-step[data-shown="#{$i}"] {
+        display: inline-flex;
+      }
+    }
+
+    .pagination {
+      display: flex;
+      padding-left: 0;
+      list-style: none;
+      border-radius: 0.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+      gap: 0.5rem;
+    }
+    .pagination li {
+      margin: 0;
+    }
+    .pagination li a {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      height: 2.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #344767;
+      background-color: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease-in-out;
+      text-decoration: none;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .pagination li a:hover {
+      color: #344767;
+      background-color: #f8f9fa;
+      border-color: #e9ecef;
+      transform: translateY(-1px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+    .pagination li.active a {
+      color: #fff;
+      background-color: #344767;
+      border-color: #344767;
+      box-shadow: 0 4px 6px -1px rgba(52, 71, 103, 0.4), 0 2px 4px -1px rgba(52, 71, 103, 0.3);
+    }
+    .pagination li.disabled a {
+      color: #adb5bd;
+      background-color: #f8f9fa;
+      border-color: #e9ecef;
+      pointer-events: none;
+      box-shadow: none;
+    }
+    .pagination li a:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(52, 71, 103, 0.25);
+    }
+    /* Enhanced prev/next buttons */
+    .pagination li:first-child a,
+    .pagination li:last-child a {
+      min-width: 3.5rem;
+      background-color: #344767;
+      color: #fff;
+      border-color: #344767;
+    }
+    .pagination li:first-child a:hover,
+    .pagination li:last-child a:hover {
+      background-color: #2a3a52;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(52, 71, 103, 0.3);
+    }
+    .pagination li.disabled:first-child a,
+    .pagination li.disabled:last-child a {
+      background-color: #e9ecef;
+      color: #adb5bd;
+      border-color: #e9ecef;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+   <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+      <button class="btn btn-info btn-sm me-2" id="toggleFilterBtn" style="position:relative;margin-left: 1000px;margin-top: 20px; text-align: center; padding-right: 100px;">
+      <i class="fa fa-filter me-1"></i> Filter
+      </button>
+    </div>
+   </div>
+    <div id="filterSection" class="px-4 py-3 mb-3" style="display: none; background-color: #f8f9fa; border-radius: 0.5rem;">
+    <form id="teamFilterForm">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="filterName" name="name" placeholder="Filter by name">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterCategory" class="form-label">Category</label>
+            <input type="text" class="form-control" id="filterCategory" name="category" placeholder="Filter by category">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterGameMode" class="form-label">Game Mode</label>
+            <select class="form-control" id="filterGameMode" name="gameMode">
+              <option value="">All Modes</option>
+              <option value="EN_GROUPE">Group</option>
+              <option value="PAR_2">Pairs</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-group w-100">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fa fa-search me-1"></i> Apply
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterMinPlayers" class="form-label">Min Players</label>
+            <input type="number" class="form-control" id="filterMinPlayers" name="minPlayers" min="1" placeholder="Minimum">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="filterMaxPlayers" class="form-label">Max Players</label>
+            <input type="number" class="form-control" id="filterMaxPlayers" name="maxPlayers" min="1" placeholder="Maximum">
+          </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-group w-100">
+            <button type="reset" class="btn btn-outline-secondary w-100">
+              <i class="fa fa-times me-1"></i> Reset
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-group w-100">
+            <button type="button" id="closeFilterBtn" class="btn btn-outline-danger w-100">
+              <i class="fa fa-times-circle me-1"></i> Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+    <div class="container-fluid py-4">
+      {% for label, messages in app.flashes %}
+          {% for message in messages %}
+              <div cla
+ss="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+          {% endfor %}
+      {% endfor %}
+      
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Teams table</h6>
+              <a class="btn btn-success btn-sm" href="javascript:void(0);" data-toggle="modal" id="AddTeamPopUpModel">Add</a>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Game mode</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Categorie</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">nb Players</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Edit</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Delete</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ranking</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Join Tournament</th>
+                      
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for team in teams %}
+                    <tr>
+                      <td>
+                        <div class="d-flex px-2 py-1">
+                          <div>
+                            {% if team.logoPath %}
+                                <img src="{{ path('app_image', {
+                                    'subdirectory': 'teams', 
+                                    'filename': team.logoPath|split('/')|last
+                                }) }}" alt="{{ team.nom }} logo" style="width: 50px; height: 50px;" class="team-logo">
+                            {% else %}
+                                {# Fallback image when no logo exists #}
+                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" style="width: 50px; height: 50px;"alt="Default team logo" class="team-logo">
+                            {% endif %}
+                        </div>
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">{{ team.nom }}</h6>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <p class="text-xs font-weight-bold mb-0">{{ team.modeJeu }}</p>
+                        <p class="text-xs text-secondary mb-0"></p>
+                      </td>
+                      <!--<td class="align-middle text-center text-sm">
+                        <span class="badge badge-sm bg-gradient- author.status == 'Online' ? 'success' : 'secondary' }}"> author.status }}</span>
+                      </td>-->
+                      <td class="align-middle text-center">
+                        <span class="text-secondary text-xs font-weight-bold">{{team.categorie }}</span>
+                      </td>
+                       <td class="align-middle text-center">
+                        <span class="text-secondary text-xs font-weight-bold">{{ team.nombreJoueurs}}</span>
+                      </td>
+                      <td class="align-middle text-center">
+                        <a class="btn btn-warning btn-sm edit-team" href="javascript:void(0);" 
+                           data-team-id="{{ team.id }}"
+                           data-team-name="{{ team.nom }}"
+                           data-team-categorie="{{ team.categorie }}"
+                           data-team-modejeu="{{ team.modeJeu }}"
+                           data-team-nombrejoueurs="{{ team.nombreJoueurs }}">Edit</a>
+                        </td>
+                        <td class="align-middle text-center">
+                        <a class="btn btn-danger btn-sm delete-team" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Delete</a>
+                        </td>
+                         <td class="align-middle text-center">
+                        <a class="btn btn-red btn-sm Consult-Ranking" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Consult</a>
+                        </td>
+                        <td class="align-middle text-center">
+                        <a class="btn btn-info btn-sm join-tournament" href="javascript:void(0);" data-team-id="{{ team.id }}" data-team-name="{{ team.nom }}">Join</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+                <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                  {{ knp_pagination_render(teams, null, {}, {
+                    'align': 'center',
+                    'size': 'medium',
+                    'style': 'pagination',
+                    'span_class': 'page-link',
+                    'template': 'pagination/custom_pagination.html.twig',
+                    'page_range': 5
+                  }) }}
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      
+  </main>
+
+  <!-- Edit Team Modal -->
+  <div class="modal fade" id="editTeamModal" tabindex="-1" role="dialog" aria-labelledby="editTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editTeamModalLabel">Edit Team</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editTeamForm" class="needs-validation" novalidate>
+            <input type="hidden" id="editTeamId" name="id">
+            <div class="mb-3">
+              <label for="editTeamName" class="form-label">Team Name</label>
+              <input type="text" class="form-control" id="editTeamName" name="nom" required 
+                     minlength="3" maxlength="255"
+                     pattern="^[a-zA-Z0-9\s\-_]+$">
+              <div class="invalid-feedback" id="editTeamNameError">
+                Please enter a valid team name (3-255 characters, letters, numbers, spaces, hyphens, and underscores only)
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="editTeamCategorie" class="form-label">Category</label>
+              <input type="text" class="form-control" id="editTeamCategorie" name="categorie" required
+                     minlength="3" maxlength="255">
+              <div class="invalid-feedback" id="editTeamCategorieError">
+                Please enter a valid category (3-255 characters)
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="editTeamModeJeu" class="form-label">Game Mode</label>
+              <select class="form-control" id="editTeamModeJeu" name="modeJeu" required>
+                <option value="">Select a game mode</option>
+                <option value="EN_GROUPE">Group</option>
+                <option value="PAR_2">Pairs</option>
+              </select>
+              <div class="invalid-feedback" id="editTeamModeJeuError">
+                Please select a valid game mode
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="editTeamNombreJoueurs" class="form-label">Number of Players</label>
+              <input type="number" class="form-control" id="editTeamNombreJoueurs" name="nombreJoueurs" required
+                     min="2" max="10">
+              <div class="invalid-feedback" id="editTeamNombreJoueursError">
+                Please enter a valid number of players (between 2 and 10)
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="updateTeam">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteTeamModal" tabindex="-1" role="dialog" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteTeamModalLabel">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the team "<span id="teamName"></span>"?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Ranking Modal -->
+  <div class="modal fade" id="teamRankingModal" tabindex="-1" role="dialog" aria-labelledby="teamRankingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 95%; width: 95%;" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="teamRankingModalLabel">Team Rankings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0" style="min-width: 1000px; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 20%;">Tournament</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2" style="width: 8%;">Position</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Points</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Wins</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Draws</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 8%;">Losses</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 10%;">Goals Scored</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 10%;">Goals Conceded</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 10%;">Goal Difference</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTableBody">
+                <!-- Rankings will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Team Modal -->
+  <div class="modal fade" id="addTeamModal" tabindex="-1" role="dialog" aria-labelledby="addTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTeamModalLabel">Add New Team</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{ form_start(form, {
+              'id': 'addTeamForm',
+              'attr': {
+                  'class': 'needs-validation',
+                  'novalidate': 'novalidate'
+              }
+          }) }}
+            <div class="mb-3">
+              {{ form_label(form.nom, 'Team Name', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.nom, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter team name'
+                  }
+              }) }}
+              {{ form_errors(form.nom, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_nom_error'
+                  }
+              }) }}
+            </div>
+            <div class="mb-3">
+              {{ form_label(form.categorie, 'Category', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.categorie, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter category'
+                  }
+              }) }}
+              {{ form_errors(form.categorie, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_categorie_error'
+                  }
+              }) }}
+            </div>
+            <div class="mb-3">
+              {{ form_label(form.modeJeu, 'Game Mode', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.modeJeu, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter game mode'
+                  }
+              }) }}
+              {{ form_errors(form.modeJeu, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_modeJeu_error'
+                  }
+              }) }}
+            </div>
+            <div class="mb-3">
+              {{ form_label(form.nombreJoueurs, 'Number of Players', {'label_attr': {'class': 'form-label'}}) }}
+              {{ form_widget(form.nombreJoueurs, {
+                  'attr': {
+                      'class': 'form-control',
+                      'placeholder': 'Enter number of players'
+                  }
+              }) }}
+              {{ form_errors(form.nombreJoueurs, {
+                  'attr': {
+                      'class': 'invalid-feedback',
+                      'id': 'team_nombreJoueurs_error'
+                  }
+              }) }}
+            </div>
+          {{ form_end(form) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fixed-plugin">
+    <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
+      <i class="fa fa-cog py-2"> </i>
+    </a>
+    <div class="card shadow-lg ">
+      <div class="card-header pb-0 pt-3 ">
+        <div class="float-start">
+          <h5 class="mt-3 mb-0">Soft UI Configurator</h5>
+          <p>See our dashboard options.</p>
+        </div>
+        <div class="float-end mt-4">
+          <button class="btn btn-link text-dark p-0 fixed-plugin-close-button">
+            <i class="fa fa-close"></i>
+          </button>
+        </div>
+        <!-- End Toggle Button -->
+      </div>
+      <hr class="horizontal dark my-1">
+      <div class="card-body pt-sm-3 pt-0">
+        <!-- Sidebar Backgrounds -->
+        <div>
+          <h6 class="mb-0">Sidebar Colors</h6>
+        </div>
+        <a href="javascript:void(0)" class="switch-trigger background-color">
+          <div class="badge-colors my-2 text-start">
+            <span class="badge filter bg-primary active" data-color="primary" onclick="sidebarColor(this)"></span>
+            <span class="badge filter bg-gradient-dark" data-color="dark" onclick="sidebarColor(this)"></span>
+            <span class="badge filter bg-gradient-info" data-color="info" onclick="sidebarColor(this)"></span>
+            <span class="badge filter bg-gradient-success" data-color="success" onclick="sidebarColor(this)"></span>
+            <span class="badge filter bg-gradient-warning" data-color="warning" onclick="sidebarColor(this)"></span>
+            <span class="badge filter bg-gradient-danger" data-color="danger" onclick="sidebarColor(this)"></span>
+          </div>
+        </a>
+        <!-- Sidenav Type -->
+        <div class="mt-3">
+          <h6 class="mb-0">Sidenav Type</h6>
+          <p class="text-sm">Choose between 2 different sidenav types.</p>
+        </div>
+        <div class="d-flex">
+          <button class="btn btn-primary w-100 px-3 mb-2 active" data-class="bg-transparent" onclick="sidebarType(this)">Transparent</button>
+          <button class="btn btn-primary w-100 px-3 mb-2 ms-2" data-class="bg-white" onclick="sidebarType(this)">White</button>
+        </div>
+        <p class="text-sm d-xl-none d-block mt-2">You can change the sidenav type just on desktop view.</p>
+        <!-- Navbar Fixed -->
+        <div class="mt-3">
+          <h6 class="mb-0">Navbar Fixed</h6>
+        </div>
+        <div class="form-check form-switch ps-0">
+          <input class="form-check-input mt-1 ms-auto" type="checkbox" id="navbarFixed" onclick="navbarFixed(this)">
+        </div>
+        <hr class="horizontal dark my-sm-4">
+        <a class="btn bg-gradient-dark w-100" href="https://www.creative-tim.com/product/soft-ui-dashboard">Free Download</a>
+        <a class="btn btn-outline-dark w-100" href="https://www.creative-tim.com/learning-lab/bootstrap/license/soft-ui-dashboard">View documentation</a>
+        <div class="w-100 text-center">
+          <a class="github-button" href="https://github.com/creativetimofficial/soft-ui-dashboard" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star creativetimofficial/soft-ui-dashboard on GitHub">Star</a>
+          <h6 class="mt-3">Thank you for sharing!</h6>
+          <a href="https://twitter.com/intent/tweet?text=Check%20Soft%20UI%20Dashboard%20made%20by%20%40CreativeTim%20%23webdesign%20%23dashboard%20%23bootstrap5&amp;url=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fsoft-ui-dashboard" class="btn btn-dark mb-0 me-2" target="_blank">
+            <i class="fab fa-twitter me-1" aria-hidden="true"></i> Tweet
+          </a>
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https://www.creative-tim.com/product/soft-ui-dashboard" class="btn btn-dark mb-0 me-2" target="_blank">
+            <i class="fab fa-facebook-square me-1" aria-hidden="true"></i> Share
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Join Tournament Modal -->
+  <div class="modal fade" id="joinTournamentModal" tabindex="-1" role="dialog" aria-labelledby="joinTournamentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="joinTournamentModalLabel">Join Tournament</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="joinTournamentForm">
+            <input type="hidden" id="joinTeamId" name="teamId">
+            <div class="mb-3">
+              <label for="tournamentSelect" class="form-label">Select Tournament</label>
+              <select class="form-control" id="tournamentSelect" name="tournamentId" required>
+                <option value="">Select a tournament</option>
+                <!-- Tournaments will be populated here -->
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="joinTournamentBtn">Join</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <!--   Core JS Files   -->
+  <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
+  <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
+  <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
+  <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+
+    // Function to show toast message
+    function showToast(message, type = 'success') {
+      const toastContainer = document.createElement('div');
+      toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+      toastContainer.innerHTML = `
+        <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(toastContainer);
+      const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+      toast.show();
+      toastContainer.querySelector('.toast').addEventListener('hidden.bs.toast', () => {
+        toastContainer.remove();
+      });
+    }
+
+    // Function to refresh the table
+    function refreshTable() {
+      const currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+      window.location.href = `${window.location.pathname}?page=${currentPage}`;
+    }
+
+    
+
+    // Delete team confirmation modal
+    document.addEventListener('DOMContentLoaded', function() {
+      const deleteButtons = document.querySelectorAll('.delete-team');
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteTeamModal'));
+      const teamNameSpan = document.getElementById('teamName');
+      const confirmDeleteBtn = document.getElementById('confirmDelete');
+      let currentTeamId = null;
+      let currentRow = null;
+
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const teamId = this.getAttribute('data-team-id');
+          const teamName = this.getAttribute('data-team-name');
+          currentTeamId = teamId;
+          currentRow = this.closest('tr');
+          teamNameSpan.textContent = teamName;
+          deleteModal.show();
+        });
+      });
+
+      confirmDeleteBtn.addEventListener('click', function() {
+        if (currentTeamId) {
+          fetch(`/admin/teams/${currentTeamId}/delete`, {
+            method: 'DELETE',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              showToast('Team deleted successfully');
+              setTimeout(refreshTable, 1500);
+            } else {
+              throw new Error(data.message || 'Failed to delete team');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showToast(error.message, 'danger');
+          })
+          .finally(() => {
+            deleteModal.hide();
+          });
+        }
+      });
+    });
+
+    // Add Team Form Submission
+    document.addEventListener('DOMContentLoaded', function() {
+      const AfficheAddTeamModel = document.getElementById('AddTeamPopUpModel');
+      const addTeamModal = document.getElementById('addTeamModal');
+      const form = document.getElementById('addTeamForm');
+      const submitTeamForm = document.getElementById('submitTeamForm');
+
+      function clearFormErrors() {
+        const errorElements = form.querySelectorAll('.invalid-feedback');
+        errorElements.forEach(element => element.textContent = '');
+        const formControls = form.querySelectorAll('.form-control');
+        formControls.forEach(control => {
+          control.classList.remove('is-invalid');
+          control.classList.remove('is-valid');
+        });
+      }
+
+      if (AfficheAddTeamModel && addTeamModal) {
+        const modal = new bootstrap.Modal(addTeamModal);
+        AfficheAddTeamModel.addEventListener('click', function() {
+          if (form) {
+            form.reset();
+            clearFormErrors();
+          }
+          modal.show();
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          clearFormErrors();
+
+          if (submitTeamForm) {
+            submitTeamForm.disabled = true;
+            submitTeamForm.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+          }
+
+          const formData = new FormData(form);
+          
+          fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+            } else if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text();
+          })
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const errorMessages = doc.querySelectorAll('.alert-danger');
+            
+            if (errorMessages.length > 0) {
+              errorMessages.forEach(error => {
+                showToast(error.textContent.trim(), 'danger');
+              });
+            } else {
+              showToast('Team added successfully', 'success');
+              if (addTeamModal) {
+                const modal = bootstrap.Modal.getInstance(addTeamModal);
+                if (modal) {
+                  modal.hide();
+                }
+              }
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred while submitting the form', 'danger');
+          })
+          .finally(() => {
+            if (submitTeamForm) {
+              submitTeamForm.disabled = false;
+              submitTeamForm.textContent = 'Add Team';
+            }
+          });
+        });
+      }
+    });
+
+    // Edit team validation and submission
+    document.addEventListener('DOMContentLoaded', function() {
+      const editForm = document.getElementById('editTeamForm');
+      const updateBtn = document.getElementById('updateTeam');
+      const editModal = new bootstrap.Modal(document.getElementById('editTeamModal'));
+      const editButtons = document.querySelectorAll('.edit-team');
+      editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const teamId = this.getAttribute('data-team-id');
+          const teamName = this.getAttribute('data-team-name');
+          const teamCategorie = this.getAttribute('data-team-categorie');
+          const teamModeJeu = this.getAttribute('data-team-modejeu');
+          const teamNombreJoueurs = this.getAttribute('data-team-nombrejoueurs');
+          
+          currentTeamId = teamId;
+          currentRow = this.closest('tr');
+          
+          // Fill the form with current team data
+          document.getElementById('editTeamId').value = teamId;
+          document.getElementById('editTeamName').value = teamName;
+          document.getElementById('editTeamCategorie').value = teamCategorie;
+          document.getElementById('editTeamModeJeu').value = teamModeJeu;
+          document.getElementById('editTeamNombreJoueurs').value = teamNombreJoueurs;
+          
+          editModal.show();
+        });
+      });
+      function clearEditFormErrors() {
+        const errorElements = editForm.querySelectorAll('.invalid-feedback');
+        errorElements.forEach(element => element.style.display = 'none');
+        const formControls = editForm.querySelectorAll('.form-control');
+        formControls.forEach(control => {
+          control.classList.remove('is-invalid');
+          control.classList.remove('is-valid');
+        });
+      }
+
+      function validateEditForm() {
+        let isValid = true;
+        clearEditFormErrors();
+
+        // Validate team name
+        const teamName = document.getElementById('editTeamName');
+        const teamNameValue = teamName.value.trim();
+        if (!teamNameValue || teamNameValue.length < 3 || teamNameValue.length > 255) {
+          teamName.classList.add('is-invalid');
+          document.getElementById('editTeamNameError').style.display = 'block';
+          isValid = false;
+        }
+
+        // Validate category
+        const category = document.getElementById('editTeamCategorie');
+        const categoryValue = category.value.trim();
+        if (!categoryValue || categoryValue.length < 3 || categoryValue.length > 255) {
+          category.classList.add('is-invalid');
+          document.getElementById('editTeamCategorieError').style.display = 'block';
+          isValid = false;
+        }
+
+        // Validate game mode
+        const gameMode = document.getElementById('editTeamModeJeu');
+        if (!gameMode.value || (gameMode.value !== 'EN_GROUPE' && gameMode.value !== 'PAR_2')) {
+          gameMode.classList.add('is-invalid');
+          document.getElementById('editTeamModeJeuError').style.display = 'block';
+          isValid = false;
+        }
+
+        // Validate number of players
+        const playersCount = document.getElementById('editTeamNombreJoueurs');
+        const playersCountValue = parseInt(playersCount.value);
+        if (isNaN(playersCountValue) || playersCountValue < 2 || playersCountValue > 100){
+          playersCount.classList.add('is-invalid');
+          document.getElementById('editTeamNombreJoueursError').style.display = 'block';
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+
+      if (editForm) {
+        // Add real-time validation
+        const inputs = editForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+          input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+              validateEditForm();
+            }
+          });
+        });
+
+        // Handle form submission
+        editForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const isValid = validateEditForm();
+          // First validate the form
+          if (!isValid) {
+            showToast('Please correct the errors in the form', 'warning');
+            return false;
+          }else if(isValid){
+            submitForm();
+            return true;
+          }
+        });
+
+      function submitForm() {
+        const formData = new FormData(editForm);
+        const data = Object.fromEntries(formData.entries());
+        fetch(`/admin/teams/${data.id}/edit`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify(data)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            showToast('Team updated successfully', 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTeamModal'));
+            if (modal) {
+              modal.hide();
+            }
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            throw new Error(data.message || 'Failed to update team');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showToast(error.message, 'danger');
+        })
+        .finally(() => {
+          if (updateBtn) {
+            updateBtn.disabled = false;
+            updateBtn.textContent = 'Save Changes';
+          }
+        });
+      }
+      }
+
+      // Team Ranking Modal
+      const rankingModal = new bootstrap.Modal(document.getElementById('teamRankingModal'));
+      const rankingTableBody = document.getElementById('rankingTableBody');
+      const consultButtons = document.querySelectorAll('.Consult-Ranking');
+
+      consultButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const teamId = this.getAttribute('data-team-id');
+          const teamName = this.getAttribute('data-team-name');
+          
+          // Update modal title with team name
+          document.getElementById('teamRankingModalLabel').textContent = `Rankings for ${teamName}`;
+          
+          // Clear previous rankings
+          rankingTableBody.innerHTML = '';
+          
+          // Show loading state
+          rankingTableBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+          `;
+          
+          // Fetch rankings
+          fetch(`/admin/teams/${teamId}/rankings`, {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            rankingTableBody.innerHTML = '';
+            
+            if (data.rankings && data.rankings.length > 0) {
+              data.rankings.forEach(ranking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>
+                    <div class="d-flex px-2 py-1">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">${ranking.tournamentName}</h6>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="text-xs font-weight-bold mb-0">${ranking.position}</p>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.points}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.wins}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.draws}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.losses}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalsScored}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalsConceded}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalDifference}</span>
+                  </td>
+                `;
+                rankingTableBody.appendChild(row);
+              });
+            } else {
+              rankingTableBody.innerHTML = `
+                <tr>
+                  <td colspan="4" class="text-center">
+                    <p class="text-muted mb-0">No rankings available for this team.</p>
+                  </td>
+                </tr>
+              `;
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            rankingTableBody.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center text-danger">
+                  <p class="mb-0">Error loading rankings. Please try again later.</p>
+                </td>
+              </tr>
+            `;
+          });
+          
+          rankingModal.show();
+        });
+      });
+    });
+
+    // Join Tournament functionality
+    const joinTournamentModal = new bootstrap.Modal(document.getElementById('joinTournamentModal'));
+    const joinButtons = document.querySelectorAll('.join-tournament');
+    const tournamentSelect = document.getElementById('tournamentSelect');
+    const joinTeamId = document.getElementById('joinTeamId');
+    const joinTournamentForm = document.getElementById('joinTournamentForm');
+
+    joinButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const teamId = this.getAttribute('data-team-id');
+        const teamName = this.getAttribute('data-team-name');
+        
+        // Update modal title
+        document.getElementById('joinTournamentModalLabel').textContent = `Join Tournament - ${teamName}`;
+        joinTeamId.value = teamId;
+        
+        // Clear previous options
+        tournamentSelect.innerHTML = '<option value="">Select a tournament</option>';
+        
+        // Fetch available tournaments
+        fetch('/admin/tournaments/available', {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.tournaments && data.tournaments.length > 0) {
+            data.tournaments.forEach(tournament => {
+              const option = document.createElement('option');
+              option.value = tournament.id;
+              option.textContent = tournament.nom;
+              tournamentSelect.appendChild(option);
+            });
+          } else {
+            tournamentSelect.innerHTML = '<option value="" disabled>No tournaments available</option>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showToast('Error loading tournaments', 'danger');
+        });
+        
+        joinTournamentModal.show();
+      });
+    });
+
+    joinTournamentForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const teamId = joinTeamId.value;
+      const tournamentId = tournamentSelect.value;
+      
+      if (!tournamentId) {
+        showToast('Please select a tournament', 'warning');
+        return;
+      }
+      
+      const joinBtn = document.getElementById('joinTournamentBtn');
+      joinBtn.disabled = true;
+      joinBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Joining...';
+      
+      fetch('/admin/teams/join-tournament', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          teamId: teamId,
+          tournamentId: tournamentId
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          showToast('Team joined tournament successfully', 'success');
+          joinTournamentModal.hide();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          throw new Error(data.message || 'Failed to join tournament');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast(error.message, 'danger');
+      })
+      .finally(() => {
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+      });
+    });
+    // Filter toggle functionality
+const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+const filterSection = document.getElementById('filterSection');
+const closeFilterBtn = document.getElementById('closeFilterBtn');
+const filterForm = document.getElementById('teamFilterForm');
+
+if (toggleFilterBtn && filterSection) {
+  toggleFilterBtn.addEventListener('click', function() {
+    if (filterSection.style.display === 'none') {
+      filterSection.style.display = 'block';
+      this.innerHTML = '<i class="fa fa-filter me-1"></i> Hide Filter';
+    } else {
+      filterSection.style.display = 'none';
+      this.innerHTML = '<i class="fa fa-filter me-1"></i> Filter';
+    }
+  });
+}
+
+if (closeFilterBtn) {
+  closeFilterBtn.addEventListener('click', function() {
+    filterSection.style.display = 'none';
+    toggleFilterBtn.innerHTML = '<i class="fa fa-filter me-1"></i> Filter';
+  });
+}
+
+// Filter form submission
+if (filterForm) {
+  filterForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(filterForm);
+    const params = new URLSearchParams();
+    
+    // Add all filter values to URL params
+    formData.forEach((value, key) => {
+      if (value) params.append(key, value);
+    });
+    
+    // Reload the page with filter parameters
+    window.location.href = `${window.location.pathname}?${params.toString()}`;
+  });
+  
+  // Reset form handler
+  filterForm.addEventListener('reset', function() {
+    // Clear all filters and submit
+    window.location.href = window.location.pathname;
+  });
+}
+  </script>
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+{% endblock %}

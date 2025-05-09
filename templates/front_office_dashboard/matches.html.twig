@@ -1,0 +1,210 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}All Matches{% endblock %}
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+    <div class="banner banner1 position-relative">
+        <div class="inner-page-banner banner-bg overlay-dark">
+            <div class="container">
+                <div class="banner-content text-center py-5">
+                    <div class="page-path mb-3">
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item"><a class="home-page-link text-white opacity-75 text-decoration-none" href="{{ path('app_home1') }}">Home</a></li>
+                            <li class="list-inline-item text-white opacity-75">/</li>
+                            <li class="list-inline-item"><a class="current-page text-white fw-bold" href="#">Matches</a></li>
+                        </ul>
+                    </div>
+                    <h1 class="banner-heading text-uppercase text-white display-4 fw-bold mb-0">ALL MATCHES</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
+{% block content %}
+  <div class="rts-matches-section section-gap py-5">
+    <div class="container">
+      <!-- Filter Form -->
+      <form id="match-filter-form" class="row g-3 mb-4">
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-primary text-white"><i class="fas fa-search"></i></span>
+            <input type="text" name="team" id="team-filter" placeholder="Search by team name..." 
+                   class="form-control" value="{{ app.request.query.get('team') }}"/>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-primary text-white"><i class="fas fa-filter"></i></span>
+            <select name="status" id="status-filter" class="form-select">
+              <option value="">All status</option>
+              <option value="UPCOMING" {% if app.request.query.get('status') == 'UPCOMING' %}selected{% endif %}>Upcoming</option>
+              <option value="LIVE" {% if app.request.query.get('status') == 'LIVE' %}selected{% endif %}>Live</option>
+              <option value="FINISHED" {% if app.request.query.get('status') == 'FINISHED' %}selected{% endif %}>Finished</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-filter me-2"></i>Apply Filters
+          </button>
+        </div>
+        <div id="filter-status" class="col-12 d-none">
+          <div class="alert alert-info d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm text-primary me-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Filtering matches...</span>
+          </div>
+        </div>
+      </form>
+
+      <!-- Matches Container -->
+      <div id="matches-container">
+        {% include 'front_office_dashboard/_matches_container.html.twig' with { 
+          matches: matches, 
+          apiMatches: apiMatches,
+          season: season 
+        } %}
+      </div>
+        
+    </div>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {{ parent() }}
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('match-filter-form');
+      const teamInput = form.querySelector('input[name="team"]');
+      const statusSel = form.querySelector('select[name="status"]');
+      const container = document.getElementById('matches-container');
+      const filterStatus = document.getElementById('filter-status');
+      const url = "{{ path('app_front_matches') }}";
+
+      // Form submission handler
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        sendRequest();
+      });
+      
+      // Optional: Debounced input handler for immediate filtering while typing
+      let timeout = null;
+      teamInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(sendRequest, 500);
+      });
+      
+      // Immediate filter on status change
+      statusSel.addEventListener('change', sendRequest);
+
+      function sendRequest() {
+        // Show loading indicator
+        filterStatus.classList.remove('d-none');
+        
+        const params = new URLSearchParams(new FormData(form)).toString();
+        fetch(`${url}?${params}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.text())
+        .then(html => {
+          container.innerHTML = html;
+          // Update URL to reflect filters (for bookmarking/sharing)
+          history.pushState(null, '', `${url}?${params}`);
+          // Hide loading indicator
+          filterStatus.classList.add('d-none');
+        })
+        .catch(err => {
+          console.error('Filter error:', err);
+          filterStatus.classList.add('d-none');
+          // Show error message
+          alert('Error filtering matches. Please try again.');
+        });
+      }
+      
+      // Initialize filter values from URL params if present
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('team')) {
+        teamInput.value = urlParams.get('team');
+      }
+      if (urlParams.has('status')) {
+        statusSel.value = urlParams.get('status');
+      }
+    });
+  </script>
+  
+  <style>
+    .hover-scale {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-scale:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .match-card {
+      transition: all 0.3s ease;
+    }
+    
+    .match-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .overlay-dark {
+      position: relative;
+    }
+    
+    .overlay-dark:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 0;
+    }
+    
+    .overlay-dark .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .team-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .team-logo img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    
+    .team-name {
+      font-size: 0.9rem;
+      color: #333;
+    }
+    
+    .vs-badge {
+      color: #333;
+    }
+    
+    /* Button hover effect */
+    .btn-primary {
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    #filter-status {
+      transition: opacity 0.3s ease;
+    }
+  </style>
+{% endblock %}

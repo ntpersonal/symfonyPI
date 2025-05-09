@@ -1,0 +1,76 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6>Réclamations de {{ user.firstname }} {{ user.lastname }}</h6>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="status-filter p-3">
+                            <h6 class="mb-3">Filtrer par statut</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ path('reclamation_by_user', {'id': user.id}) }}" class="btn {{ currentStatus is null ? 'btn-primary' : 'btn-outline-secondary' }} btn-sm">
+                                    Toutes
+                                </a>
+                                {% for status, label in statusChoices %}
+                                    <a href="{{ path('reclamation_by_user', {'id': user.id, 'status': status}) }}"
+                                       class="btn {{ currentStatus == status ? 'btn-primary' : 'btn-outline-secondary' }} btn-sm">
+                                        {{ label }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Message</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for reclamation in reclamations %}
+                                    <tr>
+                                        <td class="align-middle">
+                                            <p class="text-sm font-weight-bold mb-0">{{ reclamation.message|slice(0, 100) }}{% if reclamation.message|length > 100 %}...{% endif %}</p>
+                                        </td>
+                                        <td class="align-middle">
+                                            <p class="text-sm font-weight-bold mb-0">{{ reclamation.createdAt|date('d/m/Y H:i') }}</p>
+                                        </td>
+                                        <td class="align-middle">
+                                            <span class="badge bg-{{ reclamation.statusColor }}">{{ reclamation.status }}</span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <a href="{{ path('reclamation_show', {'id': reclamation.id}) }}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Voir détail">
+                                                Voir détail
+                                            </a>
+
+                                            <form method="post" action="{{ path('reclamation_delete', {'id': reclamation.id}) }}" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button class="btn btn-link text-danger text-xs">Supprimer</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <p class="text-sm mb-0">Aucune réclamation trouvée.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}Nouvelle Réservation | Sportify{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card z-index-0 fadeIn3 fadeInBottom">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1 d-flex align-items-center">
+                        <h4 class="text-white font-weight-bolder text-center mt-2 mb-0 ms-4">
+                            <i class="fas fa-calendar-plus fa-lg me-2"></i>
+                            Créer une nouvelle réservation
+                        </h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Veuillez remplir tous les champs obligatoires pour créer une nouvelle réservation.</p>
+                    {{ include('admin_dashboard/reservations/_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if app.flashes('success') is defined and app.flashes('success') is not empty %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        title: 'Succès!',
+        text: '{{ app.flashes('success')[0] }}',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#e6304a'
+    });
+});
+</script>
+{% endif %}
+
+{% if app.flashes('error') is defined and app.flashes('error') is not empty %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        title: 'Erreur!',
+        text: '{{ app.flashes('error')[0] }}',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#e6304a'
+    });
+});
+</script>
+{% endif %}
+
+<style>
+.bg-gradient-primary {
+    background-image: linear-gradient(310deg, #e6304a 0%, #ff8d72 100%);
+}
+</style>
+{% endblock %} 

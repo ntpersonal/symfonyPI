@@ -1,0 +1,685 @@
+{% block stylesheets %}
+    <!--     Fonts and icons     -->
+    <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800" rel="stylesheet" />
+    <!-- Nucleo Icons -->
+    <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-icons.css" rel="stylesheet" />
+    <link href="https://demos.creative-tim.com/soft-ui-dashboard/assets/css/nucleo-svg.css" rel="stylesheet" />
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- CSS Files -->
+    <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.1.0') }}" rel="stylesheet" />
+     <style>
+
+  /* Custom Scrollbar Design for Sidenav */
+
+/* Main sidebar scrollbar customization */
+
+.sidenav {
+  height: auto !important;
+  max-height: 95vh !important;
+  overflow-y: auto;
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: rgba(94, 114, 228, 0.3) transparent; /* For Firefox */
+}
+
+/* Scrollbar Track - Webkit browsers (Chrome, Safari, Edge) */
+.sidenav::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+
+/* Scrollbar Handle */
+.sidenav::-webkit-scrollbar-thumb {
+  background-color: rgba(94, 114, 228, 0.3); /* Soft blue matching the dashboard theme */
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar Handle on hover */
+.sidenav::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(94, 114, 228, 0.6); /* Darker blue on hover */
+}
+
+/* Scrollbar Track on hover */
+.sidenav::-webkit-scrollbar-track {
+  background-color: rgba(233, 236, 239, 0.3); /* Very light gray track */
+  border-radius: 10px;
+}
+
+/* Fix for sidebar wrapper */
+#sidenav-collapse-main {
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Ensure all nav items fit without being cut off */
+.navbar-nav {
+  padding-bottom: 20px;
+}
+
+/* Additional scrollbar customization for other scrollable areas */
+.scrollable-element {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(94, 114, 228, 0.3) transparent;
+}
+
+.scrollable-element::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+
+.scrollable-element::-webkit-scrollbar-thumb {
+  background-color: rgba(94, 114, 228, 0.3);
+  border-radius: 10px;
+}
+
+.scrollable-element::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(94, 114, 228, 0.6);
+}
+
+.scrollable-element::-webkit-scrollbar-track {
+  background-color: rgba(233, 236, 239, 0.3);
+  border-radius: 10px;
+}
+     </style>
+
+
+{% endblock %}
+
+
+<body class="g-sidenav-show  bg-gray-100">
+<!-- Replace your current sidebar code with this improved version -->
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main">
+  <div class="sidenav-header">
+    <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+    <a class="navbar-brand m-0" href="{{ path('app_admin_dashboard') }}">
+      <img src="{{ asset('assets/images/sportify.png') }}" class="navbar-brand-img h-100" alt="main_logo">
+      <span class="ms-1 font-weight-bold">Sportify</span>
+    </a>
+  </div>
+  <hr class="horizontal dark mt-0">
+  <div class="w-auto" id="sidenav-collapse-main">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_dashboard' %}active{% endif %}" href="{{ path('app_admin_dashboard') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-chart-line text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_dashboard_users' %}active{% endif %}" href="{{ path('app_admin_dashboard_users') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-users text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Users</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'product_index' %}active{% endif %}" href="{{ path('product_index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-shopping-cart text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Products</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'order_index' %}active{% endif %}" href="{{ path('order_index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-clipboard-list text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Orders</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_dashboard_teams' %}active{% endif %}" href="{{ path('app_admin_dashboard_teams') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-users text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Teams</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_dashboard_tournoi' %}active{% endif %}" href="{{ path('app_admin_dashboard_tournoi') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-trophy text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Tournois</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'reclamation_index' %}active{% endif %}" href="{{ path('reclamation_index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-flag text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Réclamations</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_matches_index' %}active{% endif %}" href="{{ path('app_matches_index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-futbol text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Matches</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') starts with 'app_event' %}active{% endif %}" href="{{ path('app_event_index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-calendar-alt text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Événements</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if app.request.attributes.get('_route') starts with 'app_reservation' %}active{% endif %}" href="{{ path('app_reservation_index') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-bookmark text-dark"></i>
+          </div>
+          <span class="nav-link-text ms-1">Réservations</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</aside>
+
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+    <!-- Navbar -->
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
+      <div class="container-fluid py-1 px-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">User Management Dashboard</li>
+          </ol>
+          <h6 class="font-weight-bolder mb-0">User Analytics</h6>
+        </nav>
+        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+          <div class="ms-md-auto pe-md-3 d-flex align-items-center"></div>
+          <ul class="navbar-nav justify-content-end">
+            <li class="nav-item d-flex align-items-center">
+              <form method="post" action="{{ path('app_log_out') }}" id="logout-form" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                <button type="submit" class="nav-link btn btn-link text-body font-weight-bold px-3 m-0" style="border: none;">
+                  <i class="fa fa-sign-out me-sm-1"></i>
+                  <span class="d-sm-inline d-none">Log out</span>
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- End Navbar -->
+    {% block body %}
+      <div class="container-fluid py-4">
+        <!-- User Statistics Cards -->
+        <div class="row">
+          <!-- Total Users Card -->
+          <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Users</p>
+                      <h5 class="font-weight-bolder mb-0">{{ totalUsers|default(0) }}</h5>
+                      <p class="mb-0">
+                        <span class="text-success text-sm font-weight-bolder">+{{ userGrowthRate|default(0) }}%</span>
+                        this month
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                      <i class="fas fa-users text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Users Card -->
+          <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-uppercase font-weight-bold">Active Users</p>
+                      <h5 class="font-weight-bolder mb-0">{{ activeUsers|default(0) }}</h5>
+                      <p class="mb-0">
+                        <span class="text-success text-sm font-weight-bolder">{{ totalUsers|default(0) > 0 ? ((activeUsers|default(0) / totalUsers|default(1) * 100)|round) : 0 }}%</span>
+                        of total users
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                      <i class="fas fa-user-check text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Players Card -->
+          <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-uppercase font-weight-bold">Players</p>
+                      <h5 class="font-weight-bolder mb-0">{{ playerUsers|default(0) }}</h5>
+                      <p class="mb-0">
+                        <span class="text-info text-sm font-weight-bolder">{{ totalUsers|default(0) > 0 ? ((playerUsers|default(0) / totalUsers|default(1) * 100)|round) : 0 }}%</span>
+                        of total users
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-info shadow-info text-center rounded-circle">
+                      <i class="fas fa-gamepad text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Organizers Card -->
+          <div class="col-xl-3 col-sm-6">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-uppercase font-weight-bold">Organizers</p>
+                      <h5 class="font-weight-bolder mb-0">{{ organizerUsers|default(0) }}</h5>
+                      <p class="mb-0">
+                        <span class="text-warning text-sm font-weight-bolder">{{ totalUsers|default(0) > 0 ? ((organizerUsers|default(0) / totalUsers|default(1) * 100)|round) : 0 }}%</span>
+                        of total users
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+                      <i class="fas fa-calendar-check text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if registrationLabels is defined and registrationData is defined %}
+        <!-- Charts Row -->
+        <div class="row mt-4">
+          <!-- User Registration Trend Chart -->
+          <div class="col-lg-8 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0">
+                <div class="d-flex justify-content-between">
+                  <h6 class="mb-0">User Registration Trend</h6>
+                  <div class="dropdown">
+                    <button class="btn btn-link text-secondary mb-0" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa fa-ellipsis-v text-xs"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Action</a></li>
+                      <li><a class="dropdown-item" href="#">Another action</a></li>
+                      <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body p-3">
+                <div class="chart">
+                  <canvas id="registrationChart" class="chart-canvas" height="300"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- User Age Distribution Chart -->
+          <div class="col-lg-4">
+            <div class="card">
+              <div class="card-header pb-0">
+                <h6 class="mb-0">Age Distribution</h6>
+              </div>
+              <div class="card-body p-3">
+                <div class="chart">
+                  <canvas id="ageDistributionChart" class="chart-canvas" height="300"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+
+        {% endif %}
+      </div>
+    {% endblock %}
+
+    <footer class="footer pt-3">
+      <div class="container-fluid">
+        <div class="row align-items-center justify-content-lg-between">
+          <div class="col-lg-6 mb-lg-0 mb-4">
+            <div class="copyright text-center text-sm text-muted text-lg-start">
+              © <script>
+                document.write(new Date().getFullYear())
+              </script>,
+              made with <i class="fa fa-heart"></i> by
+              <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative Tim</a>
+              for a better web.
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+              <li class="nav-item">
+                <a href="https://www.creative-tim.com" class="nav-link text-muted" target="_blank">Creative Tim</a>
+              </li>
+              <li class="nav-item">
+                <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted" target="_blank">About Us</a>
+              </li>
+              <li class="nav-item">
+                <a href="https://www.creative-tim.com/blog" class="nav-link text-muted" target="_blank">Blog</a>
+              </li>
+              <li class="nav-item">
+                <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted" target="_blank">License</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+{% block javascripts %}
+  <!--   Core JS Files   -->
+  <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
+  <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
+  <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
+  <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    {% if registrationLabels is defined and registrationData is defined %}
+    // User Registration Trend Chart
+    const registrationCtx = document.getElementById('registrationChart').getContext('2d');
+    new Chart(registrationCtx, {
+      type: 'line',
+      data: {
+        labels: {{ registrationLabels|json_encode|raw }},
+        datasets: [{
+          label: 'New Users',
+          data: {{ registrationData|json_encode|raw }},
+          borderColor: '#5e72e4',
+          backgroundColor: 'rgba(94, 114, 228, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#5e72e4',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#5e72e4',
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: false,
+            callbacks: {
+              label: function(context) {
+                return context.parsed.y + ' new users';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e9ecef',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Age Distribution Chart
+    const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+    new Chart(ageCtx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys({{ ageDistribution|json_encode|raw }}),
+        datasets: [{
+          data: Object.values({{ ageDistribution|json_encode|raw }}),
+          backgroundColor: [
+            '#5e72e4',
+            '#11cdef',
+            '#fb6340',
+            '#2dce89',
+            '#f5365c'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: false
+          }
+        },
+        cutout: '70%'
+      }
+    });
+
+    // User Activity by Role Chart
+    const activityCtx = document.getElementById('userActivityChart').getContext('2d');
+    new Chart(activityCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Players', 'Organizers', 'Admins'],
+        datasets: [
+          {
+            label: 'Active',
+            data: [
+              {{ activeByRole.player }},
+              {{ activeByRole.organizer }},
+              {{ activeByRole.Admin }}
+            ],
+            backgroundColor: '#2dce89',
+            borderRadius: 4
+          },
+          {
+            label: 'Inactive',
+            data: [
+              {{ inactiveByRole.player }},
+              {{ inactiveByRole.organizer }},
+              {{ inactiveByRole.Admin }}
+            ],
+            backgroundColor: '#f5365c',
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e9ecef',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // User Ratings Distribution Chart
+    const ratingsCtx = document.getElementById('userRatingsChart').getContext('2d');
+    new Chart(ratingsCtx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys({{ ratingDistribution|json_encode|raw }}),
+        datasets: [{
+          label: 'Users',
+          data: Object.values({{ ratingDistribution|json_encode|raw }}),
+          backgroundColor: [
+            '#f5365c',
+            '#fb6340',
+            '#ffd600',
+            '#2dce89',
+            '#11cdef'
+          ],
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#5e72e4',
+            bodyColor: '#5e72e4',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+              label: function(context) {
+                return context.parsed.y + ' users';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e9ecef',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#5e72e4',
+              font: {
+                weight: 500
+              }
+            }
+          }
+        }
+      }
+    });
+    {% endif %}
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+  </script>
+{% endblock %}

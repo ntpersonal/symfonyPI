@@ -1,0 +1,46 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}Modifier la Réservation #{{ reservation.id }} | Sportify{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Modifier la réservation #{{ reservation.id }}</h6>
+                </div>
+                <div class="card-body">
+                    {{ include('admin_dashboard/reservations/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if app.flashes('success') is defined and app.flashes('success') is not empty %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        title: 'Succès!',
+        text: '{{ app.flashes('success')[0] }}',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+});
+</script>
+{% endif %}
+
+{% if app.flashes('error') is defined and app.flashes('error') is not empty %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        title: 'Erreur!',
+        text: '{{ app.flashes('error')[0] }}',
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+});
+</script>
+{% endif %}
+{% endblock %} 

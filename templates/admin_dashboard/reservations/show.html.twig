@@ -1,0 +1,173 @@
+{% extends 'admin_dashboard/dashboard.html.twig' %}
+
+{% block title %}Détails de la Réservation | Sportify{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Détails de la réservation #{{ reservation.id }}</h6>
+                    <div>
+                        <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                        <form method="post" action="{{ path('app_reservation_delete', {'id': reservation.id}) }}" class="delete-form" style="display: inline-block" data-id="{{ reservation.id }}" data-event="{{ reservation.event.nom }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.id) }}">
+                            <button type="button" class="btn btn-danger btn-sm delete-btn">Supprimer</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Informations générales</h5>
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <th>ID</th>
+                                                <td>{{ reservation.id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Date de réservation</th>
+                                                <td>{{ reservation.date ? reservation.date|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Statut</th>
+                                                <td>
+                                                    {% if reservation.status == 'pending' %}
+                                                        <span class="badge bg-warning">En attente</span>
+                                                    {% elseif reservation.status == 'approved' %}
+                                                        <span class="badge bg-success">Approuvé</span>
+                                                    {% elseif reservation.status == 'rejected' %}
+                                                        <span class="badge bg-danger">Rejeté</span>
+                                                    {% elseif reservation.status == 'cancelled' %}
+                                                        <span class="badge bg-secondary">Annulé</span>
+                                                    {% else %}
+                                                        <span class="badge bg-info">{{ reservation.status }}</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% if reservation.comment %}
+                                            <tr>
+                                                <th>Commentaire</th>
+                                                <td>{{ reservation.comment }}</td>
+                                            </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Événement</h5>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            {% if reservation.event.image is defined and reservation.event.image %}
+                                                <img src="{{ asset(reservation.event.image) }}" class="img-fluid rounded" style="max-height: 100px;" alt="{{ reservation.event.nom }}">
+                                            {% else %}
+                                                <img src="{{ asset('assets/images/small-logos/logo-spotify.svg') }}" style="max-height: 100px;" alt="Default">
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h4>{{ reservation.event.nom }}</h4>
+                                            <p class="text-muted">
+                                                {% if attribute(reservation.event, 'startTime') is defined %}
+                                                    {{ reservation.event.startTime|date('Y-m-d H:i') }}
+                                                {% elseif attribute(reservation.event, 'event_date') is defined %}
+                                                    {{ reservation.event.event_date|date('Y-m-d H:i') }}
+                                                {% else %}
+                                                    Date non spécifiée
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ path('app_event_show', {'id': reservation.event.id}) }}" class="btn btn-info btn-sm">
+                                        <i class="fa fa-eye me-2"></i>Voir l'événement
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Utilisateur</h5>
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <th>ID</th>
+                                                <td>{{ reservation.user.id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <td>{{ reservation.user.firstname }} {{ reservation.user.lastname }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Email</th>
+                                                <td>{{ reservation.user.email }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Téléphone</th>
+                                                <td>{{ reservation.user.phonenumber ?? 'Non spécifié' }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ path('app_reservation_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sweet Alert -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.all.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gérer les clics sur les boutons de suppression
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const form = this.closest('.delete-form');
+                const id = form.getAttribute('data-id');
+                const event = form.getAttribute('data-event');
+                
+                Swal.fire({
+                    title: 'Êtes-vous sûr?',
+                    html: `Vous êtes sur le point de supprimer la réservation pour l'événement <strong>${event}</strong>.<br>Cette action est irréversible!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Oui, supprimer!',
+                    cancelButtonText: 'Annuler',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,874 @@
+{# templates/chat/widget.html.twig
+<div id="chat-toggle-btn" class="btn-primary">💬</div>
+
+<div id="chat-widget" class="d-flex flex-column">
+  <div id="chat-header" class="d-flex justify-content-between align-items-center p-2 bg-primary text-white">
+    <span>Chat Bot</span>
+    <div class="d-flex">
+      <button id="clear-chat" class="btn btn-sm btn-light me-2" title="Effacer la conversation">
+        <i class="fas fa-trash"></i>
+      </button>
+      <button id="chat-close-btn" class="btn btn-sm btn-light">&times;</button>
+    </div>
+  </div>
+  <div id="chat-messages" class="flex-grow-1 p-2 overflow-auto"></div>
+  <div id="chat-typing" class="p-2 border-top bg-light d-none">
+    <div class="d-flex align-items-center">
+      <span class="small text-muted">Bot est en train d'écrire...</span>
+      <div class="spinner-grow spinner-grow-sm ms-2 text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+    </div>
+  </div>
+  <form id="chat-form" class="d-flex p-2 border-top bg-light">
+    <input type="text" id="chat-input" name="message" class="form-control me-2" placeholder="Tapez votre message…" required>
+    <button type="submit" class="btn btn-primary">Envoyer</button>
+  </form>
+</div>
+
+<style>
+  /* Bouton flottant */
+  #chat-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px; height: 56px;
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1050;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+  
+  #chat-toggle-btn:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Fenêtre de chat */
+  #chat-widget {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1050;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease forwards;
+  }
+  
+  #chat-header { cursor: move; }
+  
+  #chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #dee2e6 #f8f9fa;
+  }
+  
+  #chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  #chat-messages::-webkit-scrollbar-track {
+    background: #f8f9fa;
+  }
+  
+  #chat-messages::-webkit-scrollbar-thumb {
+    background-color: #dee2e6;
+    border-radius: 3px;
+  }
+  
+  /* Messages */
+  .suggested-questions {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+  
+  .suggested-question {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+    margin: 0.2rem;
+  }
+  
+  .btn-link {
+    text-decoration: none;
+    padding: 0.25rem;
+  }
+  
+  .btn-link:hover {
+    opacity: 0.8;
+  }
+  
+  /* Animation pour les messages */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  #chat-messages > div {
+    animation: fadeIn 0.3s ease forwards;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Sélection des éléments DOM
+  const toggle = document.getElementById('chat-toggle-btn');
+  const widget = document.getElementById('chat-widget');
+  const closeBtn = document.getElementById('chat-close-btn');
+  const clearChat = document.getElementById('clear-chat');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('chat-input');
+  const messages = document.getElementById('chat-messages');
+  const typing = document.getElementById('chat-typing');
+  
+  // Endpoint API
+  const endpoint = "{{ path('api_chat') }}";
+  
+  // Récupérer ou initialiser l'ID de conversation
+  let conversationId = sessionStorage.getItem('chatbot_conversation_id');
+  if (!conversationId) {
+    conversationId = generateUUID();
+    sessionStorage.setItem('chatbot_conversation_id', conversationId);
+  }
+  
+  // Afficher l'historique des messages s'il existe
+  const savedMessages = sessionStorage.getItem('chatbot_messages');
+  if (savedMessages) {
+    messages.innerHTML = savedMessages;
+    messages.scrollTop = messages.scrollHeight;
+  } else {
+    // Message d'accueil initial
+    appendMessage("Bonjour ! Comment puis-je vous aider aujourd'hui ?", 'bot');
+    
+    // Ajouter des questions suggerées
+    addSuggestedQuestions([
+      "Combien de match ces equipes ont jouees ?",
+      "Afficher les statistiques de buteur de cette chompionnat ?",
+    ]);
+  }
+  
+  // Ouvre/ferme le widget
+  toggle.addEventListener('click', () => {
+    widget.style.display = 'flex';
+    // Marquer comme lu
+    toggle.classList.remove('btn-danger');
+    toggle.classList.add('btn-primary');
+  });
+  
+  closeBtn.addEventListener('click', () => {
+    widget.style.display = 'none';
+  });
+  
+  // Effacer la conversation
+  clearChat.addEventListener('click', () => {
+    if (confirm('Voulez-vous vraiment effacer toute la conversation ?')) {
+      messages.innerHTML = '';
+      sessionStorage.removeItem('chatbot_messages');
+      
+      // Message d'accueil
+      appendMessage("Bonjour ! Comment puis-je vous aider aujourd'hui ?", 'bot');
+      
+      // Ajouter des questions suggerées
+      addSuggestedQuestions([
+        "How many goal scored in this tournament until now?",
+        "How many matches this teams played ?",
+        "What are the fotball rules?"
+      ]);
+    }
+  });
+  
+  // Gestion du chat
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = input.value.trim();
+    if (!msg) return;
+    
+    // Ajouter le message de l'utilisateur
+    appendMessage(msg, 'user');
+    saveMessages();
+    
+    // Effacer l'input
+    input.value = '';
+    
+    // Afficher l'indicateur de saisie
+    typing.classList.remove('d-none');
+    
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ 
+          message: msg,
+          conversationId: conversationId
+        })
+      });
+      
+      const data = await res.json();
+      
+      // Masquer l'indicateur de saisie
+      typing.classList.add('d-none');
+      
+      // Traiter la réponse
+      if (data.status === 'success' || data.reply) {
+        const reply = data.reply || data.message;
+        appendMessage(reply, 'bot');
+      } else if (data.status === 'not_football') {
+        appendMessage("Désolé, je ne peux répondre qu'aux questions liées au football. Pourriez-vous reformuler votre question ?", 'bot');
+      } else {
+        appendMessage("Désolé, je n'ai pas pu traiter votre demande. Veuillez réessayer plus tard.", 'bot');
+      }
+      
+      saveMessages();
+    } catch (error) {
+      console.error('Error:', error);
+      typing.classList.add('d-none');
+      appendMessage("Désolé, une erreur s'est produite lors de la communication avec le serveur.", 'bot');
+      saveMessages();
+    }
+  });
+  
+  // Fonction pour ajouter un message au chat
+  function appendMessage(message, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'd-flex mb-3' + (sender === 'user' ? ' justify-content-end' : '');
+    messageDiv.style.opacity = '0';
+    messageDiv.style.transform = 'translateY(20px)';
+    messageDiv.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = (sender === 'user' ? 'bg-primary text-white' : 'bg-light') + ' p-2 rounded-3 shadow-sm';
+    messageContent.style.maxWidth = '80%';
+    messageContent.style.position = 'relative';
+    
+    const messagePara = document.createElement('p');
+    messagePara.className = 'mb-0';
+    messagePara.innerHTML = formatMessage(message);
+    
+    // Ajouter le bouton de copie pour les messages du bot
+    if (sender === 'bot') {
+      const copyButton = document.createElement('button');
+      copyButton.className = 'btn btn-sm btn-link text-muted position-absolute top-0 end-0 p-1';
+      copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+      copyButton.title = 'Copier le message';
+      copyButton.style.opacity = '0';
+      copyButton.style.transition = 'opacity 0.2s ease';
+      
+      copyButton.addEventListener('click', function() {
+        navigator.clipboard.writeText(message).then(() => {
+          const originalIcon = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+            this.innerHTML = originalIcon;
+          }, 2000);
+        });
+      });
+      
+      messageContent.appendChild(copyButton);
+      
+      // Afficher le bouton de copie au survol
+      messageContent.addEventListener('mouseenter', () => {
+        copyButton.style.opacity = '1';
+      });
+      
+      messageContent.addEventListener('mouseleave', () => {
+        copyButton.style.opacity = '0';
+      });
+    }
+    
+    messageContent.appendChild(messagePara);
+    messageDiv.appendChild(messageContent);
+    messages.appendChild(messageDiv);
+    
+    // Animer l'apparition du message
+    setTimeout(() => {
+      messageDiv.style.opacity = '1';
+      messageDiv.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // Faire défiler vers le dernier message
+    messages.scrollTop = messages.scrollHeight;
+    
+    // Si c'est un message du bot et que le chat n'est pas visible, notifier l'utilisateur
+    if (sender === 'bot' && widget.style.display === 'none') {
+      toggle.classList.remove('btn-primary');
+      toggle.classList.add('btn-danger');
+    }
+  }
+  
+  // Ajouter des questions suggérées sous un message du bot
+  function addSuggestedQuestions(questions) {
+    const suggDiv = document.createElement('div');
+    suggDiv.className = 'suggested-questions mt-3';
+    
+    const textP = document.createElement('p');
+    textP.className = 'text-muted small mb-2';
+    textP.textContent = 'Questions suggérées :';
+    suggDiv.appendChild(textP);
+    
+    const btnContainer = document.createElement('div');
+    btnContainer.className = 'd-flex flex-wrap gap-2';
+    
+    questions.forEach(q => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-sm btn-outline-primary suggested-question';
+      btn.textContent = q;
+      btn.addEventListener('click', () => {
+        input.value = q;
+        form.dispatchEvent(new Event('submit'));
+      });
+      btnContainer.appendChild(btn);
+    });
+    
+    suggDiv.appendChild(btnContainer);
+    messages.appendChild(suggDiv);
+  }
+  
+  // Formater le message avec support Markdown basique
+  function formatMessage(message) {
+    // Convertir les liens
+    message = message.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary">$1</a>');
+    
+    // Convertir le texte en gras
+    message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Convertir le texte en italique
+    message = message.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Convertir les listes
+    message = message.replace(/^- (.*?)$/gm, '<li>$1</li>');
+    message = message.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+    
+    return message;
+  }
+  
+  // Sauvegarder les messages dans le stockage de session
+  function saveMessages() {
+    sessionStorage.setItem('chatbot_messages', messages.innerHTML);
+  }
+  
+  // Générer un UUID pour identifier la conversation
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+  
+  // Rendre le chat déplaçable
+  makeDraggable(widget, document.getElementById('chat-header'));
+  
+  // Rendre un élément déplaçable
+  function makeDraggable(element, handle) {
+    let posX = 0, posY = 0, posInitX = 0, posInitY = 0;
+    
+    handle.onmousedown = dragMouseDown;
+    
+    function dragMouseDown(e) {
+      e.preventDefault();
+      // Position initiale du curseur
+      posInitX = e.clientX;
+      posInitY = e.clientY;
+      document.onmouseup = closeDragElement;
+      document.onmousemove = elementDrag;
+    }
+    
+    function elementDrag(e) {
+      e.preventDefault();
+      // Calculer la nouvelle position
+      posX = posInitX - e.clientX;
+      posY = posInitY - e.clientY;
+      posInitX = e.clientX;
+      posInitY = e.clientY;
+      // Définir la nouvelle position de l'élément
+      element.style.right = (parseInt(getComputedStyle(element).right) + posX) + "px";
+      element.style.bottom = (parseInt(getComputedStyle(element).bottom) - posY) + "px";
+    }
+    
+    function closeDragElement() {
+      // Arrêter le mouvement
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  }
+});
+</script> #}
+
+{# templates/chat/widget.html.twig 
+<div id="chat-toggle-btn" class="btn-primary">💬</div>
+
+<div id="chat-widget" class="d-flex flex-column" style="display:none;">
+  <div id="chat-header" class="d-flex justify-content-between align-items-center p-2 bg-primary text-white">
+    <span>Chat Bot</span>
+    <div class="d-flex">
+      <button id="clear-chat" class="btn btn-sm btn-light me-2" title="Effacer la conversation">
+        <i class="fas fa-trash"></i>
+      </button>
+      <button id="chat-close-btn" class="btn btn-sm btn-light">&times;</button>
+    </div>
+  </div>
+  <div id="chat-messages" class="flex-grow-1 p-2 overflow-auto"></div>
+  <div id="chat-typing" class="p-2 border-top bg-light d-none">
+    <div class="d-flex align-items-center">
+      <span class="small text-muted">Bot est en train d'écrire...</span>
+      <div class="spinner-grow spinner-grow-sm ms-2 text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+    </div>
+  </div>
+  <form id="chat-form" class="d-flex p-2 border-top bg-light">
+    <input type="text" id="chat-input" name="message" class="form-control me-2" placeholder="Tapez votre message…" required>
+    <button type="submit" class="btn btn-primary">Envoyer</button>
+  </form>
+</div>
+
+<style>
+  /* Bouton flottant */
+  #chat-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* Position à gauche */
+    width: 56px; height: 56px;
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1050;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+  }
+
+  #chat-toggle-btn:hover {
+    transform: scale(1.1);
+  }
+
+  /* Fenêtre de chat */
+  #chat-widget {
+    display: none !important;
+    position: fixed;
+    bottom: 90px;
+    left: 20px; /* Position à gauche */
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    flex-direction: column;
+    z-index: 1050;
+    overflow: hidden;
+  }
+
+  #chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+
+  #chat-header { cursor: move; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('chat-toggle-btn');
+  const widget = document.getElementById('chat-widget');
+  const closeBtn = document.getElementById('chat-close-btn');
+  const clearChat = document.getElementById('clear-chat');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('chat-input');
+  const messages = document.getElementById('chat-messages');
+  const typing = document.getElementById('chat-typing');
+  const endpoint = "{{ path('api_chat') }}";
+
+  let conversationId = sessionStorage.getItem('chatbot_conversation_id');
+  if (!conversationId) {
+    conversationId = generateUUID();
+    sessionStorage.setItem('chatbot_conversation_id', conversationId);
+  }
+
+  const savedMessages = sessionStorage.getItem('chatbot_messages');
+  if (savedMessages) {
+    messages.innerHTML = savedMessages;
+    messages.scrollTop = messages.scrollHeight;
+  } else {
+    appendMessage("Bonjour ! Comment puis-je vous aider aujourd'hui ?", 'bot');
+  }
+
+  toggle.onclick = () => {
+    widget.style.display = 'flex';
+    toggle.classList.remove('btn-danger');
+    toggle.classList.add('btn-primary');
+  };
+
+  closeBtn.onclick = () => widget.style.display = 'none';
+
+  clearChat.onclick = () => {
+    messages.innerHTML = '';
+    sessionStorage.removeItem('chatbot_messages');
+    appendMessage("Bonjour ! Comment puis-je vous aider aujourd'hui ?", 'bot');
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = input.value.trim();
+    if (!msg) return;
+    appendMessage(msg, 'user');
+    saveMessages();
+    input.value = '';
+    typing.classList.remove('d-none');
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, conversationId })
+      });
+      const data = await res.json();
+      typing.classList.add('d-none');
+      appendMessage(data.reply || data.message || "Désolé, je ne comprends pas.", 'bot');
+      saveMessages();
+    } catch (error) {
+      typing.classList.add('d-none');
+      appendMessage("Erreur de connexion au serveur.", 'bot');
+      saveMessages();
+    }
+  });
+
+  function appendMessage(message, sender) {
+    const div = document.createElement('div');
+    div.className = `mb-2 ${sender === 'user' ? 'text-end' : 'text-start'}`;
+    div.innerHTML = `<span class="badge ${sender === 'user' ? 'bg-primary' : 'bg-light text-dark'} p-2">${message}</span>`;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+
+    if (sender === 'bot' && widget.style.display === 'none') {
+      toggle.classList.remove('btn-primary');
+      toggle.classList.add('btn-danger');
+    }
+  }
+
+  function saveMessages() {
+    sessionStorage.setItem('chatbot_messages', messages.innerHTML);
+  }
+
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+});
+</script>#}
+{# templates/chat/widget.html.twig #}
+
+{# templates/chat/widget.html.twig #}
+
+<div id="chat-toggle-btn" class="btn-primary">💬</div>
+
+<div id="chat-widget" style="display: none;">
+  <div id="chat-header">
+    <span>Chat Bot</span>
+    <div>
+      <button id="clear-chat" title="Effacer la conversation">
+        <i class="fas fa-trash"></i>
+      </button>
+      <button id="chat-close-btn">&times;</button>
+    </div>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-typing" style="display: none;">
+    <div>
+      <span>Bot est en train d'écrire...</span>
+      <div class="typing-spinner"></div>
+    </div>
+  </div>
+  <form id="chat-form">
+    <input type="text" id="chat-input" placeholder="Tapez votre message…" required>
+    <button type="submit">Envoyer</button>
+  </form>
+</div>
+
+<style>
+  #chat-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 56px; 
+    height: 56px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1050;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+
+  #chat-widget {
+    position: fixed;
+    bottom: 90px;
+    left: 20px;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+    overflow: hidden;
+  }
+
+  #chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    cursor: move;
+  }
+
+  #chat-header div {
+    display: flex;
+  }
+
+  #chat-header button {
+    background: white;
+    border: none;
+    border-radius: 4px;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+  }
+
+  #chat-messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  #chat-typing {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background-color: #f8f9fa;
+  }
+
+  #chat-typing div {
+    display: flex;
+    align-items: center;
+  }
+
+  #chat-typing span {
+    font-size: 12px;
+    color: #6c757d;
+  }
+
+  .typing-spinner {
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background-color: #007bff;
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    50% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.8; }
+  }
+
+  #chat-form {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background-color: #f8f9fa;
+  }
+
+  #chat-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+
+  #chat-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+
+  .user-message, .bot-message {
+    margin-bottom: 10px;
+    display: flex;
+  }
+
+  .user-message {
+    justify-content: flex-end;
+  }
+
+  .message-content {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 18px;
+  }
+
+  .user-message .message-content {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .bot-message .message-content {
+    background-color: #f1f1f1;
+    color: #333;
+  }
+</style>
+
+<script>
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Get elements
+  var toggleBtn = document.getElementById('chat-toggle-btn');
+  var chatWidget = document.getElementById('chat-widget');
+  var closeBtn = document.getElementById('chat-close-btn');
+  var chatForm = document.getElementById('chat-form');
+  var chatInput = document.getElementById('chat-input');
+  var chatMessages = document.getElementById('chat-messages');
+  var typingIndicator = document.getElementById('chat-typing');
+  var clearChatBtn = document.getElementById('clear-chat');
+  var endpoint = "{{ path('api_chat') }}";
+  
+  // Initialize conversation ID
+  var conversationId = localStorage.getItem('chatbot_conversation_id');
+  if (!conversationId) {
+    conversationId = generateUUID();
+    localStorage.setItem('chatbot_conversation_id', conversationId);
+  }
+  
+  // Load saved messages
+  var savedMessages = localStorage.getItem('chatbot_messages');
+  if (savedMessages) {
+    chatMessages.innerHTML = savedMessages;
+  }
+  
+  // Toggle button click handler
+  toggleBtn.onclick = function() {
+    if (chatWidget.style.display === 'none' || chatWidget.style.display === '') {
+      chatWidget.style.display = 'flex';
+    } else {
+      chatWidget.style.display = 'none';
+    }
+  };
+  
+  // Close button click handler
+  closeBtn.onclick = function() {
+    chatWidget.style.display = 'none';
+  };
+  
+  // Clear chat button click handler
+  clearChatBtn.onclick = function() {
+    chatMessages.innerHTML = '';
+    localStorage.removeItem('chatbot_messages');
+  };
+  
+  // Form submit handler
+  chatForm.onsubmit = function(e) {
+    e.preventDefault();
+    var message = chatInput.value.trim();
+    if (!message) return;
+    
+    // Add user message
+    addMessage(message, 'user');
+    chatInput.value = '';
+    
+    // Show typing indicator
+    typingIndicator.style.display = 'block';
+    
+    // Send message to server
+ fetch(endpoint, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    message: message,
+    conversationId: conversationId,
+    contextType: '{{ contextType|default('') }}',
+    contextId: '{{ contextId|default('') }}',
+    contextData: {{ contextData|default([])|json_encode|raw }}
+  })
+})
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      // Hide typing indicator
+      typingIndicator.style.display = 'none';
+      
+      // Add bot response
+      var botReply = data.reply || data.message || "Désolé, je ne comprends pas.";
+      addMessage(botReply, 'bot');
+    })
+    .catch(function(error) {
+      // Hide typing indicator
+      typingIndicator.style.display = 'none';
+      
+      // Add error message
+      addMessage("Erreur de connexion au serveur.", 'bot');
+      console.error('Error:', error);
+    });
+  };
+  
+  // Add message to chat
+  function addMessage(text, sender) {
+    var messageDiv = document.createElement('div');
+    messageDiv.className = sender === 'user' ? 'user-message' : 'bot-message';
+    
+    var contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.textContent = text;
+    
+    messageDiv.appendChild(contentDiv);
+    chatMessages.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Save messages
+    localStorage.setItem('chatbot_messages', chatMessages.innerHTML);
+  }
+  
+  // Generate UUID for conversation
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+});
+</script>

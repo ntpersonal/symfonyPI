@@ -1,0 +1,189 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}Player Details{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .player-details-container {
+            padding: 2rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .player-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .player-meta {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #046bd2;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .player-bio {
+            margin-top: 2rem;
+            line-height: 1.6;
+        }
+
+        .achievements {
+            margin-top: 2rem;
+        }
+
+        .achievement-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .achievement-icon {
+            color: #046bd2;
+        }
+
+        @media (max-width: 768px) {
+            .player-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .player-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+     <div class="banner banner1">
+        <div class="inner-page-banner banner-bg">
+            <div class="container">
+                <div class="banner-content">
+                    <div class="page-path">
+                        <ul>
+                            <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                            <li><a class="current-page" href="#">Team</a></li>
+                        </ul>
+                    </div>
+                    <h1 class="banner-heading">OUR AVENGERS</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
+
+{% block content %}
+{% if app.user and app.user.team is not null and app.user.role == 'organizer' or app.user.role =='player' %}
+
+    <div class="container py-5">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <div class="card mb-4">
+                <div class="card-body">
+                    
+                     {% if player.profilepicture %}
+                               <img  class="img-fluid rounded-circle mb-3"
+                             style="width: 200px; height: 200px; object-fit: cover;"
+                             src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" alt="{{ player.firstname }} {{ player.lastname }} photo">
+                            {% else %}
+                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image"  class="img-fluid rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+                            {% endif %}
+                    <h2>{{ player.firstname }} {{ player.lastname }}</h2>
+                    <span class="badge bg-primary">{{ player.position|default('PLAYER')|upper }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Player Details</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Team</dt>
+                        <dd class="col-sm-9">
+                            {% if player.team %}
+                                {{ player.team.nom }} {# Access the team name property #}
+                            {% else %}
+                                No team assigned
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-3">Birth Date</dt>
+                        <dd class="col-sm-9">{{ player.dateofbirth ? player.dateofbirth|date('Y-m-d') : 'Unknown' }}</dd>
+                        
+                        <dt class="col-sm-3">Nationality</dt>
+                        <dd class="col-sm-9">{{ player.nationality|default('Unknown') }}</dd>
+                        
+                        <dt class="col-sm-3">Rating</dt>
+                        <dd class="col-sm-9">
+                            {% if player.rating %}
+                                <div class="star-rating" data-rating="{{ player.rating / 20 }}"></div>
+                                ({{ player.rating }}/100)
+                            {% else %}
+                                Not rated yet
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %} 

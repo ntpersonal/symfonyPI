@@ -1,0 +1,245 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}Checkout{% endblock %}
+{% block banner %}
+<!--================= Banner Section Start Here =================-->
+        <div class="banner banner1">
+            <div class="inner-page-banner banner-bg">
+                <div class="container">
+                    <div class="banner-content">
+                        <div class="page-path">
+                            <ul>
+                                <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                                <li><a class="current-page" href="#">Checkout</a></li>
+                            </ul>
+                        </div>
+                        <h1 class="banner-heading">CHECKOUT</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--================= Banner Section End Here =================-->
+{% endblock %}
+{% block content %}
+<!--================= Checkout Section strat Here =================-->
+    <div class="rts-checkout-section">
+        <div class="container">
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('warning') %}
+                <div class="alert alert-warning mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            <div class="row justify-content-between">
+                <div class="col-xl-8">
+                    <div class="checkout-form-wrapper">
+                        <h3 class="mb-4">Billing & Shipping Information</h3>
+                        
+                        <form id="payment-form" action="{{ path('app_shop_checkout_process') }}" method="post" class="checkout-form">
+                            <div class="row mb-4">
+                                <div class="col-xl-12">
+                                    <div class="input-div">
+                                        <label for="homeaddress">Home Address</label>
+                                        <input type="text" id="homeaddress" name="homeaddress" placeholder="Your delivery address" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+
+                            <div class="row mb-4">
+                                <div class="col-xl-6 col-md-6">
+                                    <div class="input-div">
+                                        <label for="phonenum">Phone Number</label>
+                                        <input type="tel" id="phonenum" name="phonenum" placeholder="Your phone number" required>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6 col-md-6">
+                                    <div class="input-div">
+                                        <label for="email">Email Address</label>
+                                        <input type="email" id="email" name="email" placeholder="Your email address" value="{{ app.user ? app.user.email : '' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+
+                            <h4 class="mt-5 mb-3">Payment Information</h4>
+                            
+
+                            <div class="input-div mb-4">
+                                <label for="card-element">Credit or Debit Card</label>
+                                <div id="card-element" style="padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: white;">
+                                    <!-- Stripe Element will be inserted here -->
+                                </div>
+                                <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                            </div>
+                            
+
+                            <button type="submit" class="place-order-btn">Complete Order</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="col-xl-4">
+                    <div class="order-summary">
+                        <h3>Order Summary</h3>
+                        
+                        <div class="product-list">
+                            {% for item in cart_items|default([]) %}
+                                <div class="product-item">
+                                    <div class="product-name">{{ item.product.nameproduct }} × {{ item.quantity }}</div>
+                                    <div class="product-price">${{ (item.product.priceproduct * item.quantity)|number_format(2, '.', ',') }}</div>
+                                </div>
+                            {% else %}
+                                <div class="product-item">
+                                    <div class="product-name">Your cart is empty</div>
+                                    <div class="product-price">$0.00</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="subtotal">
+                            <div class="subtotal-name">Subtotal</div>
+                            <div class="subtotal-price">${{ cart_total|default(0)|number_format(2, '.', ',') }}</div>
+                        </div>
+                        
+                        <div class="shipping">
+                            <div class="shipping-name">Shipping</div>
+                            <div class="shipping-options">
+                                <div class="shipping-option">
+                                    <input type="radio" id="flat-rate" name="shipping" checked>
+                                    <label for="flat-rate">Flat rate</label>
+                                </div>
+                                <div class="shipping-option">
+                                    <input type="radio" id="free-shipping" name="shipping">
+                                    <label for="free-shipping">Free shipping</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="total">
+                            <div class="total-name">Total</div>
+                            <div class="total-price">${{ cart_total|default(0)|number_format(2, '.', ',') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Checkout Section End Here =================-->
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create a Stripe client
+            var stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+            var elements = stripe.elements();
+            
+            // Create an instance of the card Element
+            var card = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#32325d',
+                        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                        fontSmoothing: 'antialiased',
+                        '::placeholder': {
+                            color: '#aab7c4'
+                        }
+                    },
+                    invalid: {
+                        color: '#fa755a',
+                        iconColor: '#fa755a'
+                    }
+                }
+            });
+            
+            // Add an instance of the card Element into the `card-element` div
+            card.mount('#card-element');
+            
+            // Handle real-time validation errors from the card Element
+            card.addEventListener('change', function(event) {
+                var displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.textContent = '';
+                }
+            });
+            
+            // Handle form submission
+            var form = document.getElementById('payment-form');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Validate form fields
+                var homeAddress = document.getElementById('homeaddress');
+                var phoneNum = document.getElementById('phonenum');
+                var email = document.getElementById('email');
+                
+                var isValid = true;
+                
+                if (!homeAddress.value.trim()) {
+                    isValid = false;
+                    homeAddress.classList.add('is-invalid');
+                } else {
+                    homeAddress.classList.remove('is-invalid');
+                }
+                
+                if (!phoneNum.value.trim()) {
+                    isValid = false;
+                    phoneNum.classList.add('is-invalid');
+                } else {
+                    phoneNum.classList.remove('is-invalid');
+                }
+                
+                if (!email.value.trim()) {
+                    isValid = false;
+                    email.classList.add('is-invalid');
+                } else {
+                    email.classList.remove('is-invalid');
+                }
+                
+                if (!isValid) {
+                    return;
+                }
+                
+                stripe.createToken(card).then(function(result) {
+                    if (result.error) {
+                        // Inform the user if there was an error
+                        var errorElement = document.getElementById('card-errors');
+                        errorElement.textContent = result.error.message;
+                    } else {
+                        // Send the token to your server
+                        stripeTokenHandler(result.token);
+                    }
+                });
+            });
+            
+            // Submit the form with the token ID
+            function stripeTokenHandler(token) {
+                // Insert the token ID into the form so it gets submitted to the server
+                var form = document.getElementById('payment-form');
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'stripeToken');
+                hiddenInput.setAttribute('value', token.id);
+                form.appendChild(hiddenInput);
+                
+                // Submit the form
+                form.submit();
+            }
+        });
+    </script>
+{% endblock %}

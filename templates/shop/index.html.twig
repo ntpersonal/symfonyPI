@@ -1,0 +1,419 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}Shop - Sportius{% endblock %}
+
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+    <div class="banner banner1">
+        <div class="swiper bannerSlide">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <div class="banner-single banner-single-1 banner-bg">
+                        <div class="container">
+                            <div class="banner-content">
+                                <span class="pretitle">WELCOME TO OUR SHOP</span>
+                                <h1 class="banner-heading">OFFICIAL TEAM <BR>
+                                    MERCHANDISE</h1>
+                                <div class="banner-btn-area">
+                                    <a href="#products-section" class="team-btn banner-btn">VIEW PRODUCTS <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    <a href="{{ path('app_shop_cart') }}" class="nxt-match-btn banner-btn">VIEW CART <i class="far fa-long-arrow-right ml--5"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="banner-single banner-single-1_2 banner-bg">
+                        <div class="container">
+                            <div class="banner-content">
+                                <span class="pretitle">PREMIUM QUALITY PRODUCTS</span>
+                                <h1 class="banner-heading">SPORTIUS <BR>
+                                    OFFICIAL STORE</h1>
+                                <div class="banner-btn-area">
+                                    <a href="#products-section" class="team-btn banner-btn">VIEW PRODUCTS <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    <a href="{{ path('app_shop_cart') }}" class="nxt-match-btn banner-btn">VIEW CART <i class="far fa-long-arrow-right ml--5"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="banner-single banner-single-3 banner-bg">
+                        <div class="container">
+                            <div class="banner-content">
+                                <span class="pretitle">EXCLUSIVE COLLECTION</span>
+                                <h1 class="banner-heading">CHAMPION <BR>
+                                    MERCHANDISE</h1>
+                                <div class="banner-btn-area">
+                                    <a href="#products-section" class="team-btn banner-btn">VIEW PRODUCTS <i class="far fa-long-arrow-right ml--5"></i></a>
+                                    <a href="{{ path('app_shop_cart') }}" class="nxt-match-btn banner-btn">VIEW CART <i class="far fa-long-arrow-right ml--5"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+
+    </div>
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
+
+{% block content %}
+
+
+    <!--================= Product Section Start Here =================-->
+    <div class="rts-product-section section-gap" id="products-section">
+        <div class="contain
+        er">
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success mb-4">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('warning') %}
+                <div class="alert alert-warning mb-4">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="title-area text-center">
+                        <span class="pretitle">OUR PRODUCTS</span>
+                        <h2 class="section-title">OFFICIAL MERCHANDISE</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search and Filter -->
+            <div class="row mb-5">
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form method="get" action="{{ path('app_shop') }}" class="product-filter-form">
+                                <div class="row align-items-center">
+                                    <div class="col-md-5 mb-3 mb-md-0">
+                                        <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ searchTerm|default('') }}">
+                                    </div>
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <select name="category" class="form-select">
+                                            <option value="">All Categories</option>
+                                            <option value="tournement" {% if selectedCategory|default('') == 'tournement' %}selected{% endif %}>Tournament Equipment</option>
+                                            <option value="clothes" {% if selectedCategory|default('') == 'clothes' %}selected{% endif %}>Sports Clothes</option>
+                                            <option value="trophies" {% if selectedCategory|default('') == 'trophies' %}selected{% endif %}>Trophies & Awards</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="rts-btn btn-primary w-100">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4 mt-3 mt-md-0">
+                            <form method="post" action="{{ path('app_shop_image_search') }}" enctype="multipart/form-data" class="image-search-form">
+                                <div class="input-group">
+                                    <input type="file" name="image_search" class="form-control" accept="image/*" required>
+                                    <button type="submit" class="rts-btn btn-secondary">
+                                        <i class="fal fa-camera me-2"></i> Search by Image
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if imageSearch is defined and imageSearch %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h5><i class="fal fa-image me-2"></i> Image Search Results</h5>
+                            <p>Showing products that match your uploaded image. <a href="{{ path('app_shop') }}" class="btn btn-sm btn-primary">See All Products</a></p>
+                            
+                            {% if aiAnalysis is defined and aiAnalysis %}
+                                <div class="mt-2">
+                                    <h6>AI Analysis:</h6>
+                                    <ul class="list-unstyled">
+                                        {% if aiAnalysis.labels is defined %}
+                                            <li><strong>Detected:</strong> 
+                                                {% for label in aiAnalysis.labels|slice(0, 5) %}
+                                                    <span class="badge bg-primary me-1">{{ label.description }}</span>
+                                                {% endfor %}
+                                            </li>
+                                        {% endif %}
+                                        {% if aiAnalysis.colors is defined %}
+                                            <li><strong>Colors:</strong> 
+                                                {% for color in aiAnalysis.colors|slice(0, 3) %}
+                                                    <span class="badge me-1" style="background-color: {{ color.hex }}; color: {% if color.hex == '#FFFFFF' %}#000000{% else %}#FFFFFF{% endif %}">{{ color.name }}</span>
+                                                {% endfor %}
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Products Grid -->
+            <div class="row">
+                {% for product in products %}
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-4">
+                        <div class="product-item">
+                            <div class="product-thumb">
+                                <a href="{{ path('app_product_details', {'id': product.id}) }}">
+                                    {% if product.image %}
+                                        <img src="{{ asset('uploads/products/' ~ product.image) }}" alt="{{ product.nameproduct }}">
+                                    {% else %}
+                                        <img src="https://placehold.co/400x300" alt="Default Image">
+                                    {% endif %}
+                                </a>
+                                {% if product.stock == 'yes' %}
+                                    <div class="cart-area">
+                                        <form action="{{ path('cart_add', {'id': product.id}) }}" method="post">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="cart-icon"><i class="fal fa-shopping-cart"></i></button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="product-content">
+                                <div class="product-header">
+                                    <h3 class="product-title">
+                                        <a href="{{ path('app_product_details', {'id': product.id}) }}">{{ product.nameproduct }}</a>
+                                    </h3>
+                                    <div class="product-category">{{ product.category|capitalize }}</div>
+                                </div>
+                                <div class="product-meta">
+                                    <div class="product-price">${{ product.priceproduct }}</div>
+                                    <div class="product-stock">
+                                        {% if product.stock == 'yes' %}
+                                            <span class="in-stock">In Stock</span>
+                                        {% else %}
+                                            <span class="out-of-stock">Out of Stock</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="product-actions mt-3">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <a href="{{ path('app_product_details', {'id': product.id}) }}" class="rts-btn btn-secondary btn-sm w-100">Details</a>
+                                        </div>
+                                        <div class="col-6">
+                                            {% if product.stock == 'yes' %}
+                                                <form action="{{ path('cart_add', {'id': product.id}) }}" method="post">
+                                                    <input type="hidden" name="quantity" value="1">
+                                                    <button type="submit" class="rts-btn btn-primary btn-sm w-100">Add to Cart</button>
+                                                </form>
+                                            {% else %}
+                                                <button class="rts-btn btn-secondary btn-sm w-100" disabled>Out of Stock</button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <div class="no-product-found">
+                            <i class="fal fa-shopping-bag fa-3x mb-3"></i>
+                            <h3>No products found</h3>
+                            <p>Try adjusting your search criteria</p>
+                            <a href="{{ path('app_shop') }}" class="rts-btn btn-primary mt-3">View All Products</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="pagination-area">
+                        <button class="prev-page"><i class="fal fa-long-arrow-left"></i></button>
+                        <button class="page-number active">1</button>
+                        <button class="page-number">2</button>
+                        <button class="page-number">3</button>
+                        <button class="next-page"><i class="fal fa-long-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Product Section End Here =================-->
+    
+    <!--================= Featured Products Section Start Here =================-->
+    <div class="rts-team-section section-gap bg-team">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="title-area text-center">
+                        <span class="pretitle">TOP PICKS</span>
+                        <h2 class="section-title">FEATURED PRODUCTS</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                {% for product in products|slice(0, 3) %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="team-card">
+                            <div class="team-img">
+                                <a href="{{ path('app_product_details', {'id': product.id}) }}">
+                                    {% if product.image %}
+                                        <img src="{{ asset('uploads/products/' ~ product.image) }}" alt="{{ product.nameproduct }}">
+                                    {% else %}
+                                        <img src="https://placehold.co/400x300" alt="Default Image">
+                                    {% endif %}
+                                </a>
+                            </div>
+                            <div class="team-content">
+                                <div class="team-info">
+                                    <h3 class="team-name">
+                                        <a href="{{ path('app_product_details', {'id': product.id}) }}">{{ product.nameproduct }}</a>
+                                    </h3>
+                                    <span class="team-designation">${{ product.priceproduct }}</span>
+                                </div>
+                                <div class="team-social">
+                                    {% if product.stock == 'yes' %}
+                                        <form action="{{ path('cart_add', {'id': product.id}) }}" method="post">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="social-links">
+                                                <i class="fal fa-shopping-cart"></i>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="social-links out-of-stock">
+                                            <i class="fal fa-times-circle"></i>
+                                        </span>
+                                    {% endif %}
+                                    <a href="{{ path('app_product_details', {'id': product.id}) }}" class="social-links">
+                                        <i class="fal fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 text-center">
+                        <p class="text-white">No featured products available</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <!--================= Featured Products Section End Here =================-->
+    
+    <!--================= Categories Section Start Here =================-->
+    <div class="rts-match-section section-gap">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="title-area text-center">
+                        <span class="pretitle">BROWSE</span>
+                        <h2 class="section-title">PRODUCT CATEGORIES</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="match-card">
+                        <div class="match-content">
+                            <h3 class="match-title">Tournament Equipment</h3>
+                            <p>Everything you need for your next tournament. Balls, whistles, flags, and more.</p>
+                            <a href="{{ path('app_shop', {'category': 'tournement'}) }}" class="rts-btn btn-primary">View Products</a>
+                        </div>
+                        <div class="match-thumb">
+                            <img src="{{ asset('assets/images/img_1.jpg') }}" alt="Tournament Equipment">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="match-card">
+                        <div class="match-content">
+                            <h3 class="match-title">Sports Clothes</h3>
+                            <p>High-quality jerseys, shorts, socks, and more for your team or individual use.</p>
+                            <a href="{{ path('app_shop', {'category': 'clothes'}) }}" class="rts-btn btn-primary">View Products</a>
+                        </div>
+                        <div class="match-thumb">
+                            <img src="{{ asset('assets/images/img_2.jpg') }}" alt="Sports Clothes">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="match-card">
+                        <div class="match-content">
+                            <h3 class="match-title">Trophies & Awards</h3>
+                            <p>Celebrate your victories with our selection of trophies, medals, and awards.</p>
+                            <a href="{{ path('app_shop', {'category': 'trophies'}) }}" class="rts-btn btn-primary">View Products</a>
+                        </div>
+                        <div class="match-thumb">
+                            <img src="{{ asset('assets/images/img_3.jpg') }}" alt="Trophies & Awards">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Categories Section End Here =================-->
+    
+    <!--================= Cart Button Section Start Here =================-->
+    <div class="rts-cta-section">
+        <div class="container">
+            <div class="cta-inner">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <div class="cta-content">
+                            <h2 class="cta-title">Ready to checkout?</h2>
+                            <p>View your cart to complete your purchase</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <a href="{{ path('app_shop_cart') }}" class="rts-btn btn-secondary">
+                            <i class="fal fa-shopping-cart me-2"></i> View Cart 
+                            ({{ app.session.get('cart')|default([])|reduce((carry, v) => carry + v, 0)|default(0) }})
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Cart Button Section End Here =================-->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Image preview for image search
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.querySelector('input[name="image_search"]');
+            if (imageInput) {
+                imageInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const fileSize = this.files[0].size / 1024 / 1024; // in MB
+                        if (fileSize > 5) {
+                            alert('File size exceeds 5MB. Please select a smaller image.');
+                            this.value = '';
+                            return;
+                        }
+                        
+                        // File type validation
+                        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                        if (!validTypes.includes(this.files[0].type)) {
+                            alert('Invalid file type. Please select a JPEG, PNG, GIF, or WEBP image.');
+                            this.value = '';
+                            return;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

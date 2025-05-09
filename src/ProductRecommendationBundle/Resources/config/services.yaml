@@ -1,0 +1,39 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    # Register the bundle's services
+    App\ProductRecommendationBundle\:
+        resource: '../../*'
+        exclude: '../../{Entity,Migrations,Tests}'
+
+    # Main recommendation service
+    App\ProductRecommendationBundle\Services\ProductRecommendationService:
+        public: true
+        arguments:
+            - '@doctrine'
+        calls:
+            - [addStrategy, ['@App\ProductRecommendationBundle\Services\RecommendationStrategy\SameCategoryStrategy']]
+            - [addStrategy, ['@App\ProductRecommendationBundle\Services\RecommendationStrategy\PopularProductsStrategy']]
+            - [addStrategy, ['@App\ProductRecommendationBundle\Services\RecommendationStrategy\PriceRangeStrategy']]
+
+    # Recommendation strategies
+    App\ProductRecommendationBundle\Services\RecommendationStrategy\SameCategoryStrategy:
+        arguments:
+            - '@doctrine'
+            
+    App\ProductRecommendationBundle\Services\RecommendationStrategy\PopularProductsStrategy:
+        arguments:
+            - '@doctrine'
+            
+    App\ProductRecommendationBundle\Services\RecommendationStrategy\PriceRangeStrategy:
+        arguments:
+            - '@doctrine'
+
+    # Controllers
+    App\ProductRecommendationBundle\Controller\RecommendationController:
+        arguments:
+            - '@App\ProductRecommendationBundle\Services\ProductRecommendationService'
+        tags: ['controller.service_arguments']

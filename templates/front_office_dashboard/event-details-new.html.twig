@@ -1,0 +1,677 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+
+{% block title %}{{ event is defined and event ? event.nom : 'Détails de l\'événement' }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
+    <style>
+        .event-hero {
+            position: relative;
+            height: 450px;
+            background-size: cover;
+            background-position: center center;
+            color: white;
+            margin-bottom: 0;
+            border-bottom: 5px solid #e6304a;
+        }
+        .event-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0.3) 70%, transparent 100%);
+            z-index: 1;
+        }
+        .event-hero-content {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            z-index: 2;
+        }
+        .event-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            margin-bottom: 15px;
+        }
+        .event-meta {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+        .event-meta span {
+            margin-right: 30px;
+        }
+        .event-meta i {
+            margin-right: 8px;
+            color: #e6304a;
+            font-size: 1.1em;
+        }
+        
+        .event-details-section {
+            padding: 80px 0;
+            background-color: #f8f9fa;
+        }
+        .event-section {
+            margin-bottom: 60px;
+            padding: 40px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            opacity: 0; /* Start hidden for animation */
+            animation: fadeInUp 0.6s ease forwards;
+            animation-delay: calc(var(--animation-order, 0) * 0.15s); /* Stagger animation */
+        }
+        .event-section:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+        .event-section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            color: #343a40;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .event-section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            height: 4px;
+            background-color: #e6304a;
+            border-radius: 2px;
+        }
+        .event-description p {
+            line-height: 1.8;
+            font-size: 1.05rem;
+            color: #555;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+        .info-item i {
+            width: 45px;
+            height: 45px;
+            background-color: rgba(230, 48, 74, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e6304a;
+            margin-right: 20px;
+            font-size: 1.2em;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .info-item:hover i {
+            transform: scale(1.1);
+            background-color: rgba(230, 48, 74, 0.15);
+        }
+        .info-label {
+            font-weight: 600;
+            color: #343a40;
+            min-width: 80px;
+        }
+        .info-value {
+            color: #555;
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        
+        .action-buttons {
+            margin-top: 30px; /* Reduced top margin */
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+        .action-buttons .btn {
+            font-size: 1.1rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            width: 100%; /* Make buttons full width */
+            margin-bottom: 15px; /* Add space between buttons */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-buttons .btn:last-child {
+            margin-bottom: 0;
+        }
+        .action-buttons .btn i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .btn-primary {
+            background-color: #e6304a;
+            border-color: #e6304a;
+            box-shadow: 0 4px 15px rgba(230, 48, 74, 0.2);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #d02236;
+            border-color: #d02236;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(230, 48, 74, 0.3);
+            color: white;
+        }
+        .btn-danger {
+            background-color: #f15a69;
+            border-color: #f15a69;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.15);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.2);
+            color: white;
+        }
+        
+        /* QR Code Styles */
+        .qr-code-section {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .qr-code-section h5 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .qr-code-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .qr-code-container img {
+            display: block;
+        }
+        
+        /* Modal improvements */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .modal-header {
+            background-color: #e6304a;
+            color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            border-bottom: none;
+            padding: 20px 25px;
+        }
+        .modal-header .modal-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+        .modal-header .btn-close {
+            color: white;
+            opacity: 0.9;
+            font-size: 1.2rem;
+            filter: brightness(0) invert(1);
+            box-shadow: none;
+        }
+        .modal-body {
+            padding: 30px;
+        }
+        .modal-footer {
+            border-top: none;
+            padding: 20px 30px;
+        }
+        #reservation-modal .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s;
+            box-shadow: none;
+            font-size: 0.95rem;
+        }
+        #reservation-modal .form-control:focus {
+            border-color: #e6304a;
+            box-shadow: 0 0 0 0.25rem rgba(230, 48, 74, 0.15);
+        }
+        #reservation-modal .form-control::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
+        #reservation-modal .form-label {
+            font-weight: 600;
+            color: #343a40;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+        #reservation-modal .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #reservation-modal .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-top: 0;
+            cursor: pointer;
+            border: 2px solid #e6304a;
+        }
+        #reservation-modal .form-check-input:checked {
+            background-color: #e6304a;
+            border-color: #e6304a;
+        }
+        #reservation-modal .form-check-label {
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        #reservation-modal .btn-submit {
+            background-color: #e6304a;
+            border-color: #e6304a;
+            border-radius: 50px;
+            padding: 14px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(230, 48, 74, 0.25);
+            transition: all 0.3s;
+        }
+        #reservation-modal .btn-submit:hover {
+            background-color: #d02236;
+            border-color: #d02236;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230, 48, 74, 0.35);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+{% if event is not defined or event is null %}
+    <div class="alert alert-danger">
+        <h3>Erreur : La variable "event" n'est pas définie ou est nulle.</h3>
+        <p>Veuillez vérifier que l'événement existe et qu'il est correctement transmis à la vue.</p>
+    </div>
+{% else %}
+<div class="event-hero" style="background-image: url('{% if event.image %}{{ asset(event.image) }}{% else %}{{ asset('assets/images/bg_1.jpg') }}{% endif %}');">
+    <div class="event-hero-content">
+        <div class="container">
+            <h1 class="event-title">{{ event.nom }}</h1>
+            <p class="event-meta">
+                <span>
+                    <i class="fas fa-calendar-alt"></i>
+                    {% if attribute(event, 'startTime') is defined and event.startTime %}
+                        {{ event.startTime|date('d M Y') }}
+                    {% elseif attribute(event, 'event_date') is defined and event.event_date %}
+                        {{ event.event_date|date('d M Y') }}
+                    {% endif %}
+                </span>
+                <span id="event-address-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {% if attribute(event, 'address') is defined and event.address %}
+                        {{ event.address }}
+                    {% else %}
+                        Lieu à préciser
+                    {% endif %}
+                </span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="event-details-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Event Overview Section -->
+                <div class="event-section" style="--animation-order: 1;">
+                    <h2 class="event-section-title">APERÇU DE L'ÉVÉNEMENT</h2>
+                    <div class="event-description">
+                        {{ event.description|nl2br }}
+                    </div>
+                </div>
+                
+                <!-- Location Section -->
+                <div class="event-section" style="--animation-order: 2;">
+                    <h2 class="event-section-title">LOCALISATION</h2>
+                    {% if attribute(event, 'latitude') is defined and attribute(event, 'longitude') is defined and event.latitude and event.longitude %}
+                        <div id="map" class="map-container"></div>
+                    {% else %}
+                        <div class="alert alert-info">Aucune information de localisation disponible pour cet événement.</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- Event Details Sidebar -->
+                <div class="event-section" style="--animation-order: 3;">
+                    <h2 class="event-section-title">DÉTAILS</h2>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <span class="info-label">Début:</span>
+                            <span class="info-value">
+                                {% if attribute(event, 'startTime') is defined and event.startTime %}
+                                    {{ event.startTime|date('d/m/Y H:i') }}
+                                {% else %}--:--{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {% if attribute(event, 'breakTime') is defined and event.breakTime %}
+                    <div class="info-item">
+                        <i class="fas fa-coffee"></i>
+                        <div>
+                            <span class="info-label">Pause:</span>
+                            <span class="info-value">{{ event.breakTime|date('d/m/Y H:i')}}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-item">
+                        <i class="fas fa-flag-checkered"></i>
+                        <div>
+                            <span class="info-label">Fin:</span>
+                            <span class="info-value">
+                                {% if attribute(event, 'endTime') is defined and event.endTime %}
+                                    {{ event.endTime|date('d/m/Y H:i') }}
+                                {% else %}--:--{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-map-pin"></i>
+                        <div>
+                            <span class="info-label">Lieu:</span>
+                            <span class="info-value" id="event-full-address">
+                                {% if attribute(event, 'address') is defined and event.address %}
+                                    {{ event.address }}
+                                {% else %}
+                                    Chargement...
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <span class="info-label">Places:</span>
+                            <span class="info-value">
+                                {% if event.maxParticipants %}
+                                    <strong>{{ event.currentParticipants|default(0) }} / {{ event.maxParticipants }}</strong>
+                                    {% if event.currentParticipants >= event.maxParticipants %}
+                                        <span class="badge bg-danger ms-2">Complet</span>
+                                    {% else %}
+                                        <span class="badge bg-success ms-2">{{ event.maxParticipants - event.currentParticipants }} restantes</span>
+                                    {% endif %}
+                                {% else %}
+                                    <strong>{{ event.currentParticipants|default(0) }} participants</strong>
+                                    <span class="badge bg-info ms-2">Illimitées</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons text-center">
+                        {% if is_registered is defined and is_registered %}
+                            <button type="button" class="btn btn-danger cancel-reservation-btn">
+                                <i class="fas fa-times"></i> Se désinscrire
+                            </button>
+                            <button id="qr-code-btn" class="btn btn-secondary">
+                                <i class="fas fa-qrcode"></i> Voir QR Code
+                            </button>
+                        {% else %}
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reservation-modal">
+                                <i class="fas fa-check-circle"></i> S'inscrire à l'événement
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    <form id="cancel-registration-form" method="post" action="{{ cancel_registration_path is defined ? cancel_registration_path : '#' }}" style="display: none;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ event.id) }}">
+                    </form>
+                </div>
+
+                <!-- QR Code Section if registered -->
+                {% if is_registered is defined and is_registered and qr_code_data_url is defined and qr_code_data_url is not null %}
+                <div class="event-section qr-code-section" style="--animation-order: 4;">
+                    <h5>Votre QR Code d'inscription</h5>
+                    <div class="qr-code-container">
+                        <img src="{{ qr_code_data_url }}" alt="QR Code d'inscription" class="img-fluid" style="max-width: 180px;">
+                    </div>
+                    <p class="text-muted small mt-3 mb-0">Présentez ce QR code à l'entrée de l'événement</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reservation Modal -->
+<div class="modal fade" id="reservation-modal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservationModalLabel">
+                    <i class="fas fa-ticket-alt me-2"></i>
+                    Réserver - {{ event.nom }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{{ register_path is defined ? register_path : '#' }}" id="reservation-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token('register' ~ event.id) }}">
+                    
+                    <div class="mb-4">
+                        <label for="comment" class="form-label">
+                            <i class="fas fa-comment-alt me-2 text-primary"></i>
+                            Commentaire (optionnel)
+                        </label>
+                        <textarea class="form-control" id="comment" name="comment" rows="4" 
+                            placeholder="Ajoutez un commentaire pour votre réservation..."></textarea>
+                    </div>
+                    
+                    <div class="fw-info alert alert-info d-flex align-items-center mb-4 py-3">
+                        <i class="fas fa-info-circle me-3 fs-5"></i>
+                        <span>En réservant, vous vous engagez à participer à cet événement. Les places sont limitées.</span>
+                    </div>
+                    
+                    <div class="form-check mb-4">
+                        <input type="checkbox" class="form-check-input" id="terms" required>
+                        <label class="form-check-label" for="terms">J'accepte les conditions de participation</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 btn-submit">
+                        <i class="fas fa-check me-2"></i>
+                        Confirmer ma réservation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qr-code-modal" tabindex="-1" aria-labelledby="qr-code-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qr-code-modal-label">QR Code pour {{ event.nom }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                {% if qr_code_data_url is defined and qr_code_data_url is not null %}
+                    <img src="{{ qr_code_data_url }}" alt="QR Code" class="img-fluid">
+                {% else %}
+                    <p class="text-danger">QR Code non disponible</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% if event is defined and event is not null %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.all.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Activation des tooltips Bootstrap 5
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Annulation de la réservation
+            const cancelBtn = document.querySelector('.cancel-reservation-btn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    Swal.fire({
+                        title: 'Annuler la réservation',
+                        html: 'Êtes-vous sûr de vouloir annuler votre réservation pour <strong>{{ event.nom|e('js') }}</strong>?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Oui, annuler',
+                        cancelButtonText: 'Non, garder ma réservation',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('cancel-registration-form').submit();
+                        }
+                    });
+                });
+            }
+            
+            // Affichage du modal QR Code
+            const qrCodeBtn = document.getElementById('qr-code-btn');
+            if (qrCodeBtn) {
+                const qrCodeModal = new bootstrap.Modal(document.getElementById('qr-code-modal'));
+                qrCodeBtn.addEventListener('click', function() {
+                    qrCodeModal.show();
+                });
+            }
+            
+            // Affichage du modal de réservation (si le bouton existe)
+            const registerBtn = document.querySelector('[data-bs-target="#reservation-modal"]');
+            if (registerBtn) {
+                const reservationModal = new bootstrap.Modal(document.getElementById('reservation-modal'));
+                registerBtn.addEventListener('click', function() {
+                    reservationModal.show();
+                });
+            }
+            
+            {% if attribute(event, 'latitude') is defined and attribute(event, 'longitude') is defined and event.latitude and event.longitude %}
+            // Initialisation de la carte
+            var map = L.map('map').setView([{{ event.latitude }}, {{ event.longitude }}], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            var eventIcon = L.icon({
+                iconUrl: '{{ asset('assets/images/marker-icon.png') }}', // Assurez-vous d'avoir une icône personnalisée si besoin
+                iconSize: [38, 38],
+                iconAnchor: [19, 38],
+                popupAnchor: [0, -38]
+            });
+            
+            var marker = L.marker([{{ event.latitude }}, {{ event.longitude }}], {icon: eventIcon}).addTo(map);
+            
+            // Récupération de l'adresse si elle n'est pas définie
+            let popupContent = '{{ event.nom|e('js') }}';
+            let fullAddressElement = document.getElementById('event-full-address');
+            let addressHeaderElement = document.getElementById('event-address-header');
+            
+            {% if not (attribute(event, 'address') is defined and event.address) %}
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat={{ event.latitude }}&lon={{ event.longitude }}&zoom=18&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.display_name) {
+                        popupContent = data.display_name;
+                        if (fullAddressElement) fullAddressElement.textContent = data.display_name;
+                        if (addressHeaderElement) addressHeaderElement.innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + data.display_name;
+                    } else {
+                        if (fullAddressElement) fullAddressElement.textContent = 'Adresse non disponible';
+                        if (addressHeaderElement) addressHeaderElement.innerHTML = '<i class="fas fa-map-marker-alt"></i> Lieu à préciser';
+                    }
+                    marker.bindPopup(popupContent).openPopup();
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la récupération de l\'adresse:', error);
+                    if (fullAddressElement) fullAddressElement.textContent = 'Erreur de chargement';
+                    if (addressHeaderElement) addressHeaderElement.innerHTML = '<i class="fas fa-map-marker-alt"></i> Erreur de localisation';
+                    marker.bindPopup('{{ event.nom|e('js') }}').openPopup();
+                });
+            {% else %}
+            popupContent = '{{ event.address|e('js') }}';
+            marker.bindPopup(popupContent).openPopup();
+            {% endif %}
+            {% endif %}
+        });
+    </script>
+    {% endif %}
+{% endblock %} 

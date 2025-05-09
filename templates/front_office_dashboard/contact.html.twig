@@ -1,0 +1,1067 @@
+{% extends 'front_office_dashboard/base.html.twig' %}
+{% block title %}Contact{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/ai-chatbot.css') }}">
+    <style>
+        /* Nouvelle disposition en deux colonnes */
+        .equal-height-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .equal-height-row > [class*='col-'] {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .equal-height-row > [class*='col-'] > div {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cartes stylisées */
+        .contact-form-card, .chatbot-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 25px;
+            height: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-form-card:hover, .chatbot-card:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+            transform: translateY(-5px);
+        }
+
+        .contact-form-card:before, .chatbot-card:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .contact-form-card:before {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        }
+
+        .chatbot-card:before {
+            background: linear-gradient(90deg, #2196F3, #03A9F4);
+        }
+
+        .form-title, .chatbot-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 12px;
+            color: #333;
+        }
+
+        .form-title:after, .chatbot-title:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            border-radius: 3px;
+        }
+
+        .form-title:after {
+            background: #4CAF50;
+        }
+
+        .chatbot-title:after {
+            background: #2196F3;
+        }
+
+        .sub-title, .chatbot-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        /* Section d'informations de contact */
+        .contact-info-section {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .contact-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .contact-info-item {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .contact-info-item i {
+            font-size: 24px;
+            color: #4CAF50;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        .contact-info-content h5 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .contact-info-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .contact-info-content a {
+            color: #4CAF50;
+            transition: color 0.3s;
+        }
+
+        .contact-info-content a:hover {
+            color: #2E7D32;
+            text-decoration: none;
+        }
+
+        /* Ajustements pour le chatbot intégré */
+        .embedded-chatbot {
+            margin-bottom: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 65px); /* Tenir compte du titre et sous-titre */
+            max-height: 600px;
+        }
+
+        .embedded-messages {
+            flex: 1;
+        }
+
+        /* Styles responsifs */
+        @media (max-width: 991px) {
+            .contact-form-card, .chatbot-card {
+                margin-bottom: 30px;
+            }
+
+            .embedded-chatbot {
+                height: 500px;
+            }
+        }
+
+        /* Bouton de génération de modèle */
+        .model-suggestion-bar {
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .generate-model-btn {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .generate-model-btn i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .generate-model-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+            background: linear-gradient(135deg, #ff9800, #ef6c00);
+        }
+
+        /* Styles améliorés pour le formulaire de réclamation */
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .input-box {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-box textarea {
+            width: 100%;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02) inset;
+            resize: vertical;
+        }
+
+        .input-box textarea:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .form-btn {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        #word-counter {
+            font-size: 0.85em;
+            text-align: right;
+            margin-top: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .realtime-alert {
+            display: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s;
+            font-weight: 500;
+        }
+
+        /* Embedded Chatbot Styles - Design amélioré */
+        .embedded-chatbot {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .embedded-chatbot:hover {
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+
+        .embedded-chatbot h4 {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 15px;
+            margin: 0;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .embedded-chatbot h4 i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .embedded-chatbot h4 .status {
+            font-size: 12px;
+            background-color: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 10px;
+        }
+
+        .embedded-messages {
+            height: 320px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMxLjIgMCAyLjEuOSAyLjEgMi4xdjE5LjhjMCAxLjItLjkgMi4xLTIuMSAyLjFIMjRjLTEuMiAwLTIuMS0uOS0yLjEtMi4xVjIwLjFjMC0xLjIuOS0yLjEgMi4xLTIuMWgxMiIgc3Ryb2tlPSIjRTBFMEUwIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxwYXRoIGZpbGw9IiNFMEUwRTAiIGQ9Ik0zMCAyNGg2djZoLTZ6TTI0IDI0aDR2NmgtNHpNMzAgMzJoNnY2aC02ek0yNCAzMmg0djZoLTR6Ii8+PC9nPjwvc3ZnPg==');
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        .embedded-chatbot-input {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #f0f0f0;
+            position: relative;
+            align-items: center;
+        }
+
+        .embedded-chatbot-input textarea {
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            padding: 12px 20px;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 15px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05) inset;
+        }
+
+        .embedded-chatbot-input textarea:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        #embedded-chatbot-send {
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        #embedded-chatbot-send i {
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        #embedded-chatbot-send:hover {
+            background-color: #43A047;
+            transform: scale(1.05);
+        }
+
+        #embedded-chatbot-send:hover i {
+            transform: translateX(2px);
+        }
+
+        .embedded-message {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: flex-start;
+            animation: fadeIn 0.3s ease-out;
+            max-width: 85%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .embedded-bot-message {
+            justify-content: flex-start;
+            margin-right: auto;
+        }
+
+        .embedded-user-message {
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+            margin-left: auto;
+        }
+
+        .embedded-message-icon {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin: 0 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .embedded-bot-message .embedded-message-icon {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        }
+
+        .embedded-user-message .embedded-message-icon {
+            background: linear-gradient(135deg, #2196F3, #1565C0);
+        }
+
+        .embedded-message-content {
+            padding: 13px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .embedded-bot-message .embedded-message-content {
+            background-color: white;
+            border-bottom-left-radius: 3px;
+        }
+
+        .embedded-bot-message .embedded-message-content:before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            bottom: 0;
+            border-style: solid;
+            border-width: 0 0 10px 10px;
+            border-color: transparent transparent white transparent;
+        }
+
+        .embedded-user-message .embedded-message-content {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border-bottom-right-radius: 3px;
+            text-align: right;
+        }
+
+        .embedded-user-message .embedded-message-content:before {
+            content: "";
+            position: absolute;
+            right: -8px;
+            bottom: 0;
+            border-style: solid;
+            border-width: 0 10px 10px 0;
+            border-color: transparent transparent #BBDEFB transparent;
+        }
+
+        /* Typing Indicator for embedded chatbot - version améliorée */
+        .embedded-typing-dots {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 0;
+        }
+
+        .embedded-typing-dots span {
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: inline-block;
+            animation: typing 1.4s infinite both;
+            opacity: 0.7;
+        }
+
+        .embedded-typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .embedded-typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Quick Reply Buttons */
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .quick-reply-btn {
+            background-color: white;
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+            border-radius: 18px;
+            padding: 8px 15px;
+            margin: 0 5px 8px 0;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-reply-btn:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Scroll down button */
+        .scroll-down-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 5;
+            border: none;
+            color: #4CAF50;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        /* Embedded Suggestion Button */
+        .embedded-suggest-btn {
+            background-color: #4CAF50 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 20px !important;
+            padding: 8px 15px !important;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.2);
+            transition: all 0.3s;
+        }
+
+        .embedded-suggest-btn i {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+
+        .embedded-suggest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Styles pour le reste de la page */
+        .bad-words-alert {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .bad-words-alert h5 {
+            color: #721c24;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .bad-words-list {
+            background-color: #f2f2f2;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .bad-words-list li {
+            display: inline-block;
+            background-color: #e2e2e2;
+            padding: 4px 8px;
+            margin: 3px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .realtime-alert {
+            display: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            background-color: #f8d7da;
+            color: #721c24;
+            margin-top: 10px;
+            border-left: 4px solid #dc3545;
+            animation: fadeIn 0.3s;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .realtime-alert i {
+            margin-right: 5px;
+        }
+        .blocked-word {
+            font-weight: bold;
+            text-decoration: line-through;
+            color: #dc3545;
+            margin: 0 3px;
+            padding: 0 3px;
+            background-color: rgba(220, 53, 69, 0.1);
+            border-radius: 3px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shakeAlert {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shakeAlert 0.6s;
+        }
+        .highlight-error {
+            background-color: rgba(220, 53, 69, 0.2);
+            transition: background-color 0.5s ease;
+        }
+        #word-counter {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85em;
+            color: #6c757d;
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block banner %}
+    <!--================= Banner Section Start Here =================-->
+    <div class="banner banner1">
+        <div class="inner-page-banner banner-bg">
+            <div class="container">
+                <div class="banner-content">
+                    <div class="page-path">
+                        <ul>
+                            <li><a class="home-page-link" href="{{ path('app_home') }}">Home</a></li>
+                            <li><a class="current-page" href="#">CONTACT</a></li>
+                        </ul>
+                    </div>
+                    <h1 class="banner-heading">CONTACT US</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--================= Banner Section End Here =================-->
+{% endblock %}
+
+{% block content %}
+    <!--contact-area start-->
+    <div class="contact-area">
+        <div class="container">
+            <!-- Nouveau conteneur pour la disposition sur le même niveau -->
+            <div class="row">
+                <div class="col-12 mb-30">
+                    <h3 class="post-title text-center">CUSTOM REQUEST</h3>
+                    <p class="text-center mb-40">Have something to report or suggest? Send us your feedback.</p>
+                </div>
+            </div>
+
+            <div class="row equal-height-row">
+                <!-- Formulaire de réclamation - Colonne gauche -->
+                <div class="col-lg-6 col-md-12 mb-40">
+                    {% if bad_words is defined and bad_words|length > 0 %}
+                        <div class="bad-words-alert">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Mots inappropriés détectés</h5>
+                            <p>Votre message contient les termes suivants qui ne sont pas autorisés:</p>
+                            <ul class="bad-words-list">
+                                {% for word in bad_words %}
+                                    <li>{{ word }}</li>
+                                {% endfor %}
+                            </ul>
+                            <p>Veuillez reformuler votre message sans utiliser ces termes.</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="contact-form-card">
+                        {{ form_start(form, {'attr': {'class': 'contact-form', 'novalidate': 'novalidate', 'id': 'reclamation-form'}}) }}
+                        <h4 class="form-title">Envoyer une réclamation</h4>
+                        <span class="sub-title">Décrivez votre situation en détail pour que nous puissions vous aider.</span>
+                        <div class="info-form">
+                            <div class="row">
+                                <div class="col-lg-12 col-sm-12">
+                                    <div class="input-box text-input mb-20">
+                                        {{ form_widget(form.message, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'Entrez votre message ici...',
+                                                'rows': 10,
+                                                'id': 'reclamation-message'
+                                            }
+                                        }) }}
+                                        <span id="word-counter">0 caractères</span>
+                                        <div id="realtime-alert" class="realtime-alert">
+                                            <i class="fas fa-exclamation-circle"></i> <span id="alert-message">Un mot inapproprié a été détecté et supprimé.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-15">
+                                    <button type="submit" class="form-btn form-btn4" id="submit-button">
+                                        Envoyer la réclamation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Chatbot - Colonne droite -->
+                <div class="col-lg-6 col-md-12 mb-40">
+                    <div class="chatbot-card">
+                        <h4 class="chatbot-title">Assistant virtuel</h4>
+                        <p class="chatbot-subtitle">Notre assistant vous aide à formuler votre réclamation et répond à vos questions.</p>
+
+                        <!-- AI Chatbot integrated directly in the page -->
+                        <div class="embedded-chatbot">
+                            <h4>
+                                <div>
+                                    <i class="fas fa-robot"></i>
+                                    Assistant Sportify
+                                </div>
+                                <span class="status"><i class="fas fa-circle" style="color: #4CAF50; font-size: 10px; margin-right: 4px;"></i> En ligne</span>
+                            </h4>
+                            <div id="embedded-chatbot-messages" class="embedded-messages"></div>
+                            <button id="scroll-down-btn" class="scroll-down-btn">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="model-suggestion-bar">
+                                <button id="generate-model-btn" class="generate-model-btn">
+                                    <i class="fas fa-file-alt"></i> Générer un modèle de réclamation
+                                </button>
+                            </div>
+                            <div class="embedded-chatbot-input">
+                                <textarea id="embedded-chatbot-input" placeholder="Posez votre question ici..." rows="2"></textarea>
+                                <button type="button" id="embedded-chatbot-send">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations de contact - En dessous -->
+            <div class="row mt-40">
+                <div class="col-lg-12">
+                    <div class="contact-info-section">
+                        <h3 class="section-title2">Get In Touch</h3>
+                        <div class="contact-info-grid">
+                            <div class="contact-info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="contact-info-content">
+                                    <h5>Adresse</h5>
+                                    <p>24/26 Strait Bargate, Boston, PE21,<br> United Kingdom</p>
+                                </div>
+                            </div>
+                            <div class="contact-info-item">
+                                <i class="fas fa-phone-alt"></i>
+                                <div class="contact-info-content">
+                                    <h5>Téléphone</h5>
+                                    <p><a href="tel:+0989057868978">+098 (905) 786 897 8</a><br>
+                                        <a href="tel:61463895748">6 - 146 - 389 - 5748</a></p>
+                                </div>
+                            </div>
+                            <div class="contact-info-item">
+                                <i class="fas fa-clock"></i>
+                                <div class="contact-info-content">
+                                    <h5>Horaires</h5>
+                                    <p>Store Hours: <br> 10 am - 10 pm EST, 7 days a week</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map mt-50">
+            <p><iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3651.0452483624595!2d90.424043!3d23.781403!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x3cc42b4e4b430164!2sReacThemes!5e0!3m2!1sen!2sbd!4v1656420500360!5m2!1sen!2sbd" height="500" style="border:0;" allowfullscreen="" loading="lazy"></iframe></p>
+        </div>
+    </div>
+    <!--contact-area end-->
+{% endblock %}
+
+{% block footer %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/embedded-chatbot.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Correctly identify form elements
+            const form = document.getElementById('reclamation-form') || document.querySelector('form');
+            const messageInput = document.getElementById('reclamation-message') || document.querySelector('textarea[name="reclamation[message]"]');
+            const alertContainer = document.getElementById('realtime-alert');
+            const alertMessage = document.getElementById('alert-message');
+            const wordCounter = document.getElementById('word-counter');
+
+            console.log('Form elements loaded:', {
+                form: form,
+                messageInput: messageInput,
+                alertContainer: alertContainer,
+                alertMessage: alertMessage,
+                wordCounter: wordCounter
+            });
+
+            // Liste étendue de mots inappropriés
+            const badWords = [
+                'putain', 'pute', 'connard', 'encule', 'enculé', 'salope', 'bite',
+                'couille', 'merde', 'connerie', 'foutre', 'pd', 'salaud', 'chier', 'cul',
+                'batard', 'bâtard', 'bordel', 'crétin', 'débile', 'nique', 'ta mère', 'ta mere',
+                'tg', 'ftg', 'ntm', 'ptn', 'fdp', 'va te faire', 'vtf', 'suce', 'fils de'
+            ];
+
+            // Fonction pour normaliser le texte (enlever les accents, caractères spéciaux, etc.)
+            function normalizeText(text) {
+                if (!text) return '';
+
+                // Remplacer les caractères spéciaux et accents
+                let normalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                // Remplacer les chiffres et caractères qui ressemblent à des lettres
+                normalized = normalized.replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a')
+                    .replace(/5/g, 's').replace(/0/g, 'o').replace(/8/g, 'b')
+                    .replace(/\$/g, 's').replace(/@/g, 'a');
+                // Supprimer les répétitions de caractères (ex: "puuutain" -> "putain")
+                normalized = normalized.replace(/(.)\1+/g, '$1');
+                // Supprimer les caractères qui ne sont pas des lettres
+                normalized = normalized.replace(/[^a-z]/gi, '');
+
+                return normalized.toLowerCase();
+            }
+
+            // Fonction pour détecter les mots inappropriés avec plusieurs stratégies
+            function findBadWords(text) {
+                if (!text) return { found: false };
+
+                const textLower = text.toLowerCase();
+                const textNormalized = normalizeText(text);
+
+                for (const badWord of badWords) {
+                    const badWordNormalized = normalizeText(badWord);
+
+                    // Méthode 1: Vérification simple d'inclusion
+                    if (textLower.includes(badWord)) {
+                        return { found: true, word: badWord, method: 'exact' };
+                    }
+
+                    // Méthode 2: Vérification avec limites de mots
+                    const regex = new RegExp(`\\b${badWord}\\b`, 'i');
+                    if (regex.test(textLower)) {
+                        return { found: true, word: badWord, method: 'word_boundary' };
+                    }
+
+                    // Méthode 3: Vérification sur le texte normalisé
+                    if (textNormalized.includes(badWordNormalized)) {
+                        return { found: true, word: badWord, method: 'normalized' };
+                    }
+
+                    // Méthode 4: Vérification avec séparation de caractères
+                    // Par exemple, "p.u.t.a.i.n" ou "p u t a i n"
+                    const separatedRegex = new RegExp(badWord.split('').join('[^a-zA-Z0-9]*'), 'i');
+                    if (separatedRegex.test(textLower)) {
+                        return { found: true, word: badWord, method: 'separated' };
+                    }
+
+                    // Méthode 5: Vérification des variations intentionnelles
+                    // Par exemple, "put@in", "put41n", etc.
+                    const specialCharsRegex = badWord.replace(/a/g, '[a@4]')
+                        .replace(/e/g, '[e3]')
+                        .replace(/i/g, '[i1!]')
+                        .replace(/o/g, '[o0]')
+                        .replace(/s/g, '[s$5]');
+                    const variantRegex = new RegExp(specialCharsRegex, 'i');
+                    if (variantRegex.test(textLower)) {
+                        return { found: true, word: badWord, method: 'variant' };
+                    }
+                }
+
+                return { found: false };
+            }
+
+            // Fonction pour filtrer un texte
+            function filterText(text) {
+                if (!text) return { text: text, detected: false };
+
+                let filteredText = text;
+                let detected = false;
+                let detectedWord = '';
+
+                for (const badWord of badWords) {
+                    const badWordPattern = new RegExp(badWord, 'gi');
+                    if (badWordPattern.test(filteredText)) {
+                        filteredText = filteredText.replace(badWordPattern, '*'.repeat(badWord.length));
+                        detected = true;
+                        detectedWord = badWord;
+                    }
+
+                    // Vérifier également les variations avec des caractères spéciaux
+                    const textNormalized = normalizeText(text);
+                    const badWordNormalized = normalizeText(badWord);
+
+                    if (textNormalized.includes(badWordNormalized)) {
+                        // Trouver l'occurrence originale et la remplacer
+                        const startPos = textNormalized.indexOf(badWordNormalized);
+                        if (startPos >= 0 && startPos < text.length) {
+                            const endPos = Math.min(startPos + badWordNormalized.length, text.length);
+                            if (startPos < endPos) {
+                                const originalPortion = text.substring(startPos, endPos);
+                                filteredText = filteredText.replace(originalPortion, '*'.repeat(originalPortion.length));
+                                detected = true;
+                                detectedWord = badWord;
+                            }
+                        }
+                    }
+                }
+
+                return {
+                    text: filteredText,
+                    detected: detected,
+                    word: detectedWord
+                };
+            }
+
+            // Met à jour le compteur de mots
+            function updateWordCounter() {
+                if (!messageInput || !wordCounter) return;
+
+                const length = messageInput.value.length;
+                wordCounter.textContent = `${length} caractères`;
+
+                // Change la couleur en fonction de la longueur
+                if (length > 200) {
+                    wordCounter.style.color = '#28a745'; // vert
+                } else if (length > 100) {
+                    wordCounter.style.color = '#6c757d'; // gris
+                } else if (length > 50) {
+                    wordCounter.style.color = '#ffc107'; // jaune
+                } else if (length > 0) {
+                    wordCounter.style.color = '#dc3545'; // rouge
+                }
+            }
+
+            // Fonction pour afficher une alerte
+            function showAlert(message, type = 'danger') {
+                if (!alertContainer || !alertMessage) {
+                    console.error('Alert elements not found', { alertContainer, alertMessage });
+                    return;
+                }
+
+                alertMessage.textContent = message;
+                alertContainer.style.display = 'block';
+                alertContainer.classList.add('shake');
+
+                if (messageInput) {
+                    messageInput.classList.add('highlight-error');
+                }
+
+                setTimeout(() => {
+                    alertContainer.classList.remove('shake');
+                    if (messageInput) {
+                        messageInput.classList.remove('highlight-error');
+                    }
+                }, 1000);
+
+                setTimeout(() => {
+                    alertContainer.style.display = 'none';
+                }, 5000);
+            }
+
+            // Vérifie et filtre le contenu du champ message
+            function checkContent() {
+                if (!messageInput) {
+                    console.error('Message input not found');
+                    return false;
+                }
+
+                const text = messageInput.value;
+                console.log('Checking content:', text);
+
+                const badWordResult = findBadWords(text);
+                console.log('Bad word check result:', badWordResult);
+
+                if (badWordResult.found) {
+                    const filtered = filterText(text);
+                    console.log('Filtered text:', filtered);
+                    messageInput.value = filtered.text;
+
+                    showAlert(`Le mot inapproprié "${badWordResult.word}" a été détecté et remplacé.`);
+                    return true;
+                }
+
+                return false;
+            }
+
+            // Événement d'écoute pour le champ message (en temps réel)
+            if (messageInput) {
+                console.log('Adding event listeners to message input');
+
+                // Vérifier immédiatement au chargement
+                setTimeout(checkContent, 500);
+
+                messageInput.addEventListener('input', function() {
+                    console.log('Input event triggered');
+                    checkContent();
+                    updateWordCounter();
+                });
+
+                messageInput.addEventListener('blur', function() {
+                    console.log('Blur event triggered');
+                    checkContent();
+                });
+
+                // Initialiser le compteur de mots
+                updateWordCounter();
+            } else {
+                console.error('Message input element not found!');
+            }
+
+            // Événement à la soumission du formulaire
+            if (form) {
+                console.log('Adding submit event listener to form');
+                form.addEventListener('submit', function(event) {
+                    console.log('Form submission triggered');
+
+                    // Vérifier une dernière fois à la soumission
+                    if (checkContent()) {
+                        event.preventDefault();
+                        showAlert('Veuillez corriger votre message avant de soumettre le formulaire.');
+                        return;
+                    }
+
+                    // Vérifier si le champ message est vide
+                    if (messageInput && !messageInput.value.trim()) {
+                        event.preventDefault();
+                        showAlert('Le message ne peut pas être vide.');
+                        return;
+                    }
+
+                    // Vérifier la longueur minimale
+                    if (messageInput && messageInput.value.trim().length < 10) {
+                        event.preventDefault();
+                        showAlert('Votre message est trop court. Veuillez fournir plus de détails.');
+                    }
+                });
+            } else {
+                console.error('Form element not found!');
+            }
+        });
+    </script>
+{% endblock %}

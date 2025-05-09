@@ -1,0 +1,8 @@
+# config/packages/mailer.yaml
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+        # Remplacez EMAIL par votre adresse Gmail
+        # Remplacez PASSWORD par votre mot de passe Gmail
+        # Exemple : gmail://mon.email@gmail.com:motdepasse@default
+        
