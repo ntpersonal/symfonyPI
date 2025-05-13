@@ -34,7 +34,7 @@ final class RankingController extends AbstractController
         $this->updateTeamRankings($team);
         try {
             $rankings = $this->entityManager->getRepository(Ranking::class)
-                ->findBy(['team' => $team], ['position' => 'ASC']);
+                ->findBy(['team' => $team],['position' => 'ASC']);
 
             $rankingsData = array_map(function($ranking) {
                 return [
@@ -58,30 +58,35 @@ final class RankingController extends AbstractController
     private function updateTeamRankings(Team $team): void
     {
         $em = $this->entityManager;
-        $rankingRepo = $em->getRepository(Ranking::class);
-        $matchesRepo = $em->getRepository(Matches::class);
+    $rankingRepo = $em->getRepository(Ranking::class);
+    $matchesRepo = $em->getRepository(Matches::class);
 
-        // 1. Récupère tous les Ranking pour cette équipe
-        $rankings = $rankingRepo->findBy(['team' => $team]);
+    $rankings = $rankingRepo->findBy(['team' => $team]);
 
-        foreach ($rankings as $ranking) {
-            $tournoi = $ranking->getTournoi();
+    foreach ($rankings as $ranking) {
+        $tournoi = $ranking->getTournoi();
 
-            // 2. Récupère tous les matches “finished” où l’équipe est A ou B
-            $matchesA = $matchesRepo->findBy([
-                'tournoi' => $tournoi,
-                'teamA'   => $team,
-                'status'  => 'finished',
-            ]);
-            $matchesB = $matchesRepo->findBy([
-                'tournoi' => $tournoi,
-                'teamB'   => $team,
-                'status'  => 'finished',
-            ]);
+        $matchesA = $matchesRepo->findBy([
+            'tournoi' => $tournoi,
+            'teamA' => $team,
+            'status' => 'finished',
+        ]);
+        
+        $matchesB = $matchesRepo->findBy([
+            'tournoi' => $tournoi,
+            'teamB' => $team,
+            'status' => 'finished',
+        ]);
 
-            // 3. Calcule victoires, nuls, défaites et buts
-            $wins = $draws = $losses = $goalsFor = $goalsAgainst = 0;
-
+        // Ne réinitialiser les stats que si on a des matches
+        $hasMatches = count($matchesA) + count($matchesB) > 0;
+        
+        $wins = $hasMatches ? 0 : $ranking->getWins();
+        $draws = $hasMatches ? 0 : $ranking->getDraws();
+        $losses = $hasMatches ? 0 : $ranking->getLosses();
+        $goalsFor = $hasMatches ? 0 : $ranking->getGoalsScored();
+        $goalsAgainst = $hasMatches ? 0 : $ranking->getGoalsConceded();
+        if ($hasMatches) {
             foreach ($matchesA as $m) {
                 $gf = $m->getScoreTeamA();
                 $ga = $m->getScoreTeamB();
@@ -103,7 +108,8 @@ final class RankingController extends AbstractController
 
             $points = $wins * 3 + $draws;
             $diff   = $goalsFor - $goalsAgainst;
-
+        }
+        if ($hasMatches || $ranking->getPoints() === 0) {
             // 4. Met à jour l’entité Ranking
             $ranking
                 ->setWins($wins)
@@ -116,6 +122,7 @@ final class RankingController extends AbstractController
 
             $em->persist($ranking);
         }
+    }
 
         // 5. Flush unique pour tout prendre en compte
         $em->flush();

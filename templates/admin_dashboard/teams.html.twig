@@ -258,6 +258,7 @@ ss="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade
                       <td>
                         <div class="d-flex px-2 py-1">
                           <div>
+                          
                             {% if team.logoPath %}
                                 <img src="{{ path('app_image', {
                                     'subdirectory': 'teams', 
@@ -1005,44 +1006,47 @@ ss="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade
             rankingTableBody.innerHTML = '';
             
             if (data.rankings && data.rankings.length > 0) {
-              data.rankings.forEach(ranking => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                  <td>
-                    <div class="d-flex px-2 py-1">
-                      <div class="d-flex flex-column justify-content-center">
+    // Vider le tableau avant d'ajouter de nouvelles données
+    rankingTableBody.innerHTML = '';
+
+    data.rankings.forEach(ranking => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
                         <h6 class="mb-0 text-sm">${ranking.tournamentName}</h6>
-                      </div>
                     </div>
-                  </td>
-                  <td>
-                    <p class="text-xs font-weight-bold mb-0">${ranking.position}</p>
-                  </td>
-                  <td class="align-middle text-center">
-                    <span class="text-secondary text-xs font-weight-bold">${ranking.points}</span>
-                  </td>
-                  <td class="align-middle text-center">
-                    <span class="text-secondary text-xs font-weight-bold">${ranking.wins}</span>
-                  </td>
-                  <td class="align-middle text-center">
-                    <span class="text-secondary text-xs font-weight-bold">${ranking.draws}</span>
-                  </td>
-                  <td class="align-middle text-center">
-                    <span class="text-secondary text-xs font-weight-bold">${ranking.losses}</span>
-                  </td>
-                  <td class="align-middle text-center">
-                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalsScored}</span>
-                  </td>
-                  <td class="align-middle text-center">
-                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalsConceded}</span>
-                  </td>
-                  <td class="align-middle text-center">
-                    <span class="text-secondary text-xs font-weight-bold">${ranking.goalDifference}</span>
-                  </td>
-                `;
-                rankingTableBody.appendChild(row);
-              });
-            } else {
+                </div>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-xs font-weight-bold">${ranking.position}</span>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">${ranking.points}</span>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">${ranking.wins}</span>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">${ranking.draws}</span>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">${ranking.losses}</span>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">${ranking.goalsScored}</span>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">${ranking.goalsConceded}</span>
+            </td>
+            <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">${ranking.goalDifference}</span>
+            </td>
+        `;
+        rankingTableBody.appendChild(row);
+    });
+} else {
               rankingTableBody.innerHTML = `
                 <tr>
                   <td colspan="4" class="text-center">

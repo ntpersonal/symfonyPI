@@ -469,14 +469,17 @@
             {% for player in players %}
                 <div class="col-xl-3 col-md-4 col-sm-6">
                     <div class="player-single">
-                        <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-picture">
-                            {% if player.profilepicture %}
-                               <img src="{{ path('app_image', {'subdirectory': 'players', 'filename': player.profilepicture|split('/')|last}) }}" 
-     alt="{{ player.firstname }} {{ player.lastname }} photo">
-                            {% else %}
-                                <img src="{{ asset('assets/images/default-team-logo.jpg') }}" alt="Default player image">
-                            {% endif %}
-                        </a>
+                      <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-picture">
+                        {% if player.profilepicture %}
+                            <img src="{{ asset('players/' ~ player.profilepicture, 'xampp_images') }}"
+                                alt="{{ player.firstname }} {{ player.lastname }} photo"
+                                loading="lazy">
+                        {% else %}
+                            <img src="{{ asset('assets/images/default-player.jpg') }}" 
+                                alt="Default player image"
+                                loading="lazy">
+                        {% endif %}
+                    </a>
                         <div class="content">
                             <a href="{{ path('app_player_details', {'id': player.id}) }}" class="player-name">
                                 {{ player.firstname }} {{ player.lastname }}

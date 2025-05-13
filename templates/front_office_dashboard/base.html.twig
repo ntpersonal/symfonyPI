@@ -422,7 +422,7 @@
 									<div class="profile-trigger" id="profileDropdown">
 										<div class="profile-picture">
 											{% if app.user.profilepicture is not null and app.user.profilepicture is not empty %}
-												<img src="{{ asset('uploads/profile/' ~ app.user.profilepicture) }}" alt="Profile Picture" class="rounded-circle" onerror="this.src='{{ asset('assets/images/logo_1.png') }}'">
+												<img src="{{ asset('uploads/profile/' ~ app.user.profilepicture) }}" alt="Profile Picture" class="rounded-circle" onerror="this.src='{{ asset('assets/images//default-avatar.png') }}'">
 											{% else %}
 												<img src="{{ asset('assets/images/default-avatar.png') }}" alt="Default Profile Picture" class="rounded-circle">
 											{% endif %}
