@@ -309,15 +309,9 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
 
-      <form
-        id="create-team-form"
-        action="{{ path('app_team') }}"
-        method="post"
-        enctype="multipart/form-data"
-      >
-        {# Token CSRF si nécessaire #}
+      <form id="create-team-form" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="{{ csrf_token('create_team') }}">
-
+        <input type="hidden" name="_token" value="{{ csrf_token('create_team') }}">
         <div class="modal-header">
           <h5 class="modal-title" id="createTeamModalLabel">Create New Team</h5>
           <button
@@ -330,44 +324,44 @@
 
         <div class="modal-body">
           <div class="mb-3">
-            <label for="team-name" class="form-label">Team Name</label>
+            <label for="team_name" class="form-label">Team Name</label>
             <input
               type="text"
               class="form-control"
-              id="team-name"
-              name="team-name"        {# => $request->request->get('team-name') #}
+              id="team_name"
+              name="team_name"
               required
             >
           </div>
 
           <div class="mb-3">
-            <label for="team-category" class="form-label">Category</label>
+            <label for="team_category" class="form-label">Category</label>
             <input
               type="text"
               class="form-control"
-              id="team-category"
-              name="team-category"    {# => $request->request->get('team-category') #}
+              id="team_category"
+              name="team_category"
               required
             >
           </div>
 
           <div class="mb-3">
-            <label for="team-players" class="form-label">Number of Players</label>
+            <label for="team_players" class="form-label">Number of Players</label>
             <input
               type="number"
               class="form-control"
-              id="team-players"
-              name="team-players"     {# => $request->request->get('team-players') #}
+              id="team_players"
+              name="team_players"
               required
             >
           </div>
 
           <div class="mb-3">
-            <label for="team-mode" class="form-label">Game Mode</label>
+            <label for="team_mode" class="form-label">Game Mode</label>
             <select
               class="form-select"
-              id="team-mode"
-              name="team-mode"        {# => $request->request->get('team-mode') #}
+              id="team_mode"
+              name="team_mode"
               required
             >
               <option value="EN_GROUPE">Group</option>
@@ -377,12 +371,12 @@
           </div>
 
           <div class="mb-3">
-            <label for="team-logo" class="form-label">Team Logo</label>
+            <label for="team_logo" class="form-label">Team Logo</label>
             <input
               type="file"
               class="form-control"
-              id="team-logo"
-              name="team-logo"        {# => $request->files->get('team-logo') #}
+              id="team_logo"
+              name="team_logo"
             >
           </div>
         </div>
@@ -404,7 +398,20 @@
           </button>
         </div>
       </form>
-
+ {#— Error Modal —#}
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+         <h5 class="modal-title">Error</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p id="error-message"></p>
+        </div>
+      </div>
+    </div>
+ </div>
     </div>
   </div>
 </div>
@@ -800,6 +807,66 @@ alert('Something went wrong.');
 });
 });
 });
+</script>
+<script>
+document.getElementById('create-team-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData();
+    const submitBtn = document.getElementById('create-team-submit');
+    
+    // Explicitly append all form parameters
+    const formElements = Array.from(form.elements).filter(el => 
+        el.name && !el.disabled && (el.type !== 'checkbox' || el.checked)
+    );
+
+    formElements.forEach(el => {
+        if (el.type === 'file') {
+            Array.from(el.files).forEach(file => {
+                formData.append(el.name, file, file.name);
+            });
+        } else if (el.type === 'checkbox' || el.type === 'radio') {
+            if (el.checked) formData.append(el.name, el.value);
+        } else {
+            formData.append(el.name, el.value);
+        }
+    });
+
+    // Add custom headers if needed
+    
+    submitBtn.disabled = true;
+
+    try {
+        const response = await fetch('{{ path('app_team') }}', {
+         method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',    // <-- tell Symfony it’s AJAX
+                'Accept':              'application/json'
+            }
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = data.redirectUrl;
+        } else {
+            showErrorModal(data.error || 'An error occurred');
+        }
+    } catch (error) {
+        showErrorModal('Network error - please try again');
+    } finally {
+        submitBtn.disabled = false;
+    }
+});
+
+function showErrorModal(message) {
+    // Better error handling example using Bootstrap modal
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+    document.getElementById('error-message').textContent = message;
+    errorModal.show();
+}
 </script>
 {% endblock %}
 		

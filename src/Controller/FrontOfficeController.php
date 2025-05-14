@@ -169,80 +169,71 @@ final class FrontOfficeController extends AbstractController
         }
         if ($request->isMethod('POST')) {
             try {
-                // Get all data including files
-                dump("Request data:", $request->request->all());
-                dump("Files data:", $request->files->all());
-                
-                // Get regular form fields - use the exact names from your form
+                // 1. Fix form field names (Symfony converts hyphens to underscores)
                 $data = [
-                    'name' => $request->request->get('team-name'), // match form field name
-                    'category' => $request->request->get('team-category'),
-                    'players' => $request->request->get('team-players'),
-                    'mode' => $request->request->get('team-mode'),
-                    'logo' => $request->request->get('team-logo')
+                    'name' => $request->request->get('team_name'), // Match corrected name
+                    'category' => $request->request->get('team_category'),
+                    'players' => $request->request->get('team_players'),
+                    'mode' => $request->request->get('team_mode'),
                 ];
-                
-                // Get uploaded file - use exact form field name
-                $logoFile = $request->files->get('team-logo'); // match file input name
-                
-                // Debug the received data
+    
+                // 2. Proper file handling
+                $logoFile = $request->files->get('team_logo'); // Match corrected name
+    
+                // Debugging
                 dump("Processed data:", $data);
                 dump("Logo file:", $logoFile);
-                
-                // Validate required fields
+    
+                // 3. Validation
                 if (empty($data['name']) || empty($data['category']) || 
                     empty($data['players']) || empty($data['mode'])) {
                     throw new \Exception('All fields are required');
                 }
-        
-                // Validate number of players
+    
                 if (!is_numeric($data['players']) || $data['players'] < 1 || $data['players'] > 30) {
                     throw new \Exception('Number of players must be between 1 and 30');
                 }
-        
-                // Create and persist team
+    
+                // 4. Create team entity
                 $team = new Team();
                 $team->setNom($data['name']);
                 $team->setCategorie($data['category']);
-                if($data['mode'] == 'Group'){
-                    $team->setModeJeu('EN_GROUPE');
-                }else{
-                    $team->setModeJeu('PAR_2');
-                }
                 $team->setNombreJoueurs((int)$data['players']);
-        
-                // Handle file upload
-                if ($logoFile) {
+                
+                // 5. Correct game mode handling
+                $team->setModeJeu($data['mode']); // Use direct value from form
+    
+                // 6. File upload handling
+                if ($logoFile instanceof UploadedFile) {
                     $newFilename = $this->handleFileUpload($logoFile);
                     $team->setLogoPath($newFilename);
                 }
-        
+    
+                // 7. Persistence
                 $entityManager->persist($team);
                 $user->setTeam($team);
-                $entityManager->persist($user);
                 $entityManager->flush();
-        
+    
+                // 8. Response handling
                 if ($request->isXmlHttpRequest()) {
                     return new JsonResponse([
-                        'success' => true,
+                        'success'     => true,
                         'redirectUrl' => $this->generateUrl('app_team')
                     ]);
                 }
-        
-                // For regular form submissions
+    
                 return $this->redirectToRoute('app_team');
-        
+    
             } catch (\Exception $e) {
-                // Handle AJAX errors
+                // Error handling
                 if ($request->isXmlHttpRequest()) {
                     return new JsonResponse([
                         'success' => false,
-                        'error' => 'Error: ' . $e->getMessage()
+                        'error' => $e->getMessage()
                     ], 400);
                 }
-        
-                // For regular form submissions
-                $this->addFlash('error', 'Error: ' . $e->getMessage());
+    
+                $this->addFlash('error', $e->getMessage());
                 return $this->redirectToRoute('app_team');
             }
         }

@@ -123,7 +123,6 @@ final class RankingController extends AbstractController
             $em->persist($ranking);
         }
     }
-
         // 5. Flush unique pour tout prendre en compte
         $em->flush();
     }
