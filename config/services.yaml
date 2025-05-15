@@ -5,7 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     upload_directory: '%kernel.project_dir%/public/uploads'  # Adjust the path as per your project structure
-    profile_pictures_directory: '%kernel.project_dir%/public/uploads/profile'
+    profile_pictures_directory: 'C:/xampp/htdocs/img/profile_pictures/'
     product_images_directory: '%kernel.project_dir%/public/uploads/products'
     event_images_directory: '%kernel.project_dir%/public/uploads/event_images'
     api_football_key: '%env(API_FOOTBALL_KEY)%'  # Use environment variable for sensitive data

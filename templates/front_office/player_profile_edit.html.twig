@@ -33,11 +33,13 @@
                             <div class="profile-cover" style="height: 120px; background-color: #e41b23;"></div>
                             <div class="profile-avatar-wrapper">
                                 {% if user.profilepicture %}
-                                    <img src="{{ asset('uploads/profile/' ~ user.profilepicture) }}"
-                                         alt="Profile Picture"
+                                   
+                                         <img src="{{ asset('profile_pictures/' ~ user.profilepicture, 'xampp_images') }}"
+                                 alt="Profile Picture"
                                          id="profile-picture-preview"
                                          class="profile-avatar"
-                                         onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
+                                         onerror="this.src='{{ asset('assets/images/default-avatar.png') }}
+                                loading="lazy">
                                 {% else %}
                                     <img src="{{ asset('assets/images/default-avatar.png') }}"
                                          alt="Default Profile Picture"

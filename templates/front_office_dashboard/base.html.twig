@@ -158,6 +158,7 @@
 			padding: 10px 0;
 		}
 	</style>
+	
 {% endblock %}
 {% block navbar %}
 	<!--================= Preloader Section Start Here =================-->
@@ -191,122 +192,58 @@
 			<div class="navbar-part navbar-part1">
 				<div class="container">
 					<div class="navbar-inner">
-						<a href="{{ path('app_home1') }}" class="logo"><img src="{{ asset('assets/images/logo.svg') }}" alt="sportius-logo"></a>
-						<a href="{{ path('app_home1') }}" class="logo-sticky"><img src="{{ asset('assets/images/logosticky.svg') }}" alt="sportius-logo"></a>
-						<div class="rts-menu">
-							<nav class="menus menu-toggle">
-								<ul class="nav__menu">
-									<li class="has-dropdown">
-										<a class="menu-item active1" href="{{ path('app_home1') }}">Home
-										</a>
-										<ul class="dropdown-ul"></ul>
-									</li>
+						<a href="{{ path('app_home1') }}" class="logo"><img src="{{ asset('assets/images/sportifytry2.png') }}" style="width:185px;background:"none""alt="sportius-logo"></a>
+					<div class="rts-menu">
+							<nav class="menus menu-toggle" role="navigation" aria-label="Main menu">
+  <ul class="nav__menu">
 
-									<li>
-										<a class="menu-item" href="{{ path('app_front_tournois') }}">Tournaments</a>
-									</li>
+    <li class="has-dropdown">
+      <a class="menu-item active1" href="{{ path('app_home1') }}">Home</a>
+      <ul class="dropdown-ul"></ul>
+    </li>
 
-									<li class="has-dropdown">
-										<a class="menu-item" href="#">Pages
-											<i class="fal fa-angle-down"></i>
-										</a>
-										<ul class="dropdown-ul mega-dropdown">
-											<li class="mega-dropdown-li">
-												<span class="parent-page-title">About Pages</span>
-												<ul class="mega-dropdown-ul">
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_about') }}">About</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_awards') }}">Awards</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_team') }}">Team</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_team_details', {'id': 1}) }}">Team Details</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_faq') }}">FAQ</a>
-													</li>
-												</ul>
-											</li>
-											<li class="mega-dropdown-li">
-												<span class="parent-page-title">Others Pages</span>
-												<ul class="mega-dropdown-ul">
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_history') }}">History</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_event_front') }}">Event</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_event_details',{'id': 1}) }}">Event Details</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_error') }}">Error</a>
-													</li>
-												</ul>
-											</li>
-											<li class="mega-dropdown-li">
-												<span class="parent-page-title">Match Fixtures</span>
-												<ul class="mega-dropdown-ul">
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_front_tournois') }}">Tournament Schedule</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_front_matches') }}">Matches</a>
-													</li>
+    <li class="has-dropdown">
+      <a class="menu-item" href="{{ path('app_front_tournois') }}">
+        Tournaments <i class="fal fa-angle-down"></i>
+      </a>
+      <ul class="dropdown-ul">
+        <li class="dropdown-li">
+          <a class="dropdown-link" href="{{ path('app_front_tournois') }}">
+            Tournament Schedule
+          </a>
+        </li>
+        <li class="dropdown-li">
+          <a class="dropdown-link" href="{{ path('app_front_matches') }}">
+            Matches
+          </a>
+        </li>
+        <li class="dropdown-li">
+          <a class="dropdown-link" href="{{ path('app_score') }}">
+            Point Table
+          </a>
+        </li>
+      </ul>
+    </li>
 
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_match_schedule') }}">Match Schedule</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_match_result') }}">Match Result</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_score') }}">Point Table</a>
-													</li>
-													<li class="dropdown-li">
-														<a class="dropdown-link" href="{{ path('app_gallery') }}">Gallery</a>
-													</li>
-												</ul>
-											</li>
-										</ul>
-									</li>
-									<li class="has-dropdown">
-										<a class="menu-item" href="#">Shop
-											<i class="fal fa-angle-down"></i>
-										</a>
-										<ul class="dropdown-ul">
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_shop') }}">Shop</a>
-											</li>
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_product_details', {'id': 1}) }}">Product Details</a>
-											</li>
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_cart') }}">Cart</a>
-											</li>
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_checkout') }}">Checkout</a>
-											</li>
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_account') }}">My Account</a>
-											</li>
-											<li class="dropdown-li">
-												<a class="dropdown-link" href="{{ path('app_thank_you') }}">Thank you</a>
-											</li>
-										</ul>
-									</li>
+    <li>
+      <a class="menu-item" href="{{ path('app_team') }}">Teams</a>
+    </li>
 
-									<li>
-										<a class="menu-item" href="{{ path('app_front_office_contact') }}">Contact</a>
-									</li>
+    <li>
+      <a class="menu-item" href="{{ path('app_event_front') }}">Event</a>
+    </li>
 
-								</ul>
-
-							</nav>
+    <li class="has-dropdown">
+      <a class="menu-item" href="{{ path('app_shop') }}">
+        Shop 
+      </a>
+      </li>
+	  <li class="has-dropdown">
+      <a class="menu-item" href="{{ path('app_front_office_contact') }}">
+        Reclamations 
+      </a>
+	  </li>
+</nav>
 						</div>
 						<div
 							class="header-action-items header-action-items1">
@@ -442,7 +379,7 @@
 										</a>
 										<a href="{{ path('app_reclamation_my') }}" class="dropdown-item">
 											<i class="fas fa-cog" style="color: red;"></i>
-											My tickets
+											My Reclamations
 										</a>
 										<div class="dropdown-divider"></div>
 										<form action="{{ path('app_log_out') }}" method="post" id="logout-form" style="display: inline;">
@@ -456,13 +393,7 @@
 								</div>
 							{% endif %}
 						</div>
-						<a class="hamburger-menu aitem d-block">
-							<div class="hamburger-menu-inner">
-								<span></span>
-								<span class=""></span>
-								<span></span>
-							</div>
-						</a>
+						
 					</div>
 				</div>
 			</div>
@@ -631,19 +562,10 @@
 					</a>
 					<ul class="sub-menu mega-dropdown-mobile">
 						<li class="mega-dropdown-li">
-							<span class="parent-page-title">About Pages</span>
+							<span class="parent-page-title">Teams Pages</span>
 							<ul class="mega-dropdown-ul mm-show">
 								<li class="dropdown-li">
-									<a class="dropdown-link" href="{{ path('app_about') }}">About</a>
-								</li>
-								<li class="dropdown-li">
-									<a class="dropdown-link" href="{{ path('app_awards') }}">Awards</a>
-								</li>
-								<li class="dropdown-li">
 									<a class="dropdown-link" href="{{ path('app_team') }}">Team</a>
-								</li>
-								<li class="dropdown-li">
-									<a class="dropdown-link" href="{{ path('app_team_details', {'id': 1}) }}">Team Details</a>
 								</li>
 								<li class="dropdown-li">
 									<a class="dropdown-link" href="{{ path('app_faq') }}">FAQ</a>
@@ -651,7 +573,7 @@
 							</ul>
 						</li>
 						<li class="mega-dropdown-li">
-							<span class="parent-page-title">Others Pages</span>
+							<span class="parent-page-title">Event Pages</span>
 							<ul class="mega-dropdown-ul mm-show">
 								<li class="dropdown-li">
 									<a class="dropdown-link" href="{{ path('app_history') }}">History</a>

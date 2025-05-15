@@ -324,7 +324,10 @@
                 <div class="event-card">
                     <div class="event-img">
                         {% if event.image is defined and event.image %}
-                            <img src="{{ asset(event.image) }}" alt="{{ event.nom }}">
+                           
+                            <img src="{{ asset('events/' ~  event.image , 'xampp_images') }}"
+                                alt="{{ event.nom }} photo"
+                                loading="lazy">
                         {% else %}
                             <img src="{{ asset('assets/images/bg_1.jpg') }}" alt="Default Event Image">
                         {% endif %}
