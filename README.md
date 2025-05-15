@@ -1,44 +1,70 @@
-⚽ Sportify — Football Tournament Organizer (Symfony Project)
-Sportify is a Symfony 6.4 web application for managing football tournaments. Users can sign up as players or organizers, while admins oversee all system management. It covers user management, tournaments, teams, events, reclamations, and a built-in shop.
+# 🏆 Sportify – The First Tunisian Sports Management Platform
 
-🚀 Features
-✅ User Authentication & Roles
+Sportify is an innovative sports management platform developed using **Symfony** for the web backend and **JavaFX** for the desktop interface. It empowers athletes, teams, and organizers to manage and participate in sports tournaments, join events, purchase sports gear, and submit feedback — all from one unified system.
 
-Sign up/login as Player, Organizer, or Admin
+---
 
-Role-based dashboards and access control
+## 📌 Overview
 
-✅ Tournament Management
+Sportify provides two interfaces:
 
-Organizers create, update, and manage tournaments
+### 🖥️ Web Interface (Symfony)
+- Used by **Admins** and **Players**
+- Admin dashboard to manage all functionalities
+- Player portal to view and join tournaments, shop, submit feedback, and more
 
-Players join tournaments and build/join teams
+### 🧩 Desktop Application (JavaFX)
+- Provides a desktop alternative for players
+- Includes real-time browsing of tournaments, team joining, and shopping
+- Connected to the same Symfony backend through RESTful APIs
 
-✅ Team Management
+---
 
-Team creation, player assignments, roster management
+## 👤 Player Features
 
-✅ Events System
+- Browse internal and external tournaments
+- Request to join teams
+- Register for events and view event posters
+- Purchase sportswear, trophies, and equipment
+- Submit reclamations and receive responses
+- Use both **Web** and **Desktop** platforms seamlessly
 
-Manage tournament events (matches, schedules, venues)
+---
 
-✅ Reclamations (Complaints)
+## 🛠️ Admin Features
 
-Players and organizers submit reclamations; admins handle resolutions
+- Manage tournaments, teams, and players
+- Add/edit products in the online shop
+- Approve team join requests
+- Manage events with visuals
+- Respond to feedback and reclamations
 
-✅ Integrated Shop
+---
 
-Browse and purchase football-related products
+## ⚙️ Tech Stack
 
-✅ Admin Dashboard
+### Backend & Web (Symfony)
+- **Symfony (PHP)**
+- **Twig** (templating)
+- **Doctrine ORM**
+- **MySQL**
+- **HTML/CSS/JS**
 
-Manage users, tournaments, teams, events, reclamations, and shop items
+### Desktop App
+- **Java**
+- **JavaFX**
+- **HTTP Client** to communicate with Symfony backend via APIs
 
-🏗️ Tech Stack
-Backend: Symfony 6.4, Doctrine ORM, PHP 8.x
+---
 
-Frontend: Twig templates, Bootstrap or custom CSS
+## 💻 Installation Guide
 
-Database: MySQL / MariaDB
+### 1. Symfony Web App
 
-Payments: (future) Stripe or PayPal integration
+#### Requirements
+- PHP ≥ 8.0
+- Composer
+- MySQL
+- Symfony CLI
+
+
